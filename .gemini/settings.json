@@ -1,0 +1,9 @@
+{
+  "skills": {
+    "disabled": [
+      "skill-creator",
+      "upgrade-stripe",
+      "stripe-best-practices"
+    ]
+  }
+}

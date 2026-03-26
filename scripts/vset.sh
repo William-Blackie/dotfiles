@@ -6,7 +6,7 @@ usage() {
   echo "Usage: vset [work|personal] <key-name> [value]"
   echo ""
   echo "Stores a config blob or secret in 1Password or Bitwarden."
-  echo "Use stable keys like F_AWS_CONFIG or F_KUBECONFIG so 'make hydrate' can restore files."
+  echo "Use stable keys like F_AWS_CONFIG or F_KUBECONFIG so your local bootstrap scripts can restore files consistently."
   echo ""
   echo "  work     -> Stores in 1Password 'Employee' vault as a Secure Note."
   echo "  personal -> Stores in Bitwarden as a Secure Note."

@@ -15,6 +15,12 @@ if command -v pyenv >/dev/null 2>&1; then
   }
 fi
 
+##### Go
+if command -v go >/dev/null 2>&1; then
+  export GOPATH="$HOME/go"
+  export PATH="$GOPATH/bin:$PATH"
+fi
+
 # ... Load any other modular configs (Tracked)
 for config_file in "$HOME/.dotfiles/zsh/lib"/*.zsh(N); do
   if [[ "$config_file" != */path.zsh ]]; then
@@ -294,9 +300,6 @@ if command -v docker >/dev/null 2>&1; then
   alias dcu="docker compose up -d --remove-orphans"
   alias dcd="docker compose down --remove-orphans"
 fi
-
-# Varlock Secret Helper
-alias vset="~/.dotfiles/scripts/vset.sh"
 
 alias g="git"
 alias gs="git status"

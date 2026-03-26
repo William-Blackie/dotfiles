@@ -1,4 +1,7 @@
-.PHONY: install uninstall reinstall status help setup-packages install-packages test-shell test-tmux test-docker check-format check-shell check-zsh-syntax check-secrets ci tune-docker normalize-stow-links setup hydrate
+.PHONY: help setup install-packages normalize-stow-links install uninstall reinstall edit test check-format check-shell check-zsh-syntax check-secrets tune-docker ci status
+
+PACKAGES := zsh tmux kitty starship nvim git fzf shell bat
+STOW := stow --target="$(HOME)" --dir="$(CURDIR)"
 
 # Default target
 help:
@@ -6,22 +9,22 @@ help:
 	@echo "==================="
 	@echo ""
 	@echo "Available commands:"
-	@echo "  make setup       - Install packages AND dotfiles (complete setup)"
-	@echo "  make install     - Install dotfiles only"
-	@echo "  make uninstall   - Remove all dotfiles"
-	@echo "  make reinstall   - Reinstall all dotfiles"
-	@echo "  make status      - Show installation status"
-	@echo "  make check-shell - Lint shell scripts with shellcheck"
-	@echo "  make check-format - Verify shell script formatting with shfmt"
-	@echo "  make check-zsh-syntax - Parse zsh dotfiles for syntax errors"
-	@echo "  make check-secrets - Scan tracked files for key/token leaks"
-	@echo "  make hydrate     - Write local config files from 1Password/Bitwarden"
-	@echo "  make tune-docker  - Apply local Docker CLI/Desktop tuning"
-	@echo "  make test        - Run all E2E environment tests"
-	@echo "  make ci          - Run full local CI suite (checks + tests)"
+	@echo "  make setup             - Install packages, stow dotfiles, run post-install bootstrap"
+	@echo "  make install-packages  - Install Homebrew packages from Brewfile"
+	@echo "  make install           - Stow packages and back up any conflicts"
+	@echo "  make reinstall         - Normalize repo links and restow everything"
+	@echo "  make uninstall         - Remove stow-managed links"
+	@echo "  make edit              - Open ~/.dotfiles in Neovim"
+	@echo "  make status            - Show stow health and tool availability"
+	@echo "  make test              - Run smoke tests"
+	@echo "  make ci                - Run checks and smoke tests"
 	@echo ""
-	@echo "Package management:"
-	@echo "  make install-packages - Install all required packages"
+	@echo "Checks:"
+	@echo "  make check-format      - Verify shell formatting with shfmt"
+	@echo "  make check-shell       - Lint shell scripts with shellcheck"
+	@echo "  make check-zsh-syntax  - Parse zsh dotfiles for syntax errors"
+	@echo "  make check-secrets     - Scan tracked files for key/token leaks"
+	@echo "  make tune-docker       - Apply local Docker CLI/Desktop tuning"
 
 setup: install-packages install
 	@echo "🔧 Running additional setup..."
@@ -33,97 +36,55 @@ install-packages:
 	@./scripts/install-packages.sh
 
 normalize-stow-links:
-	@target="$$HOME/.zshenv"; \
-	if [ -L "$$target" ]; then \
-		link="$$(readlink "$$target")"; \
-		case "$$link" in \
-			"$(CURDIR)/shell/.zshenv"|"$${HOME}/.dotfiles/shell/.zshenv") \
-				echo "🔧 Normalizing absolute symlink $$target"; \
-				ln -snf ".dotfiles/shell/.zshenv" "$$target";; \
-		esac; \
-	fi
+	@./scripts/normalize-stow-links.py "$(CURDIR)" "$(PACKAGES)"
 
 install:
 	@$(MAKE) normalize-stow-links
-	@echo "💧 Hydrating all secrets from vault..."
-	@$(MAKE) hydrate
 	@echo "📦 Stowing dotfiles (backing up conflicts)..."
 	@BACKUP_DIR="$${HOME}/.dotfiles_backup_$$(date +%Y%m%d_%H%M%S)"; \
-	PACKAGES="zsh tmux kitty starship nvim git fzf shell bat"; \
 	mkdir -p "$$BACKUP_DIR"; \
-	for pkg in $$PACKAGES; do \
+	echo "$$BACKUP_DIR" > "$${HOME}/.dotfiles-last-backup"; \
+	for pkg in $(PACKAGES); do \
 		echo "→ Processing $$pkg"; \
-		stow -n $$pkg 2>&1 | grep "existing target" | sed 's/.*existing target \(.*\) since.*/\1/' | while read -r target; do \
+		$(STOW) -n $$pkg 2>&1 | grep "existing target" | sed 's/.*existing target \(.*\) since.*/\1/' | while read -r target; do \
 			[ -z "$$target" ] && continue; \
 			target_path="$${HOME}/$$target"; \
-			if [ -e "$$target_path" ] && [ ! -L "$$target_path" ]; then \
+			if [ -e "$$target_path" ] || [ -L "$$target_path" ]; then \
 				backup_path="$$BACKUP_DIR/$$target"; \
 				mkdir -p "$$(dirname "$$backup_path")"; \
 				echo "  ⚠️  Backing up $$target"; \
 				mv "$$target_path" "$$backup_path"; \
 			fi; \
 		done; \
-		stow $$pkg; \
+		$(STOW) $$pkg; \
 	done
 	@command -v bat >/dev/null 2>&1 && bat cache --build || true
-	@echo "✅ Stow complete. Backups in $$BACKUP_DIR"
+	@echo "✅ Stow complete. Latest backup path is in ~/.dotfiles-last-backup"
 
 uninstall:
-	stow -D zsh tmux kitty starship nvim git fzf shell bat
+	$(STOW) -D $(PACKAGES)
 
 reinstall:
 	@$(MAKE) normalize-stow-links
-	stow -R zsh tmux kitty starship nvim git fzf shell bat
+	$(STOW) -R $(PACKAGES)
 	@command -v bat >/dev/null 2>&1 && bat cache --build || true
 
-hydrate:
-	@bash -lc '\
-	set -euo pipefail; \
-	read_secret() { \
-		key="$$1"; \
-		if command -v op >/dev/null 2>&1 && op account list >/dev/null 2>&1; then \
-			op item get "$$key" --vault="Employee" --fields label=notesPlain --reveal 2>/dev/null && return 0; \
-		fi; \
-		if command -v bw >/dev/null 2>&1; then \
-			status="$$(bw status 2>/dev/null || true)"; \
-			if printf "%s" "$$status" | grep -q "\"status\":\"unlocked\""; then \
-				bw get item "$$key" 2>/dev/null | python3 -c "import json,sys; data=json.load(sys.stdin); data=data[0] if isinstance(data,list) and data else data; print(data.get(\"notes\",\"\"), end=\"\")" && return 0; \
-			fi; \
-		fi; \
-		return 1; \
-	}; \
-	write_secret() { \
-		key="$$1"; dest="$$2"; \
-		content="$$(read_secret "$$key" || true)"; \
-		if [ -n "$$content" ]; then \
-			echo "  → Hydrating $$dest"; \
-			mkdir -p "$$(dirname "$$dest")"; \
-			printf "%s\n" "$$content" > "$$dest"; \
-			chmod 600 "$$dest"; \
-		fi; \
-	}; \
-	echo "💧 Hydrating local config files..."; \
-	write_secret F_AWS_CONFIG "$$HOME/.aws/config"; \
-	write_secret F_AWS_CREDENTIALS "$$HOME/.aws/credentials"; \
-	write_secret F_KUBECONFIG "$$HOME/.kube/config"; \
-	write_secret F_SSH_PRIVATE_KEY "$$HOME/.ssh/id_ed25519"; \
-	write_secret F_SSH_PUBLIC_KEY "$$HOME/.ssh/id_ed25519.pub"; \
-	write_secret F_GITCONFIG_MABYDUCK "$$HOME/.gitconfig-mabyduck"; \
-	write_secret F_GITCONFIG_DEVELOPERFY "$$HOME/.gitconfig-developerfy"; \
-	write_secret F_GITCONFIG_PERSONAL "$$HOME/.gitconfig-personal"; \
-	echo "✅ Hydration complete."; \
-	'
+edit:
+	@cd "$(CURDIR)" && nvim .
+
+test:
+	@python3 -m unittest discover -s tests/e2e -p 'test_*.py' -v
 
 check-format:
 	@command -v shfmt >/dev/null 2>&1 || { echo "shfmt not found"; exit 1; }
-	@files="$$(git ls-files '*.sh')"; \
+	@files="$$(git ls-files '*.sh' | while read -r file; do [ -f "$$file" ] && printf '%s\n' "$$file"; done)"; \
 	if [ -n "$$files" ]; then \
 	  shfmt -d -i 2 -ci -sr -ln bash $$files; \
 	fi
 
 check-shell:
 	@command -v shellcheck >/dev/null 2>&1 || { echo "shellcheck not found"; exit 1; }
-	@files="$$(git ls-files '*.sh')"; \
+	@files="$$(git ls-files '*.sh' | while read -r file; do [ -f "$$file" ] && printf '%s\n' "$$file"; done)"; \
 	if [ -n "$$files" ]; then \
 	  shellcheck -x $$files; \
 	fi
@@ -134,9 +95,6 @@ check-zsh-syntax:
 check-secrets:
 	@./scripts/check-sensitive.sh
 
-test:
-	@python3 ./scripts/test_e2e.py
-
 tune-docker:
 	@./scripts/tune-docker-cli.sh
 	@./scripts/tune-docker-desktop-macos.sh
@@ -144,10 +102,20 @@ tune-docker:
 ci: check-format check-shell check-zsh-syntax check-secrets test
 
 status:
-	@echo "Checking symlink status..."
-	@ls -la ~/{.zshrc,.tmux.conf,.gitconfig} 2>/dev/null | grep -E "\.dotfiles" || echo "Some configs not linked"
+	@echo "Repository: $(CURDIR)"
+	@echo "Packages: $(PACKAGES)"
 	@echo ""
-	@echo "Checking installed packages..."
+	@echo "Stow dry run:"
+	@tmp="$$(mktemp)"; \
+	if $(STOW) -n -R $(PACKAGES) >"$$tmp" 2>&1; then \
+		echo "✅ no stow conflicts"; \
+	else \
+		echo "❌ stow conflicts detected"; \
+		cat "$$tmp"; \
+	fi; \
+	rm -f "$$tmp"
+	@echo ""
+	@echo "Tooling:"
 	@command -v git >/dev/null && echo "✅ git installed" || echo "❌ git not installed"
 	@command -v nvim >/dev/null && echo "✅ neovim installed" || echo "❌ neovim not installed"
 	@command -v tmux >/dev/null && echo "✅ tmux installed" || echo "❌ tmux not installed"

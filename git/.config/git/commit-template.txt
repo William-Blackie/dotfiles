@@ -1,0 +1,8 @@
+# <type>(<scope>): <subject>
+#
+# Types: feat, fix, docs, chore, refactor, test, ci, build, perf
+# Scope: optional, 1-2 words
+# Subject: imperative, <= 72 chars
+#
+# Body (optional): what/why, wrap at 72
+# Footer (optional): BREAKING CHANGE: <desc> or issue refs

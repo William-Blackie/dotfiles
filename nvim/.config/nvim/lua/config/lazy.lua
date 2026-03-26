@@ -14,12 +14,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Add work-specific dotfiles repo to runtimepath if it exists
-local work_repo = vim.fn.expand("~/.dotfiles-work/nvim")
-if vim.fn.isdirectory(work_repo) == 1 then
-  vim.opt.rtp:prepend(work_repo)
-end
-
 require("lazy").setup({
   spec = {
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
@@ -29,11 +23,8 @@ require("lazy").setup({
     lazy = false,
     version = false,
   },
-  install = { colorscheme = { "catppuccin", "habamax" } },
-  checker = {
-    enabled = true,
-    notify = false,
-  },
+  install = { colorscheme = { "catppuccin" } },
+  checker = { enabled = true, notify = false },
   performance = {
     rtp = {
       disabled_plugins = {
@@ -46,6 +37,3 @@ require("lazy").setup({
     },
   },
 })
-
--- Load machine-local configuration if it exists (untracked)
-pcall(require, "config.local")
