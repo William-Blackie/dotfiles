@@ -30,6 +30,8 @@
 	excludesfile = ~/.gitignore_global
 	ignorecase = true
 	pager = delta
+	author = William Blackie
+	email = will@developerfy.com
 
 [alias]
 	# Short commands
@@ -212,3 +214,8 @@
 
 [commit]
 	template = ~/.config/git/commit-template.txt
+[credential]
+	helper = 
+	helper = /usr/local/share/gcm-core/git-credential-manager
+[credential "https://dev.azure.com"]
+	useHttpPath = true

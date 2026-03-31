@@ -11,5 +11,5 @@ vim.opt.sidescrolloff = 8
 vim.opt.wrap = false
 vim.opt.cursorline = true
 
-vim.opt.spell = false
+vim.opt.spell = true
 vim.opt.spelloptions:append("noplainbuffer")
