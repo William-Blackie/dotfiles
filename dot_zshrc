@@ -1,9 +1,6 @@
 setopt extendedglob
 
 ##### Modular Config Loader
-# Load machine-independent paths first
-source "$HOME/.dotfiles/zsh/lib/path.zsh"
-
 ##### Python / pyenv (Lazy-loaded for speed)
 # Shims are already in PATH from path.zsh for transparent use.
 # Shell integration is loaded only when the pyenv command is first called.
@@ -15,14 +12,8 @@ if command -v pyenv >/dev/null 2>&1; then
   }
 fi
 
-##### Go
-if command -v go >/dev/null 2>&1; then
-  export GOPATH="$HOME/go"
-  export PATH="$GOPATH/bin:$PATH"
-fi
-
 # ... Load any other modular configs (Tracked)
-for config_file in "$HOME/.dotfiles/zsh/lib"/*.zsh(N); do
+for config_file in "$HOME/.config/zsh/lib"/*.zsh(N); do
   if [[ "$config_file" != */path.zsh ]]; then
     source "$config_file"
   fi
@@ -162,6 +153,7 @@ setopt appendhistory sharehistory hist_ignore_space hist_ignore_all_dups \
 
 ##### Aliases & Helpers
 alias c="clear"
+alias vim="nvim"
 
 # Command Cheatsheet (searchable via fzf)
 unalias cheatsheet 2>/dev/null
@@ -174,7 +166,6 @@ vim   - neovim (modern vim)
 lg    - lazygit (terminal UI for git)
 
 ==== Tmux ====
-pfs   - fuzzy project switcher (searches ~/Projects)
 start - attach or create 'main' tmux session
 tmx   - attach or create tmux session (arg: name)
 tmn   - create new unique tmux session (arg: base_name)
@@ -194,17 +185,6 @@ gph   - git push
 gd    - git diff
 glog  - git log (graph)
 ggb   - fuzzy branch switcher
-
-==== Grove / Worktrees ====
-pfs   - open Grove project picker
-wtl   - list worktrees and context
-wta   - create a new worktree branch
-wts   - start worktree services
-wtr   - restart current worktree session
-wtx   - stop worktree services
-wtp   - promote worktree changes back to branch
-wtcl  - clean worktree compose state
-wtpj  - run worktree helpers for a named project
 
 ==== AI / Gemini ====
 ai      - run gemini CLI
@@ -372,5 +352,3 @@ if (( $+functions[zinit] )); then
   zinit light zsh-users/zsh-syntax-highlighting
   zinit light jeffreytse/zsh-vi-mode
 fi
-
-

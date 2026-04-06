@@ -1,123 +1,141 @@
-.PHONY: help setup install-packages normalize-stow-links install uninstall reinstall edit test check-format check-shell check-zsh-syntax check-secrets tune-docker ci status
+.DEFAULT_GOAL := help
 
-PACKAGES := zsh tmux kitty starship nvim git fzf shell bat
-STOW := stow --target="$(HOME)" --dir="$(CURDIR)"
+SHELL := /bin/bash
+export PATH := /opt/homebrew/bin:/usr/local/bin:$(HOME)/.local/bin:$(HOME)/bin:$(PATH)
 
-# Default target
+CHEZMOI := chezmoi --source "$(CURDIR)"
+
+PHONY := \
+	help \
+	setup post-install install-packages \
+	build-nvim \
+	apply link install reinstall \
+	diff status edit \
+	format ci \
+	check-format check-shell check-zsh-syntax check-secrets \
+	tune-docker
+
+.PHONY: $(PHONY)
+
+## Show this help message
 help:
-	@echo "Dotfiles Management"
-	@echo "==================="
-	@echo ""
-	@echo "Available commands:"
-	@echo "  make setup             - Install packages, stow dotfiles, run post-install bootstrap"
-	@echo "  make install-packages  - Install Homebrew packages from Brewfile"
-	@echo "  make install           - Stow packages and back up any conflicts"
-	@echo "  make reinstall         - Normalize repo links and restow everything"
-	@echo "  make uninstall         - Remove stow-managed links"
-	@echo "  make edit              - Open ~/.dotfiles in Neovim"
-	@echo "  make status            - Show stow health and tool availability"
-	@echo "  make test              - Run smoke tests"
-	@echo "  make ci                - Run checks and smoke tests"
-	@echo ""
-	@echo "Checks:"
-	@echo "  make check-format      - Verify shell formatting with shfmt"
-	@echo "  make check-shell       - Lint shell scripts with shellcheck"
-	@echo "  make check-zsh-syntax  - Parse zsh dotfiles for syntax errors"
-	@echo "  make check-secrets     - Scan tracked files for key/token leaks"
-	@echo "  make tune-docker       - Apply local Docker CLI/Desktop tuning"
+	@awk '\
+	  BEGIN {FS = ":"} \
+	  /^### / {section=substr($$0,5); next} \
+	  /^##/ {sub(/^## ?/, "", $$0); helpMsg = $$0; next} \
+	  /^[a-zA-Z0-9_.-]+:/ { \
+	    sub(/:.*/, "", $$1); \
+	    if (helpMsg) { \
+	      if (section) { \
+	        printf "\n\033[1m%s\033[0m\n", section; \
+	        section = ""; \
+	      } \
+	      printf "  \033[36m%-20s\033[0m %s\n", $$1, helpMsg; \
+	      helpMsg = ""; \
+	    } \
+	  }' $(MAKEFILE_LIST)
 
-setup: install-packages install
-	@echo "🔧 Running additional setup..."
-	@./setup.sh
-	@echo "🎉 Complete setup finished!"
+### Setup
+## Install packages, build Neovim from source, apply dotfiles, and run post-install bootstrap
+setup: install-packages build-nvim apply post-install
+	@echo "Complete setup finished."
 	@echo "Please restart your terminal or run: source ~/.zshrc"
 
+## Run post-install bootstrap tasks
+post-install:
+	@./setup.sh
+
+## Install Homebrew packages from Brewfile
 install-packages:
 	@./scripts/install-packages.sh
 
-normalize-stow-links:
-	@./scripts/normalize-stow-links.py "$(CURDIR)" "$(PACKAGES)"
+## Build and install Neovim from the git checkout
+build-nvim:
+	@./scripts/build-neovim.sh
 
-install:
-	@$(MAKE) normalize-stow-links
-	@echo "📦 Stowing dotfiles (backing up conflicts)..."
-	@BACKUP_DIR="$${HOME}/.dotfiles_backup_$$(date +%Y%m%d_%H%M%S)"; \
-	mkdir -p "$$BACKUP_DIR"; \
-	echo "$$BACKUP_DIR" > "$${HOME}/.dotfiles-last-backup"; \
-	for pkg in $(PACKAGES); do \
-		echo "→ Processing $$pkg"; \
-		$(STOW) -n $$pkg 2>&1 | grep "existing target" | sed 's/.*existing target \(.*\) since.*/\1/' | while read -r target; do \
-			[ -z "$$target" ] && continue; \
-			target_path="$${HOME}/$$target"; \
-			if [ -e "$$target_path" ] || [ -L "$$target_path" ]; then \
-				backup_path="$$BACKUP_DIR/$$target"; \
-				mkdir -p "$$(dirname "$$backup_path")"; \
-				echo "  ⚠️  Backing up $$target"; \
-				mv "$$target_path" "$$backup_path"; \
-			fi; \
-		done; \
-		$(STOW) $$pkg; \
-	done
+### Dotfiles
+## Apply chezmoi source state from this repo to $HOME
+apply:
+	@command -v chezmoi >/dev/null 2>&1 || { echo "chezmoi not installed"; exit 1; }
+	@$(CHEZMOI) apply
 	@command -v bat >/dev/null 2>&1 && bat cache --build || true
-	@echo "✅ Stow complete. Latest backup path is in ~/.dotfiles-last-backup"
+	@echo "chezmoi apply complete."
 
-uninstall:
-	$(STOW) -D $(PACKAGES)
+## Show the pending chezmoi diff
+diff:
+	@command -v chezmoi >/dev/null 2>&1 || { echo "chezmoi not installed"; exit 1; }
+	@$(CHEZMOI) diff
 
-reinstall:
-	@$(MAKE) normalize-stow-links
-	$(STOW) -R $(PACKAGES)
-	@command -v bat >/dev/null 2>&1 && bat cache --build || true
-
+## Open this chezmoi source repo in Neovim
 edit:
 	@cd "$(CURDIR)" && nvim .
 
-test:
-	@python3 -m unittest discover -s tests/e2e -p 'test_*.py' -v
-
-check-format:
-	@command -v shfmt >/dev/null 2>&1 || { echo "shfmt not found"; exit 1; }
-	@files="$$(git ls-files '*.sh' | while read -r file; do [ -f "$$file" ] && printf '%s\n' "$$file"; done)"; \
-	if [ -n "$$files" ]; then \
-	  shfmt -d -i 2 -ci -sr -ln bash $$files; \
-	fi
-
-check-shell:
-	@command -v shellcheck >/dev/null 2>&1 || { echo "shellcheck not found"; exit 1; }
-	@files="$$(git ls-files '*.sh' | while read -r file; do [ -f "$$file" ] && printf '%s\n' "$$file"; done)"; \
-	if [ -n "$$files" ]; then \
-	  shellcheck -x $$files; \
-	fi
-
-check-zsh-syntax:
-	@zsh -n zsh/.zshrc shell/.zprofile shell/.zshenv
-
-check-secrets:
-	@./scripts/check-sensitive.sh
-
-tune-docker:
-	@./scripts/tune-docker-cli.sh
-	@./scripts/tune-docker-desktop-macos.sh
-
-ci: check-format check-shell check-zsh-syntax check-secrets test
-
+## Show chezmoi status and tooling health
 status:
 	@echo "Repository: $(CURDIR)"
-	@echo "Packages: $(PACKAGES)"
 	@echo ""
-	@echo "Stow dry run:"
-	@tmp="$$(mktemp)"; \
-	if $(STOW) -n -R $(PACKAGES) >"$$tmp" 2>&1; then \
-		echo "✅ no stow conflicts"; \
-	else \
-		echo "❌ stow conflicts detected"; \
-		cat "$$tmp"; \
-	fi; \
-	rm -f "$$tmp"
+	@echo "chezmoi status:"
+	@command -v chezmoi >/dev/null 2>&1 || { echo "❌ chezmoi not installed"; exit 0; }
+	@$(CHEZMOI) status || true
+	@echo ""
+	@echo "chezmoi doctor:"
+	@$(CHEZMOI) doctor || true
 	@echo ""
 	@echo "Tooling:"
 	@command -v git >/dev/null && echo "✅ git installed" || echo "❌ git not installed"
+	@command -v chezmoi >/dev/null && echo "✅ chezmoi installed" || echo "❌ chezmoi not installed"
 	@command -v nvim >/dev/null && echo "✅ neovim installed" || echo "❌ neovim not installed"
 	@command -v tmux >/dev/null && echo "✅ tmux installed" || echo "❌ tmux not installed"
 	@command -v starship >/dev/null && echo "✅ starship installed" || echo "❌ starship not installed"
 	@command -v fzf >/dev/null && echo "✅ fzf installed" || echo "❌ fzf not installed"
+
+### Checks
+## Format shell scripts with shfmt
+format:
+	@command -v shfmt >/dev/null 2>&1 || { echo "shfmt not found"; exit 1; }
+	@set --; \
+	for file in $$(git ls-files '*.sh'); do \
+	  [ -f "$$file" ] && set -- "$$@" "$$file"; \
+	done; \
+	if [ "$$#" -gt 0 ]; then \
+	  shfmt -w -i 2 -ci -sr -ln bash "$$@"; \
+	fi
+
+## Run all checks
+ci: check-format check-shell check-zsh-syntax check-secrets
+
+## Verify shell formatting with shfmt
+check-format:
+	@command -v shfmt >/dev/null 2>&1 || { echo "shfmt not found"; exit 1; }
+	@set --; \
+	for file in $$(git ls-files '*.sh'); do \
+	  [ -f "$$file" ] && set -- "$$@" "$$file"; \
+	done; \
+	if [ "$$#" -gt 0 ]; then \
+	  shfmt -d -i 2 -ci -sr -ln bash "$$@"; \
+	fi
+
+## Lint shell scripts with shellcheck
+check-shell:
+	@command -v shellcheck >/dev/null 2>&1 || { echo "shellcheck not found"; exit 1; }
+	@set --; \
+	for file in $$(git ls-files '*.sh'); do \
+	  [ -f "$$file" ] && set -- "$$@" "$$file"; \
+	done; \
+	if [ "$$#" -gt 0 ]; then \
+	  shellcheck -x "$$@"; \
+	fi
+
+## Parse zsh dotfiles for syntax errors
+check-zsh-syntax:
+	@zsh -n dot_zshrc dot_zprofile dot_zshenv dot_config/zsh/lib/*.zsh
+
+## Scan tracked files for key/token leaks
+check-secrets:
+	@./scripts/check-sensitive.sh
+
+### Local
+## Apply local Docker CLI/Desktop tuning
+tune-docker:
+	@./scripts/tune-docker-cli.sh
+	@./scripts/tune-docker-desktop-macos.sh

@@ -1,0 +1,2 @@
+# Login-only local environment.
+[[ -f ~/.zprofile.local ]] && source ~/.zprofile.local

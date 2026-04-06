@@ -15,23 +15,22 @@
 [include]
 	path = ~/.config/delta/catppuccin.gitconfig
 
-[includeIf "gitdir:~/Projects/mabyduck/"]
-	path = ~/.gitconfig-mabyduck
-
-[includeIf "gitdir:~/Projects/developerfy/"]
-	path = ~/.gitconfig-developerfy
-
-[includeIf "gitdir:~/Projects/personal/"]
-	path = ~/.gitconfig-personal
-
 [core]
 	editor = nvim
 	autocrlf = input
 	excludesfile = ~/.gitignore_global
 	ignorecase = true
 	pager = delta
-	author = William Blackie
+
+[user]
+	name = William Blackie
 	email = will@developerfy.com
+
+[includeIf "hasconfig:remote.*.url:git@github.com:mabyduck/**"]
+	path = ~/.gitconfig-mabyduck
+
+[includeIf "hasconfig:remote.*.url:https://github.com/mabyduck/**"]
+	path = ~/.gitconfig-mabyduck
 
 [alias]
 	# Short commands
@@ -80,9 +79,7 @@
 	hyperlinks = true
 [url "git@github.com:"]
 	insteadOf = https://github.com/
-[user]
-	name = William Blackie
-	email = will@developerfy.com
+
 [gitflow]
 	version = 1.0
 	initialized = true

@@ -1,0 +1,5 @@
+# Single source of truth for shell PATH.
+[[ -r "$HOME/.config/zsh/lib/path.zsh" ]] && source "$HOME/.config/zsh/lib/path.zsh"
+
+# Machine-local env for all zsh invocations (not tracked in dotfiles repo).
+[[ -f ~/.zshenv.local ]] && source ~/.zshenv.local

@@ -1,27 +1,16 @@
 # Dotfiles
 
-macOS dotfiles managed with GNU Stow.
+macOS dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 
-Each top-level directory is a stow package. Files inside a package map directly into `$HOME`.
+The source of truth is [/.dotfiles](/Users/william/.dotfiles), stored in chezmoi source-state format. Repo-only files such as [Makefile](/Users/william/.dotfiles/Makefile), [scripts](/Users/william/.dotfiles/scripts), and [README.md](/Users/william/.dotfiles/README.md) are ignored by [/.chezmoiignore](/Users/william/.dotfiles/.chezmoiignore) and are not applied into `$HOME`.
 
 Examples:
 
-- `zsh/.zshrc` -> `~/.zshrc`
-- `shell/.zshenv` -> `~/.zshenv`
-- `git/.config/git/commit-template.txt` -> `~/.config/git/commit-template.txt`
-- `nvim/.config/nvim/` -> `~/.config/nvim/`
-
-## Packages
-
-- `zsh`
-- `shell`
-- `tmux`
-- `kitty`
-- `starship`
-- `nvim`
-- `git`
-- `bat`
-- `fzf`
+- [dot_zshrc](/Users/william/.dotfiles/dot_zshrc) -> `~/.zshrc`
+- [dot_zshenv](/Users/william/.dotfiles/dot_zshenv) -> `~/.zshenv`
+- [dot_config/nvim](/Users/william/.dotfiles/dot_config/nvim) -> `~/.config/nvim`
+- [dot_config/zsh/lib/path.zsh](/Users/william/.dotfiles/dot_config/zsh/lib/path.zsh) -> `~/.config/zsh/lib/path.zsh`
+- [dot_config/git/commit-template.txt](/Users/william/.dotfiles/dot_config/git/commit-template.txt) -> `~/.config/git/commit-template.txt`
 
 ## Workflow
 
@@ -35,13 +24,20 @@ Edit the files in this repo directly. That is the source of truth.
 When you want to apply changes:
 
 ```bash
-make reinstall
+make apply
 ```
 
-`make reinstall` does two things:
+This runs:
 
-1. normalizes any existing symlink that already points into `~/.dotfiles` so it is relative and stow-managed cleanly
-2. restows every package
+```bash
+chezmoi --source ~/.dotfiles apply
+```
+
+If you want to inspect pending changes first:
+
+```bash
+make diff
+```
 
 If you are setting up a machine from scratch:
 
@@ -49,31 +45,29 @@ If you are setting up a machine from scratch:
 make setup
 ```
 
-That installs packages from the [Brewfile](/Users/william/.dotfiles/Brewfile), stows the dotfiles, and runs a small post-install bootstrap for zinit, tmux TPM, and bat cache.
+That installs packages from [Brewfile](/Users/william/.dotfiles/Brewfile), builds Neovim from the upstream git repo into `~/.local/bin`, applies the chezmoi source state, and then runs the small post-install bootstrap for zinit, tmux TPM, and bat cache.
 
 ## Commands
 
 ```bash
-make help
-make install
-make reinstall
-make uninstall
+make setup
+make build-nvim
+make apply
+make diff
 make edit
 make status
-make test
 make ci
 ```
 
 Notes:
 
-- `make install` backs up conflicting files from `$HOME` before stowing
-- `make reinstall` is the normal command after edits or pulls
-- `make status` shows whether a dry-run stow is clean
-- `make test` runs smoke tests for the repo workflow
+- `make link`, `make install`, and `make reinstall` are aliases for `make apply`
+- `make status` shows both `chezmoi status` and `chezmoi doctor`
+- `make build-nvim` builds Neovim from git into `~/.local/bin/nvim`
 
 ## Neovim
 
-The Neovim config lives in [nvim/.config/nvim](/Users/william/.dotfiles/nvim/.config/nvim).
+The Neovim config lives in [dot_config/nvim](/Users/william/.dotfiles/dot_config/nvim).
 
 Edit it from this repo like everything else:
 
@@ -86,11 +80,3 @@ After pulling Neovim changes, run:
 ```vim
 :Lazy sync
 ```
-
-## Stow Rules
-
-- keep tracked dotfile links relative
-- edit files in `~/.dotfiles`, not generated copies under `$HOME`
-- if a target in `$HOME` is not stow-managed yet, `make install` will back it up before linking
-
-That is the whole model. The repo should stay declarative and boring.
