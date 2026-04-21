@@ -1,34 +1,61 @@
+#! /bin/zsh
 # Single source of truth for shell PATH.
 # Put the tools you actually want first and let zsh dedupe the rest.
 
 typeset -U path PATH
 
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
+    export XDG_RUNTIME_DIR="${TMPDIR:-/tmp}"
+    export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR%/}/xdg-runtime-$UID"
+fi
+export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
+
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_STATE_HOME" "$XDG_CACHE_HOME" "$XDG_RUNTIME_DIR"
+chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
+
 if [[ -x /opt/homebrew/bin/brew ]]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ -x /usr/local/bin/brew ]]; then
-  eval "$(/usr/local/bin/brew shellenv)"
+    eval "$(/usr/local/bin/brew shellenv)"
 fi
 
-export NVM_DIR="$HOME/.nvm"
-export PYENV_ROOT="$HOME/.pyenv"
+export AWS_CONFIG_FILE="$XDG_CONFIG_HOME/aws/config"
+export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME/aws/credentials"
+export CARGO_HOME="$XDG_DATA_HOME/cargo"
+export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
+export GOPATH="$XDG_DATA_HOME/go"
+export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
+export LESSHISTFILE="$XDG_STATE_HOME/lesshst"
+export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
+export NPM_CONFIG_INIT_MODULE="$XDG_CONFIG_HOME/npm/config/npm-init.js"
+export NPM_CONFIG_TMP="$XDG_RUNTIME_DIR/npm"
+export NVM_DIR="$XDG_DATA_HOME/nvm"
+export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
 export PYENV_DISABLE_AUTO_REHASH=1
+export PYTHON_HISTORY="$XDG_STATE_HOME/python_history"
+export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
+export SHELL_SESSIONS_DISABLE=1
 
 typeset -a preferred_path
 preferred_path=(
-  "$HOME/.local/bin"
-  "$HOME/.local/share/nvim/mason/bin"
-  "$HOME/bin"
-  "$PYENV_ROOT/shims"
-  "$PYENV_ROOT/bin"
-  "$HOME/.cargo/bin"
-  "$HOME/.go/bin"
+    "$HOME/.local/bin"
+    "$XDG_DATA_HOME/nvim/mason/bin"
+    "$HOME/bin"
+    "$CARGO_HOME/bin"
+    "$GOPATH/bin"
+    "$PYENV_ROOT/shims"
+    "$PYENV_ROOT/bin"
 )
 
 if [[ -r "$NVM_DIR/alias/default" ]]; then
-  node_version="$(<"$NVM_DIR/alias/default")"
-  if [[ -d "$NVM_DIR/versions/node/$node_version/bin" ]]; then
-    preferred_path=("$NVM_DIR/versions/node/$node_version/bin" "${preferred_path[@]}")
-  fi
+    node_version="$(<"$NVM_DIR/alias/default")"
+    if [[ -d "$NVM_DIR/versions/node/$node_version/bin" ]]; then
+        preferred_path=("$NVM_DIR/versions/node/$node_version/bin" "${preferred_path[@]}")
+    fi
 fi
 
 path=("${preferred_path[@]}" "${path[@]}")

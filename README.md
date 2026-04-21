@@ -1,82 +1,102 @@
 # Dotfiles
 
-macOS dotfiles managed with [chezmoi](https://www.chezmoi.io/).
+MacOS dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 
-The source of truth is [/.dotfiles](/Users/william/.dotfiles), stored in chezmoi source-state format. Repo-only files such as [Makefile](/Users/william/.dotfiles/Makefile), [scripts](/Users/william/.dotfiles/scripts), and [README.md](/Users/william/.dotfiles/README.md) are ignored by [/.chezmoiignore](/Users/william/.dotfiles/.chezmoiignore) and are not applied into `$HOME`.
-
-Examples:
-
-- [dot_zshrc](/Users/william/.dotfiles/dot_zshrc) -> `~/.zshrc`
-- [dot_zshenv](/Users/william/.dotfiles/dot_zshenv) -> `~/.zshenv`
-- [dot_config/nvim](/Users/william/.dotfiles/dot_config/nvim) -> `~/.config/nvim`
-- [dot_config/zsh/lib/path.zsh](/Users/william/.dotfiles/dot_config/zsh/lib/path.zsh) -> `~/.config/zsh/lib/path.zsh`
-- [dot_config/git/commit-template.txt](/Users/william/.dotfiles/dot_config/git/commit-template.txt) -> `~/.config/git/commit-template.txt`
+The source of truth is [/.dotfiles](.dotfiles), stored in chezmoi source-state
+format. Repo-only files such as [Makefile](.dotfiles/Makefile) and
+[README.md](README.md) are ignored by
+[/.chezmoiignore](.dotfiles/.chezmoiignore) and are not applied into `$HOME`.
 
 ## Workflow
 
-```bash
-cd ~/.dotfiles
-make edit
-```
-
-Edit the files in this repo directly. That is the source of truth.
-
-When you want to apply changes:
+Edit files directly in this repo or using `chezmoi.nvim`.
+Apply changes:
 
 ```bash
-make apply
+chezmoi --source ~/.dotfiles init --config-path ~/.config/chezmoi/chezmoi.toml
+chezmoi apply
 ```
 
-This runs:
+After the bootstrap step, plain `chezmoi` commands work because the repo owns
+the config template in
+[dot_config/chezmoi/chezmoi.toml.tmpl](.dotfiles/dot_config/chezmoi/chezmoi.toml.tmpl).
+
+Inspect pending changes:
 
 ```bash
-chezmoi --source ~/.dotfiles apply
+chezmoi diff
 ```
 
-If you want to inspect pending changes first:
+Setup a new machine:
 
 ```bash
-make diff
+chezmoi --source ~/.dotfiles init --config-path ~/.config/chezmoi/chezmoi.toml
+chezmoi apply
 ```
 
-If you are setting up a machine from scratch:
+That installs packages from
+[.chezmoidata/packages.yaml](.dotfiles/.chezmoidata/packages.yaml), checks out
+the Neovim source as a chezmoi external under `~/.local/src/neovim`, builds it
+into `~/.local/bin`, and applies the chezmoi source state.
+
+`chezmoi apply` now also owns the bootstrap bits that used to live in ad-hoc
+shell glue:
+
+- Homebrew package install is run via a `run_onchange_` script keyed off
+  [.chezmoidata/packages.yaml](.dotfiles/.chezmoidata/packages.yaml)
+- zinit and tmux TPM are fetched as chezmoi externals
+- Neovim source is fetched as a chezmoi `git-repo` external and built by a
+  `run_after_` script
+- bat cache rebuild runs via a `run_onchange_after_` script when the bat config
+  changes
+- zsh, git, tmux, readline, ripgrep, and several tool paths are wired for XDG
+  locations, with compatibility symlinks where data is intentionally left in
+  place under `~/.*`
+
+## Common Commands
 
 ```bash
-make setup
+# Apply dotfiles
+chezmoi apply
+
+# View pending changes
+chezmoi diff
+
+# Check status
+chezmoi status
+
+# Edit this repo in nvim
+cd ~/.dotfiles && nvim .
+
+# Force Neovim rebuild
+rm ~/.local/state/chezmoi/neovim-build.txt && chezmoi apply
 ```
-
-That installs packages from [Brewfile](/Users/william/.dotfiles/Brewfile), builds Neovim from the upstream git repo into `~/.local/bin`, applies the chezmoi source state, and then runs the small post-install bootstrap for zinit, tmux TPM, and bat cache.
-
-## Commands
-
-```bash
-make setup
-make build-nvim
-make apply
-make diff
-make edit
-make status
-make ci
-```
-
-Notes:
-
-- `make link`, `make install`, and `make reinstall` are aliases for `make apply`
-- `make status` shows both `chezmoi status` and `chezmoi doctor`
-- `make build-nvim` builds Neovim from git into `~/.local/bin/nvim`
 
 ## Neovim
 
-The Neovim config lives in [dot_config/nvim](/Users/william/.dotfiles/dot_config/nvim).
+The Neovim config lives in
+[dot_config/nvim](/Users/william/.dotfiles/dot_config/nvim).
 
 Edit it from this repo like everything else:
-
-```bash
-make edit
-```
 
 After pulling Neovim changes, run:
 
 ```vim
 :Lazy sync
 ```
+
+LazyVim and spell state are tracked using chezmoi-managed symlinks so external
+writes go back into the source tree instead of being overwritten on apply:
+
+- [dot_config/nvim/symlink_lazy-lock.json.tmpl](.dotfiles/dot_config/nvim/symlink_lazy-lock.json.tmpl)
+  -> `~/.config/nvim/lazy-lock.json` -> backing file:
+  [dot_config/nvim/data/lazy-lock.json](.dotfiles/dot_config/nvim/data/lazy-lock.json)
+- [dot_config/nvim/symlink_lazyvim.json.tmpl](.dotfiles/dot_config/nvim/symlink_lazyvim.json.tmpl)
+  -> `~/.config/nvim/lazyvim.json` -> backing file:
+  [dot_config/nvim/data/lazyvim.json](.dotfiles/dot_config/nvim/data/lazyvim.json)
+- [dot_config/nvim/spell/symlink_en.utf-8.add.tmpl](.dotfiles/dot_config/nvim/spell/symlink_en.utf-8.add.tmpl)
+  -> `~/.config/nvim/spell/en.utf-8.add` -> backing file:
+  [dot_config/nvim/data/en.utf-8.add](.dotfiles/dot_config/nvim/data/en.utf-8.add)
+- [dot_config/nvim/spell/symlink_en.utf-8.add.spl.tmpl](.dotfiles/dot_config/nvim/spell/symlink_en.utf-8.add.spl.tmpl)
+  -> `~/.config/nvim/spell/en.utf-8.add.spl` -> backing file:
+  [dot_config/nvim/data/en.utf-8.add.spl](.dotfiles/dot_config/nvim/data/en.utf-8.add.spl)

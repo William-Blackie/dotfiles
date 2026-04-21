@@ -1,46 +1,42 @@
--- https://github.com/xvzc/chezmoi.nvim/tree/main
+---@type LazyPluginSpec[]
 return {
-  "xvzc/chezmoi.nvim",
-  dependencies = { "nvim-lua/plenary.nvim" },
-  config = function()
-    require("chezmoi").setup({
-      edit = {
-        watch = true,
-        force = false,
-        ignore_patterns = {
-          "run_onchange_.*",
-          "run_once_.*",
-          "%.chezmoiignore",
-          "%.chezmoitemplate",
-          -- Add custom patterns here
-        },
-      },
+  {
+    "xvzc/chezmoi.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {
+      edit = { watch = true },
       events = {
-        on_open = {
-          notification = {
-            enable = true,
-            msg = "Opened a chezmoi-managed file",
-            opts = {},
-          },
-        },
-        on_watch = {
-          notification = {
-            enable = true,
-            msg = "This file will be automatically applied",
-            opts = {},
-          },
-        },
-        on_apply = {
-          notification = {
-            enable = true,
-            msg = "Successfully applied",
-            opts = {},
-          },
-        },
+        on_open = { notification = { enable = false } },
+        on_watch = { notification = { enable = false } },
+        on_apply = { notification = { enable = false } },
       },
-      telescope = {
-        select = { "<CR>" },
+    },
+    keys = {
+      {
+        "<leader>cz",
+        function()
+          require("chezmoi.pick").snacks()
+        end,
+        desc = "Browse chezmoi files",
       },
-    })
-  end,
+      {
+        "<leader>cza",
+        function()
+          require("chezmoi.commands").apply({})
+        end,
+        desc = "Chezmoi apply",
+      },
+    },
+  },
+  {
+    "alker0/chezmoi.vim",
+    init = function()
+      vim.g["chezmoi#use_external"] = 1
+    end,
+  },
+  {
+    "petertriho/cmp-git",
+    ft = { "gitcommit", "gitconfig", "gitconfig.chezmoitmpl" },
+    opts = {},
+  },
 }

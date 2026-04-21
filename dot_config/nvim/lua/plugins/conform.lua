@@ -1,0 +1,59 @@
+---@class ConformConfig
+---Configuration for conform.nvim (formatting)
+---@field formatters_by_ft table<string, string[]> Formatters mapped to filetypes
+
+---@class ConformFormatterConfig
+---@field command string Formatter executable command
+---@field args? string[] Command-line arguments
+---@field stdin? boolean Whether to use stdin
+
+---Formatting with conform.nvim
+---Note: LazyVim handles format_on_save automatically, don't set it here
+---@type LazyPluginSpec
+return {
+  "stevearc/conform.nvim",
+  ---@type ConformConfig
+  opts = {
+    ---Formatters by filetype
+    ---Each filetype can have multiple formatters that run sequentially
+    formatters_by_ft = {
+      ---Web technologies
+      html = { "prettier", "djlint" },
+      css = { "prettier" },
+      scss = { "prettier" },
+
+      ---Data formats
+      yaml = { "prettier" },
+      json = { "prettier" },
+      jsonc = { "prettier" },
+      toml = { "taplo" },
+
+      ---Go
+      go = { "gofumpt" },
+
+      ---Template engines
+      htmldjango = { "prettier", "djlint" },
+      jinja = { "djlint" },
+      jinja2 = { "djlint" },
+
+      ---Shell
+      sh = { "shfmt" },
+      bash = { "shfmt" },
+
+      ---Fish
+      fish = { "fish_indent" },
+
+      ---Tmux (treated as shell script)
+      tmux = { "shfmt" },
+
+      ---Git
+      gitconfig = { "prettier" },
+      gitignore = { "prettier" },
+
+      ---Config files
+      kitty = { "shfmt" },
+      readline = {},
+    },
+    -- NOTE: Do NOT set format_on_save here - LazyVim handles it automatically
+  },
+}

@@ -1,0 +1,21 @@
+[".local/share/zinit/zinit.git"]
+type = "git-repo"
+url = "https://github.com/zdharma-continuum/zinit.git"
+pull.args = ["--ff-only"]
+
+[".local/share/tmux/plugins/tpm"]
+type = "git-repo"
+url = "https://github.com/tmux-plugins/tpm"
+pull.args = ["--ff-only"]
+
+[".local/src/neovim"]
+type = "git-repo"
+url = "https://github.com/neovim/neovim.git"
+branch = "release-0.12"
+pull.args = ["--ff-only"]
+clone.args = ["--branch release-0.12"]
+
+[".local/src/typeshed"]
+type = "git-repo"
+url = "https://github.com/python/typeshed.git"
+pull.args = ["--ff-only"]

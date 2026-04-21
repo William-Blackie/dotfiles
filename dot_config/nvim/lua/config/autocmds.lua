@@ -1,16 +1,21 @@
--- Simple filetype detection
+-- Filetype detection
 vim.filetype.add({
   extension = {
     j2 = "htmldjango",
     jinja = "htmldjango",
     jinja2 = "htmldjango",
-    gotmpl = "gotmpl",
-    helm = "helm",
-    mdx = "markdown.mdx",
-    templ = "templ",
+    html = function(path, _)
+      local dir = vim.fs.dirname(path)
+      if dir:match("templates") then
+        local root = vim.fs.root(0, { "manage.py", "pyproject.toml" })
+        if root then
+          return "htmldjango"
+        end
+      end
+      return "html"
+    end,
   },
   filename = {
-    ["go.work"] = "gowork",
     ["compose.yaml"] = "yaml.docker-compose",
     ["compose.yml"] = "yaml.docker-compose",
     ["docker-compose.yaml"] = "yaml.docker-compose",
@@ -18,6 +23,7 @@ vim.filetype.add({
   },
 })
 
+-- Spell check for git commits and markdown
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "gitcommit", "markdown", "text" },
   callback = function()
@@ -25,6 +31,14 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- Highlight yanked text
+vim.api.nvim_create_autocmd("TextYankPost", {
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+})
+
+-- Chezmoi auto apply
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { os.getenv("HOME") .. "/.dotfiles/*" },
   callback = function(ev)

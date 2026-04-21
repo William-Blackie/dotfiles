@@ -1,5 +1,15 @@
-# Single source of truth for shell PATH.
-[[ -r "$HOME/.config/zsh/lib/path.zsh" ]] && source "$HOME/.config/zsh/lib/path.zsh"
+#! /bin/bash
 
-# Machine-local env for all zsh invocations (not tracked in dotfiles repo).
-[[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+if [[ -z "${XDG_RUNTIME_DIR:-}" ]]; then
+    export XDG_RUNTIME_DIR="${TMPDIR:-/tmp}"
+    export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR%/}/xdg-runtime-$UID"
+fi
+export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
+
+if [[ -r "$ZDOTDIR/.zshenv" ]]; then
+    source "$ZDOTDIR/.zshenv"
+fi

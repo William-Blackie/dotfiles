@@ -1,0 +1,19 @@
+sourceDir = "~/.dotfiles"
+workingTree = "~/.dotfiles"
+
+[edit]
+command = "nvim"
+watch = true
+apply = true
+
+[merge]
+command = "nvim"
+watch = true
+apply = true
+
+[diff]
+{{ if lookPath "delta" -}}
+pager = "delta"
+{{- end }}
+
+[status]

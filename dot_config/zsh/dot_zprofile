@@ -1,0 +1,5 @@
+#! /bin/bash
+
+# Login-only local environment.
+[[ -f "$ZDOTDIR/.zprofile.local" ]] && source "$ZDOTDIR/.zprofile.local"
+[[ -f ~/.zprofile.local ]] && source ~/.zprofile.local

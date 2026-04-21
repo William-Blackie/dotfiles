@@ -1,0 +1,249 @@
+
+[init]
+	defaultBranch = main
+
+[push]
+	autoSetupRemote = true
+	default = current
+
+[pull]
+	rebase = false
+
+[fetch]
+	prune = true
+
+[include]
+	path = ~/.config/delta/catppuccin.gitconfig
+
+[rerere]
+    enabled = true
+    autoupdate = true
+
+[core]
+	editor = nvim
+	autocrlf = input
+	excludesfile = ~/.config/git/ignore
+	ignorecase = true
+	pager = delta
+
+[user]
+	name = William Blackie
+	email = will@developerfy.com
+
+[includeIf "hasconfig:remote.*.url:https://github.com/mabyduck/**"]
+	path = ~/.gitconfig-mabyduck
+
+[alias]
+	# Short commands
+	st = status
+	co = checkout
+	br = branch
+	cm = commit
+	lg = log --oneline --graph --decorate --all
+
+	# Useful aliases
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	visual = !gitk
+
+	# Show files ignored by git
+	ignored = ls-files --others --ignored --exclude-standard
+
+	# Pretty log
+	hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+
+	# Show diff of last commit
+	dlc = diff --cached HEAD^
+
+	# Undo last commit
+	undo = reset --soft HEAD^
+	wt = !wt
+	tags-reset = "!f(){ remote=\"${1:-origin}\"; tags=\"$(git tag -l)\"; if [ -n \"$tags\" ]; then printf \"%s\\n\" \"$tags\" | xargs -n 1 git tag -d >/dev/null 2>&1; fi; git fetch \"$remote\" --tags --prune --prune-tags; }; f"
+
+[color]
+	ui = auto
+
+[diff]
+	tool = vimdiff
+
+[merge]
+	tool = vimdiff
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	features = catppuccin-mocha
+	navigate = true
+	line-numbers = true
+	side-by-side = true
+	hyperlinks = true
+
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+
+
+[gitflow]
+	version = 1.0
+	initialized = true
+
+
+[gitflow "branch.main"]
+	type = base
+	upstreamStrategy = none
+	downstreamStrategy = none
+	autoUpdate = false
+
+[gitflow "branch.feature"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/feat/
+	autoUpdate = false
+
+[gitflow "branch.bugfix"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/fix/
+	autoUpdate = false
+
+[gitflow "branch.hotfix"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/hotfix/
+	autoUpdate = false
+
+[gitflow "branch.release"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/release/
+	autoUpdate = false
+
+[gitflow "branch.support"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/support/
+	autoUpdate = false
+
+[gitflow "branch.docs"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/docs/
+	autoUpdate = false
+
+[gitflow "branch.chore"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/chore/
+	autoUpdate = false
+
+[gitflow "branch.refactor"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/refactor/
+	autoUpdate = false
+
+[gitflow "branch.test"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/test/
+	autoUpdate = false
+
+[gitflow "branch.ci"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/ci/
+	autoUpdate = false
+
+[gitflow "branch.build"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/build/
+	autoUpdate = false
+
+[gitflow "branch.perf"]
+	type = topic
+	parent = main
+	startPoint = main
+	upstreamStrategy = merge
+	downstreamStrategy = rebase
+	prefix = williamblackie/perf/
+	autoUpdate = false
+
+[gitflow "feature.finish"]
+	mergeMessage = feat: merge %b into %p
+
+[gitflow "bugfix.finish"]
+	mergeMessage = fix: merge %b into %p
+
+[gitflow "hotfix.finish"]
+	mergeMessage = fix: merge %b into %p
+
+[gitflow "release.finish"]
+	mergeMessage = chore(release): merge %b into %p
+
+[gitflow "support.finish"]
+	mergeMessage = chore(support): merge %b into %p
+
+[gitflow "docs.finish"]
+	mergeMessage = docs: merge %b into %p
+
+[gitflow "chore.finish"]
+	mergeMessage = chore: merge %b into %p
+
+[gitflow "refactor.finish"]
+	mergeMessage = refactor: merge %b into %p
+
+[gitflow "test.finish"]
+	mergeMessage = test: merge %b into %p
+
+[gitflow "ci.finish"]
+	mergeMessage = ci: merge %b into %p
+
+[gitflow "build.finish"]
+	mergeMessage = build: merge %b into %p
+
+[gitflow "perf.finish"]
+	mergeMessage = perf: merge %b into %p
+
+[commit]
+	template = ~/.config/git/commit-template.txt
+
+[credential]
+	helper =
+	helper = /usr/local/share/gcm-core/git-credential-manager
+
+[credential "https://dev.azure.com"]
+	useHttpPath = true

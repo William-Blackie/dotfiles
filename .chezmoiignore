@@ -1,8 +1,6 @@
 .git/
 .ruff_cache/
-Brewfile
 Makefile
 README.md
-scripts/
-setup.sh
-tests/
+.chezmoiignore
+chezmoi/
