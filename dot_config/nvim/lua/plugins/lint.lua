@@ -13,7 +13,8 @@ return {
       -- Shell
       sh = { "shellcheck" },
       bash = { "shellcheck" },
-      zsh = { "shellcheck" },
+      zsh = { "zsh" },
+      ["zsh.chezmoitmpl"] = { "zsh" },
       tmux = { "shellcheck" },
     },
     linters = {

@@ -1,5 +1,5 @@
 ---Template engine support (Django, Jinja2)
----@type LazyPluginSpec
+---@type LazySpec
 return {
   -- Formatting
   {
@@ -20,6 +20,7 @@ return {
     opts = {
       servers = {
         djlsp = {
+          ---@return string[]
           cmd = function()
             local root = vim.fs.root(0, { "pyproject.toml", "manage.py", ".git" })
               or vim.fn.getcwd()

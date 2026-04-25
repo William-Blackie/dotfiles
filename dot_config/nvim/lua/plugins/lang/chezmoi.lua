@@ -2,7 +2,7 @@
 ---Complements lazyvim.plugins.extras.util.chezmoi
 ---LazyVim extra provides: chezmoi.vim, chezmoi.nvim picker, dashboard
 ---This adds: filetype detection, LSP, linting, formatting for chezmoi source files
----@type LazyPluginSpec
+---@type LazySpec
 return {
   -- Filetype detection for chezmoi scripts and config files
   {
@@ -32,7 +32,9 @@ return {
           ["dot_zshrc"] = "zsh",
           [".zshrc"] = "zsh",
           [".zshenv"] = "zsh",
+          [".zprofile"] = "zsh",
           ["dot_zshenv"] = "zsh",
+          ["dot_zprofile"] = "zsh",
           [".chezmoiignore"] = "gitignore",
           [".ignore"] = "gitignore",
           ["%.env"] = "sh",
@@ -44,6 +46,7 @@ return {
           [".chezmoiignore"] = "gitignore",
           ["dot_zshrc"] = "zsh",
           ["dot_zshenv"] = "zsh",
+          ["dot_zprofile"] = "zsh",
           ["dot_nvmrc"] = "sh",
         },
       })
@@ -51,7 +54,8 @@ return {
     end,
   },
 
-  -- LSP: bash-language-server for shell scripts + chezmoi template composites
+  -- LSP: bash-language-server for sh/bash scripts and templates.
+  -- zsh intentionally stays off bashls; zsh uses Treesitter + zsh -n.
   {
     "neovim/nvim-lspconfig",
     opts = {
@@ -60,10 +64,8 @@ return {
           filetypes = {
             "sh",
             "bash",
-            "zsh",
             "sh.chezmoitmpl",
             "bash.chezmoitmpl",
-            "zsh.chezmoitmpl",
           },
         },
         taplo = {
@@ -96,6 +98,7 @@ return {
       formatters_by_ft = {
         ["sh.chezmoitmpl"] = { "shfmt" },
         ["bash.chezmoitmpl"] = { "shfmt" },
+        ["zsh.chezmoitmpl"] = { "shfmt_zsh" },
         ["yaml.chezmoitmpl"] = { "prettier" },
         ["json.chezmoitmpl"] = { "prettier" },
         ["jsonc.chezmoitmpl"] = { "prettier" },
@@ -108,6 +111,13 @@ return {
         ["tmux"] = { "shfmt" },
         ["readline"] = {},
       },
+      formatters = {
+        shfmt_zsh = {
+          command = "shfmt",
+          args = { "-ln", "zsh", "-i", "2" },
+          stdin = true,
+        },
+      },
     },
   },
 
@@ -119,6 +129,7 @@ return {
       linters_by_ft = {
         ["sh.chezmoitmpl"] = { "shellcheck" },
         ["bash.chezmoitmpl"] = { "shellcheck" },
+        ["zsh.chezmoitmpl"] = { "zsh" },
         ["tmux.chezmoitmpl"] = { "shellcheck" },
         tmux = { "shellcheck" },
       },

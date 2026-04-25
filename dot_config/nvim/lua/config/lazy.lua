@@ -26,6 +26,8 @@ local opts = {
   spec = {
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
     { import = "plugins" },
+    { import = "plugins.lang.shell" },
+    { import = "plugins.lang.chezmoi" },
   },
   defaults = {
     lazy = false,

@@ -39,6 +39,7 @@ return {
       ---Shell
       sh = { "shfmt" },
       bash = { "shfmt" },
+      zsh = { "shfmt_zsh" },
 
       ---Fish
       fish = { "fish_indent" },
@@ -53,6 +54,13 @@ return {
       ---Config files
       kitty = { "shfmt" },
       readline = {},
+    },
+    formatters = {
+      shfmt_zsh = {
+        command = "shfmt",
+        args = { "-ln", "zsh", "-i", "2" },
+        stdin = true,
+      },
     },
     -- NOTE: Do NOT set format_on_save here - LazyVim handles it automatically
   },
