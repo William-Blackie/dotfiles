@@ -14,6 +14,8 @@
 
 [include]
 	path = ~/.config/delta/catppuccin.gitconfig
+	path = ~/.config/git/local.gitconfig
+    path = ~/.config/default.gitconfig
 
 [rerere]
     enabled = true
@@ -26,12 +28,8 @@
 	ignorecase = true
 	pager = delta
 
-[user]
-	name = William Blackie
-	email = will@developerfy.com
-
-[includeIf "hasconfig:remote.*.url:https://github.com/mabyduck/**"]
-	path = ~/.gitconfig-mabyduck
+[includeIf "gitdir:~/Projects/work/"]
+	path = ~/.config/git/work.gitconfig
 
 [alias]
 	# Short commands

@@ -1,104 +1,83 @@
 # Dotfiles
 
-MacOS dotfiles managed with [chezmoi](https://www.chezmoi.io/).
+MacOS-first dotfiles managed by [chezmoi](https://www.chezmoi.io/).
 
-The source of truth is [/.dotfiles](.dotfiles), stored in chezmoi source-state
-format. Repo-only files such as [Makefile](.dotfiles/Makefile) and
-[README.md](README.md) are ignored by
-[/.chezmoiignore](.dotfiles/.chezmoiignore) and are not applied into `$HOME`.
+The chezmoi source directory is `~/.dotfiles`. Most config lives under
+`dot_config/exact_*`, which means chezmoi treats those directories as the full
+desired state and removes unmanaged files inside them on apply.
 
-## Workflow
+## New Machine
 
-Edit files directly in this repo or using `chezmoi.nvim`.
-Apply changes:
+Install Homebrew, then run:
 
-```bash
-chezmoi init --source ~/.dotfiles --config-path ~/.config/chezmoi/chezmoi.toml
+```sh
+brew install chezmoi git
+chezmoi init git@github.com:williamblackie/dotfiles.git \
+  --source ~/.dotfiles \
+  --config-path ~/.config/chezmoi/chezmoi.toml
 chezmoi apply
 ```
 
-After the bootstrap step, plain `chezmoi` commands work because the repo owns
-the config template in
-[dot_config/chezmoi/chezmoi.toml.tmpl](.dotfiles/dot_config/chezmoi/chezmoi.toml.tmpl).
+On a second machine where the repo already exists:
 
-Inspect pending changes:
-
-```bash
-chezmoi diff
-```
-
-Setup a new machine:
-
-```bash
-chezmoi init --source ~/.dotfiles --config-path ~/.config/chezmoi/chezmoi.toml
+```sh
+chezmoi init --source ~/.dotfiles \
+  --config-path ~/.config/chezmoi/chezmoi.toml
 chezmoi apply
 ```
 
-That installs packages from
-[.chezmoidata/packages.yaml](.dotfiles/.chezmoidata/packages.yaml), checks out
-the Neovim source as a chezmoi external under `~/.local/src/neovim`, builds it
-into `~/.local/bin`, and applies the chezmoi source state.
+`chezmoi apply` installs Homebrew packages and casks, applies config, fetches
+externals, and rebuilds generated caches when relevant inputs change.
 
-`chezmoi apply` now also owns the bootstrap bits that used to live in ad-hoc
-shell glue:
+## Daily Use
 
-- Homebrew package install is run via a `run_onchange_` script keyed off
-  [.chezmoidata/packages.yaml](.dotfiles/.chezmoidata/packages.yaml)
-- macOS apps are installed as Homebrew casks; there is no separate DMG
-  installer script
-- zinit and tmux TPM are fetched as chezmoi externals
-- Neovim source is fetched as a chezmoi `git-repo` external and built after
-  apply when the checked-out Neovim HEAD differs from the build stamp
-- bat cache rebuild runs via a `run_onchange_after_` script when the bat config
-  changes
-- zsh, git, tmux, readline, ripgrep, and several tool paths are wired for XDG
-  locations, with compatibility symlinks where data is intentionally left in
-  place under `~/.*`
+```sh
+chezmoi diff      # preview changes to $HOME
+chezmoi apply     # apply this repo to $HOME
+chezmoi status    # show drift
+chezmoi unmanaged ~/.config/nvim
+```
 
-## Common Commands
+Edit files in `~/.dotfiles`, then apply. If a tool writes useful config back
+into `$HOME`, copy or add it back into `~/.dotfiles` so the repo stays the
+source of truth.
 
-```bash
-# Apply dotfiles
-chezmoi apply
+## 1Password And SSH
 
-# View pending changes
-chezmoi diff
+SSH is wired to the 1Password SSH agent through `private_dot_ssh/config.tmpl`.
+The repo only stores the generic socket path.
 
-# Check status
-chezmoi status
+Local 1Password state is intentionally not managed:
 
-# Edit this repo in nvim
-cd ~/.dotfiles && nvim .
+```sh
+~/.config/1Password/ssh/agent.toml
+```
 
-# Force Neovim rebuild
-rm ~/.local/state/chezmoi/neovim-build.txt && chezmoi apply
+Set up keys in the 1Password app on each machine, enable the SSH agent, and keep
+key/vault/account selection local to that machine. Do not add `agent.toml`,
+private keys, GitHub tokens, or `gh` auth state to this repo.
+
+Optional per-machine SSH overrides go here:
+
+```sh
+~/.ssh/config.local
 ```
 
 ## Neovim
 
-The Neovim config lives in
-[dot_config/nvim](/Users/william/.dotfiles/dot_config/nvim).
+Neovim config lives in:
 
-Edit it from this repo like everything else:
-
-After pulling Neovim changes, run:
-
-```vim
-:Lazy sync
+```sh
+dot_config/exact_nvim
 ```
 
-LazyVim and spell state are tracked using chezmoi-managed symlinks so external
-writes go back into the source tree instead of being overwritten on apply:
+LazyVim lock/state files are symlinked back into the repo under
+`dot_config/exact_nvim/private_data`, so normal Lazy writes are preserved.
 
-- [dot_config/nvim/symlink_lazy-lock.json.tmpl](.dotfiles/dot_config/nvim/symlink_lazy-lock.json.tmpl)
-  -> `~/.config/nvim/lazy-lock.json` -> backing file:
-  [dot_config/nvim/data/lazy-lock.json](.dotfiles/dot_config/nvim/data/lazy-lock.json)
-- [dot_config/nvim/symlink_lazyvim.json.tmpl](.dotfiles/dot_config/nvim/symlink_lazyvim.json.tmpl)
-  -> `~/.config/nvim/lazyvim.json` -> backing file:
-  [dot_config/nvim/data/lazyvim.json](.dotfiles/dot_config/nvim/data/lazyvim.json)
-- [dot_config/nvim/spell/symlink_en.utf-8.add.tmpl](.dotfiles/dot_config/nvim/spell/symlink_en.utf-8.add.tmpl)
-  -> `~/.config/nvim/spell/en.utf-8.add` -> backing file:
-  [dot_config/nvim/data/en.utf-8.add](.dotfiles/dot_config/nvim/data/en.utf-8.add)
-- [dot_config/nvim/spell/symlink_en.utf-8.add.spl.tmpl](.dotfiles/dot_config/nvim/spell/symlink_en.utf-8.add.spl.tmpl)
-  -> `~/.config/nvim/spell/en.utf-8.add.spl` -> backing file:
-  [dot_config/nvim/data/en.utf-8.add.spl](.dotfiles/dot_config/nvim/data/en.utf-8.add.spl)
+Useful commands:
+
+```sh
+nvim
+# then inside nvim:
+# :Lazy sync
+```

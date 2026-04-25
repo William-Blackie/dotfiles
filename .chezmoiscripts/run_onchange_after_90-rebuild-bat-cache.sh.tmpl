@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-# Bat config hash: {{ include "dot_config/bat/config" | sha256sum }}
-# Bat theme hash: {{ include "dot_config/bat/themes/Catppuccin Mocha.tmTheme" | sha256sum }}
+# Bat config hash: {{ include "dot_config/exact_bat/config" | sha256sum }}
+# Bat theme hash: {{ include "dot_config/exact_bat/themes/Catppuccin Mocha.tmTheme" | sha256sum }}
 
 if command -v bat >/dev/null 2>&1 && [[ -d "${XDG_CONFIG_HOME:-$HOME/.config}/bat/themes" ]]; then
   bat cache --build

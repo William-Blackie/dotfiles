@@ -1,0 +1,2 @@
+{{- $item := onepassword "242hkzglxghblorelgowhkrysm" "Private" "my.1password.com" -}}
+{{- range $item.fields }}{{ if eq .label "public_key" }}{{ .value }}{{ end }}{{ end -}}

@@ -40,6 +40,16 @@ export PYTHON_HISTORY="$XDG_STATE_HOME/python_history"
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
 export SHELL_SESSIONS_DISABLE=1
 
+if [[ "$OSTYPE" == darwin* ]]; then
+  _op_ssh_sock="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+elif [[ "$OSTYPE" == linux* ]]; then
+  _op_ssh_sock="$HOME/.1password/agent.sock"
+fi
+if [[ -n "${_op_ssh_sock:-}" && -S "$_op_ssh_sock" ]]; then
+  export SSH_AUTH_SOCK="$_op_ssh_sock"
+fi
+unset _op_ssh_sock
+
 typeset -a preferred_path
 preferred_path=(
   "$HOME/.local/bin"

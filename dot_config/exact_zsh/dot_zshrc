@@ -60,6 +60,7 @@ fi
 
 ##### Completions
 [[ -d "$DOCKER_CONFIG/completions" ]] && fpath=("$DOCKER_CONFIG/completions" $fpath)
+[[ -d "$ZDOTDIR/functions" ]] && fpath=("$ZDOTDIR/functions" $fpath)
 mkdir -p "$XDG_CACHE_HOME/zsh" "$XDG_STATE_HOME/zsh" "$XDG_RUNTIME_DIR/npm"
 
 # Optimize compinit by only running it once a day
