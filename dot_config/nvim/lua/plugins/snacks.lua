@@ -1,3 +1,4 @@
+-- https://github.com/folke/snacks.nvim
 return {
   {
     "folke/snacks.nvim",
@@ -5,6 +6,7 @@ return {
       picker = {
         sources = {
           explorer = {
+            -- Override to show Git hidden files.
             hidden = true,
           },
           files = {

@@ -18,7 +18,7 @@ vim.opt.cursorline = true
 -- Spell check
 vim.opt.spell = true
 vim.opt.spelloptions:append("noplainbuffer")
-vim.opt.spellfile = vim.fs.abspath("~/.config/nvim/spell/en.utf-8.add")
+vim.opt.spellfile = vim.fn.stdpath("config") .. "/spell/en.utf-8.add"
 
 -- ESLint
 vim.g.lazyvim_eslint_auto_format = true
