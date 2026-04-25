@@ -13,7 +13,7 @@ Edit files directly in this repo or using `chezmoi.nvim`.
 Apply changes:
 
 ```bash
-chezmoi --source ~/.dotfiles init --config-path ~/.config/chezmoi/chezmoi.toml
+chezmoi init --source ~/.dotfiles --config-path ~/.config/chezmoi/chezmoi.toml
 chezmoi apply
 ```
 
@@ -30,7 +30,7 @@ chezmoi diff
 Setup a new machine:
 
 ```bash
-chezmoi --source ~/.dotfiles init --config-path ~/.config/chezmoi/chezmoi.toml
+chezmoi init --source ~/.dotfiles --config-path ~/.config/chezmoi/chezmoi.toml
 chezmoi apply
 ```
 
@@ -44,9 +44,11 @@ shell glue:
 
 - Homebrew package install is run via a `run_onchange_` script keyed off
   [.chezmoidata/packages.yaml](.dotfiles/.chezmoidata/packages.yaml)
+- macOS apps are installed as Homebrew casks; there is no separate DMG
+  installer script
 - zinit and tmux TPM are fetched as chezmoi externals
-- Neovim source is fetched as a chezmoi `git-repo` external and built by a
-  `run_after_` script
+- Neovim source is fetched as a chezmoi `git-repo` external and built after
+  apply when the checked-out Neovim HEAD differs from the build stamp
 - bat cache rebuild runs via a `run_onchange_after_` script when the bat config
   changes
 - zsh, git, tmux, readline, ripgrep, and several tool paths are wired for XDG

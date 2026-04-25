@@ -1,14 +1,17 @@
-{{- if eq .chezmoi.os "darwin" -}}
 #!/usr/bin/env bash
+{{- if eq .chezmoi.os "darwin" }}
 
 set -euo pipefail
 
-export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$HOME/bin:$PATH"
+PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$HOME/bin:$PATH"
+export PATH
 
 brew_cmd() {
   if command -v brew >/dev/null 2>&1; then
-    command -v brew
-    return 0
+    if brew --prefix >/dev/null 2>&1; then
+      command -v brew
+      return 0
+    fi
   fi
 
   if [[ -x /opt/homebrew/bin/brew ]]; then
@@ -30,16 +33,12 @@ if ! BREW_BIN="$(brew_cmd)"; then
   BREW_BIN="$(brew_cmd)"
 fi
 
-if "$BREW_BIN" list --versions lazygit >/dev/null 2>&1; then
-  "$BREW_BIN" link --overwrite lazygit >/dev/null 2>&1 || true
-fi
-
 "$BREW_BIN" bundle --file=/dev/stdin <<'EOF'
 {{- range .packages.darwin.brews }}
 brew {{ . | quote }}
 {{- end }}
 {{- range .packages.darwin.casks }}
-cask {{ . | quote }}
+cask {{ . | quote }}, args: { force: true }
 {{- end }}
 EOF
 {{- end }}
