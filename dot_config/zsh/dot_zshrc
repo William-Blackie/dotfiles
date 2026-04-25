@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/zsh
 
 setopt extendedglob
 
@@ -22,7 +22,7 @@ for config_file in "$ZDOTDIR/lib"/*.zsh(N); do
 done
 
 # Load machine-local drop-ins (Untracked)
-for local_config in "$ZDOTDIR/.zshrc.d"/*.zsh(N) "$HOME/.zshrc.d"/*.zsh(N); do
+for local_config in "$ZDOTDIR/.zshrc.d"/*.zsh(N); do
   source "$local_config"
 done
 
@@ -80,7 +80,6 @@ zstyle ':completion:*:warnings' format '%F{203}no matches for:%f %d'
 # fzf integration (load before fzf-tab so fzf-tab can wrap it)
 if command -v fzf >/dev/null 2>&1; then
   [[ -f "$XDG_CONFIG_HOME/fzf/fzf.zsh" ]] && source "$XDG_CONFIG_HOME/fzf/fzf.zsh"
-  [[ ! -f "$XDG_CONFIG_HOME/fzf/fzf.zsh" && -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
   export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git"
   export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
   # Catppuccin Mocha theme
@@ -191,7 +190,7 @@ vimhelp - search vim motions cheatsheet
 EOF
 )
   local local_content=""
-  [[ -f ~/.cheatsheet.local ]] && local_content=$(cat ~/.cheatsheet.local)
+  [[ -f "$ZDOTDIR/cheatsheet.local" ]] && local_content+=$'\n'$(cat "$ZDOTDIR/cheatsheet.local")
 
   local selected=$(printf "%s\n%s" "$base_content" "$local_content" | fzf --height=100% --header "Terminal Cheatsheet" --reverse)
   if [[ -n "$selected" ]]; then
@@ -297,7 +296,6 @@ fi
 
 ##### Machine-local config
 [[ -f "$ZDOTDIR/.zshrc.local" ]] && source "$ZDOTDIR/.zshrc.local"
-[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 ##### Editor
 export EDITOR="nvim"
@@ -313,7 +311,7 @@ ZSH_HIGHLIGHT_STYLES[command]="fg=#89b4fa,bold"
 ZSH_HIGHLIGHT_STYLES[builtin]="fg=#cba6f7"
 ZSH_HIGHLIGHT_STYLES[alias]="fg=#f9e2af"
 ZSH_HIGHLIGHT_STYLES[path]="fg=#94e2d5"
-ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=#f38ba8,bold"
+ZSH_HIGHLIGHT_STYLES["unknown-token"]="fg=#f38ba8,bold"
 if (( $+functions[zinit] )); then
   zinit light zsh-users/zsh-syntax-highlighting
   zinit light jeffreytse/zsh-vi-mode

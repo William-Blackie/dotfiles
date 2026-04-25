@@ -1,8 +1,7 @@
-#! /bin/bash
+#!/bin/zsh
 
-# Single source of truth for shell PATH.
+# Single source of truth for shell environment and PATH.
 [[ -r "$ZDOTDIR/lib/path.zsh" ]] && source "$ZDOTDIR/lib/path.zsh"
 
 # Machine-local env for all zsh invocations (not tracked in dotfiles repo).
 [[ -f "$ZDOTDIR/.zshenv.local" ]] && source "$ZDOTDIR/.zshenv.local"
-[[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
