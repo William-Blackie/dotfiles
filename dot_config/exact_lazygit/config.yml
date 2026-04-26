@@ -28,3 +28,49 @@ gui:
     "feature/*": "#89b4fa"
     "hotfix/*": "#f38ba8"
     "release/*": "#cba6f7"
+    "support/*": "#94e2d5"
+
+customCommands:
+  - key: "G"
+    command: "gh pr view -w {{.SelectedLocalBranch.Name}}"
+    context: "localBranches"
+    description: "Open Github PR in browser"
+  - key: "G"
+    command: "gh pr view -w"
+    context: "commits"
+    description: "Open Github PR in browser"
+  - key: "v" # couldn't think of a better keybinding
+    prompts:
+      - type: "input"
+        title: "PR id:"
+    command: "hub pr checkout {{index .PromptResponses 0}}"
+    context: "localBranches"
+    loadingText: "checking out PR"
+  - key: "M"
+    command: "git mergetool {{ .SelectedFile.Name }}"
+    context: "files"
+    loadingText: "opening git mergetool"
+    output: terminal
+  # Commitizen
+  - key: "<c-v>"
+    context: "global"
+    description: "Commit with Commitizen"
+    command: "cz commit"
+    loadingText: "opening Commitizen"
+    output: terminal
+  - key: "<c-b>"
+    context: "global"
+    description: "Preview Commitizen version bump"
+    command: "cz bump --dry-run --changelog"
+    loadingText: "previewing version bump"
+    output: terminal
+  - key: "B"
+    context: "global"
+    description: "Commitizen version bump"
+    prompts:
+      - type: "confirm"
+        title: "Version bump"
+        body: "Run cz bump --changelog?"
+    command: "cz bump --changelog"
+    loadingText: "bumping version"
+    output: terminal

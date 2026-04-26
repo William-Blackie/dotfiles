@@ -16,10 +16,17 @@ return {
     { "<leader>oi", "<CMD>Octo issue list<CR>", desc = "Issues" },
     { "<leader>op", "<CMD>Octo pr list<CR>", desc = "PRs" },
     { "<leader>on", "<CMD>Octo notification list<CR>", desc = "Notifications" },
+    {
+      "<leader>os",
+      function()
+        require("octo.utils").create_base_search_command({ include_current_repo = true })
+      end,
+      desc = "Search GitHub",
+    },
   },
   dependencies = {
     "nvim-lua/plenary.nvim",
-    "ibhagwan/fzf-lua",
+    "folke/snacks.nvim",
     "nvim-tree/nvim-web-devicons",
   },
 }

@@ -15,7 +15,7 @@
 [include]
 	path = ~/.config/delta/catppuccin.gitconfig
 	path = ~/.config/git/local.gitconfig
-    path = ~/.config/default.gitconfig
+	path = ~/.config/git/default.gitconfig
 
 [rerere]
     enabled = true
@@ -38,6 +38,12 @@
 	br = branch
 	cm = commit
 	lg = log --oneline --graph --decorate --all
+	czc = "!f() { cz commit \"$@\"; }; f"
+	cza = "!f() { cz commit -- --amend --allow-empty \"$@\"; }; f"
+	czr = "!f() { cz commit --retry \"$@\"; }; f"
+	czn = "!f() { cz bump --get-next \"$@\"; }; f"
+	czbd = "!f() { cz bump --dry-run --changelog \"$@\"; }; f"
+	czb = "!f() { cz bump --changelog \"$@\"; }; f"
 
 	# Useful aliases
 	unstage = reset HEAD --
@@ -81,161 +87,6 @@
 	insteadOf = https://github.com/
 
 
-[gitflow]
-	version = 1.0
-	initialized = true
-
-
-[gitflow "branch.main"]
-	type = base
-	upstreamStrategy = none
-	downstreamStrategy = none
-	autoUpdate = false
-
-[gitflow "branch.feature"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/feat/
-	autoUpdate = false
-
-[gitflow "branch.bugfix"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/fix/
-	autoUpdate = false
-
-[gitflow "branch.hotfix"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/hotfix/
-	autoUpdate = false
-
-[gitflow "branch.release"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/release/
-	autoUpdate = false
-
-[gitflow "branch.support"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/support/
-	autoUpdate = false
-
-[gitflow "branch.docs"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/docs/
-	autoUpdate = false
-
-[gitflow "branch.chore"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/chore/
-	autoUpdate = false
-
-[gitflow "branch.refactor"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/refactor/
-	autoUpdate = false
-
-[gitflow "branch.test"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/test/
-	autoUpdate = false
-
-[gitflow "branch.ci"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/ci/
-	autoUpdate = false
-
-[gitflow "branch.build"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/build/
-	autoUpdate = false
-
-[gitflow "branch.perf"]
-	type = topic
-	parent = main
-	startPoint = main
-	upstreamStrategy = merge
-	downstreamStrategy = rebase
-	prefix = williamblackie/perf/
-	autoUpdate = false
-
-[gitflow "feature.finish"]
-	mergeMessage = feat: merge %b into %p
-
-[gitflow "bugfix.finish"]
-	mergeMessage = fix: merge %b into %p
-
-[gitflow "hotfix.finish"]
-	mergeMessage = fix: merge %b into %p
-
-[gitflow "release.finish"]
-	mergeMessage = chore(release): merge %b into %p
-
-[gitflow "support.finish"]
-	mergeMessage = chore(support): merge %b into %p
-
-[gitflow "docs.finish"]
-	mergeMessage = docs: merge %b into %p
-
-[gitflow "chore.finish"]
-	mergeMessage = chore: merge %b into %p
-
-[gitflow "refactor.finish"]
-	mergeMessage = refactor: merge %b into %p
-
-[gitflow "test.finish"]
-	mergeMessage = test: merge %b into %p
-
-[gitflow "ci.finish"]
-	mergeMessage = ci: merge %b into %p
-
-[gitflow "build.finish"]
-	mergeMessage = build: merge %b into %p
-
-[gitflow "perf.finish"]
-	mergeMessage = perf: merge %b into %p
-
 [commit]
 	template = ~/.config/git/commit-template.txt
 
@@ -245,3 +96,11 @@
 
 [credential "https://dev.azure.com"]
 	useHttpPath = true
+
+[credential "https://github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential

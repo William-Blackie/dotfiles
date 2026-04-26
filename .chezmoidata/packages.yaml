@@ -15,6 +15,7 @@ packages:
       - "gh"
       - "gettext"
       - "git"
+      - "commitizen"
       - "hadolint"
       - "k9s"
       - "kind"
