@@ -8,7 +8,6 @@ packages:
       - "chezmoi"
       - "curl"
       - "delta"
-      - "docker"
       - "eza"
       - "fd"
       - "fzf"
@@ -20,6 +19,7 @@ packages:
       - "k9s"
       - "kind"
       - "kubectl"
+      - "kubectx"
       - "lazygit"
       - "ninja"
       - "pyenv"
@@ -34,6 +34,7 @@ packages:
       - "zoxide"
       - "jstkdng/programs/ueberzugpp"
       - "luarocks"
+      - "luajit"
       - "yarn"
     casks:
       - "1password"

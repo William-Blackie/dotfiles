@@ -1,6 +1,13 @@
 sourceDir = "~/.dotfiles"
 workingTree = "~/.dotfiles"
 
+# 1Password integration - uses first account if only one exists
+# Or set CHEZMOI_1PASSWORD_ACCOUNT env var to override
+{{ if env "CHEZMOI_1PASSWORD_ACCOUNT" -}}
+[onepassword]
+account = {{ env "CHEZMOI_1PASSWORD_ACCOUNT" | quote }}
+{{- end }}
+
 [edit]
 command = "nvim"
 watch = true

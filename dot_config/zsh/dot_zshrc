@@ -1,0 +1,87 @@
+#!/bin/zsh
+
+setopt extendedglob
+
+mkdir -p "$XDG_CACHE_HOME/zsh" "$XDG_STATE_HOME/zsh" "$XDG_RUNTIME_DIR/npm"
+
+export ZSH="$XDG_DATA_HOME/omzsh/oh-my-zsh"
+export ZSH_CUSTOM="$XDG_DATA_HOME/omzsh/custom"
+export ZSH_CACHE_DIR="$XDG_CACHE_HOME/omzsh"
+export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump-${ZSH_VERSION}"
+ZSH_THEME=""
+DISABLE_AUTO_UPDATE=true
+ZSH_DISABLE_COMPFIX=true
+
+HISTSIZE=500000
+SAVEHIST=$HISTSIZE
+HISTFILE="${XDG_STATE_HOME}/zsh/history"
+setopt appendhistory sharehistory hist_ignore_space hist_ignore_all_dups \
+  hist_save_no_dups hist_ignore_dups hist_find_no_dups
+
+[[ -d "${DOCKER_CONFIG}/completions" ]] && fpath=("${DOCKER_CONFIG}/completions" $fpath)
+[[ -d "$ZDOTDIR/functions" ]] && fpath=("$ZDOTDIR/functions" $fpath)
+[[ -d "$ZSH_CUSTOM/plugins/zsh-completions/src" ]] && fpath=("$ZSH_CUSTOM/plugins/zsh-completions/src" $fpath)
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' list-dirs-first true
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*:descriptions' format '%F{blue}%B%d%b%f'
+zstyle ':completion:*:warnings' format '%F{203}no matches for:%f %d'
+zstyle ':completion:*:corrections' format '%F{yellow}!- %d (errors: %e) -!%f'
+zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$XDG_CACHE_HOME/zsh/completions"
+
+zstyle ':fzf-tab:*' fzf-flags --height=40% --layout=reverse --border
+zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+
+typeset -gA ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[command]="fg=#89b4fa,bold"
+ZSH_HIGHLIGHT_STYLES[builtin]="fg=#cba6f7"
+ZSH_HIGHLIGHT_STYLES[alias]="fg=#f9e2af"
+ZSH_HIGHLIGHT_STYLES[path]="fg=#94e2d5"
+ZSH_HIGHLIGHT_STYLES["unknown-token"]="fg=#f38ba8,bold"
+
+ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
+ZVM_LINE_BEFORE_PROMPT=false
+zstyle ':omz:plugins:nvm' lazy yes
+zstyle ':omz:plugins:nvm' silent-autoload yes
+zstyle ':omz:plugins:eza' dirs-first yes
+zstyle ':omz:plugins:eza' git-status yes
+zstyle ':omz:plugins:eza' icons yes
+
+plugins=(
+  git
+  sudo
+  eza
+  docker
+  docker-compose
+  fzf
+  gh
+  1password
+  chezmoi
+  pyenv
+  zoxide
+  nvm
+  kubectl
+  kubectx
+  command-not-found
+  zsh-autosuggestions
+  fzf-tab
+  zsh-vi-mode
+  zsh-syntax-highlighting
+)
+
+if [[ -r "$ZSH/oh-my-zsh.sh" ]]; then
+  source "$ZSH/oh-my-zsh.sh"
+else
+  echo "Oh My Zsh is missing at $ZSH. Run: chezmoi apply --refresh-externals"
+fi
+
+if [[ -z "$STARSHIP_SHELL" ]] && command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+[[ -f "$ZDOTDIR/.zshrc.local" ]] && source "$ZDOTDIR/.zshrc.local"

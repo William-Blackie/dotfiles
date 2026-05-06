@@ -1,6 +1,4 @@
 #!/bin/zsh
-# Single source of truth for shell PATH.
-# Put the tools you actually want first and let zsh dedupe the rest.
 
 typeset -U path PATH
 
@@ -26,7 +24,8 @@ fi
 export AWS_CONFIG_FILE="$XDG_CONFIG_HOME/aws/config"
 export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME/aws/credentials"
 export CARGO_HOME="$XDG_DATA_HOME/cargo"
-export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
+export DOCKER_CONFIG="${HOME}/.docker"
+unset KUBE_CONFIG
 export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 export GOPATH="$XDG_DATA_HOME/go"
 export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
@@ -50,7 +49,6 @@ if [[ -n "${_op_ssh_sock:-}" && -S "$_op_ssh_sock" ]]; then
 fi
 unset _op_ssh_sock
 
-typeset -a preferred_path
 preferred_path=(
   "$HOME/.local/bin"
   "$XDG_DATA_HOME/nvim/mason/bin"
@@ -63,9 +61,7 @@ preferred_path=(
 
 if [[ -r "$NVM_DIR/alias/default" ]]; then
   node_version="$(<"$NVM_DIR/alias/default")"
-  if [[ -d "$NVM_DIR/versions/node/$node_version/bin" ]]; then
-    preferred_path=("$NVM_DIR/versions/node/$node_version/bin" "${preferred_path[@]}")
-  fi
+  [[ -d "$NVM_DIR/versions/node/$node_version/bin" ]] && preferred_path=("$NVM_DIR/versions/node/$node_version/bin" "${preferred_path[@]}")
 fi
 
 path=("${preferred_path[@]}" "${path[@]}")

@@ -1,6 +1,31 @@
-[".local/share/zinit/zinit.git"]
+[".local/share/omzsh/oh-my-zsh"]
 type = "git-repo"
-url = "https://github.com/zdharma-continuum/zinit.git"
+url = "https://github.com/ohmyzsh/ohmyzsh.git"
+pull.args = ["--ff-only"]
+
+[".local/share/omzsh/custom/plugins/fzf-tab"]
+type = "git-repo"
+url = "https://github.com/Aloxaf/fzf-tab.git"
+pull.args = ["--ff-only"]
+
+[".local/share/omzsh/custom/plugins/zsh-autosuggestions"]
+type = "git-repo"
+url = "https://github.com/zsh-users/zsh-autosuggestions.git"
+pull.args = ["--ff-only"]
+
+[".local/share/omzsh/custom/plugins/zsh-completions"]
+type = "git-repo"
+url = "https://github.com/zsh-users/zsh-completions.git"
+pull.args = ["--ff-only"]
+
+[".local/share/omzsh/custom/plugins/zsh-syntax-highlighting"]
+type = "git-repo"
+url = "https://github.com/zsh-users/zsh-syntax-highlighting.git"
+pull.args = ["--ff-only"]
+
+[".local/share/omzsh/custom/plugins/zsh-vi-mode"]
+type = "git-repo"
+url = "https://github.com/jeffreytse/zsh-vi-mode.git"
 pull.args = ["--ff-only"]
 
 [".local/share/tmux/plugins/tpm"]

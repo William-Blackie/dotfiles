@@ -30,7 +30,7 @@ format = """
 $directory$git_branch$git_status$c$golang$nodejs$python$rust$lua$docker_context$kubernetes$cmd_duration
 $character"""
 
-command_timeout = "500"
+command_timeout = 2000
 
 [directory]
 style = "bold fg:blue"
@@ -79,6 +79,18 @@ symbol = " "
 style = "bold yellow"
 format = "[$symbol($version )(\\($virtualenv\\) )]($style)"
 pyenv_prefix = "pyenv "
+# Only show Python when relevant files are present (faster detection)
+detect_extensions = ["py", "ipynb", "pyc", "pyo"]
+detect_files = [
+  "requirements.txt",
+  "pyproject.toml",
+  "setup.py",
+  "setup.cfg",
+  "Pipfile",
+  "tox.ini",
+  ".python-version",
+  "poetry.lock",
+]
 
 [rust]
 symbol = " "
