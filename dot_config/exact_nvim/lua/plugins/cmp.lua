@@ -18,14 +18,19 @@ return {
     sources = {
       compat = { "conventional_commits" },
       default = {
-        "git",
         "lsp",
         "path",
         "snippets",
         "buffer",
-        "css_vars",
-        "npm",
-        "conventional_commits",
+        "spell",
+      },
+      per_filetype = {
+        gitcommit = { "git", "conventional_commits", "buffer" },
+        css = { "lsp", "path", "snippets", "buffer", "css_vars" },
+        javascript = { "lsp", "path", "snippets", "buffer", "css_vars", "npm" },
+        javascriptreact = { "lsp", "path", "snippets", "buffer", "css_vars", "npm" },
+        typescript = { "lsp", "path", "snippets", "buffer", "css_vars", "npm" },
+        typescriptreact = { "lsp", "path", "snippets", "buffer", "css_vars", "npm" },
       },
       providers = {
         css_vars = {
