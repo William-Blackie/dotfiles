@@ -16,6 +16,8 @@ return {
       zsh = { "zsh" },
       ["zsh.chezmoitmpl"] = { "zsh" },
       tmux = { "shellcheck" },
+      python = { "ruff" },
+      scss = { "stylelint" },
     },
     linters = {
       -- Custom linter options can go here

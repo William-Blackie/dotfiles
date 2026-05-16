@@ -16,9 +16,10 @@ return {
   opts = {
     ---Formatters by filetype
     ---Each filetype can have multiple formatters that run sequentially
+    --- https://github.com/stevearc/conform.nvim#customizing-formatters
     formatters_by_ft = {
       ---Web technologies
-      html = { "prettier", "djlint" },
+      html = { "prettier" },
       css = { "prettier" },
       scss = { "prettier" },
 
@@ -30,11 +31,6 @@ return {
 
       ---Go
       go = { "gofumpt" },
-
-      ---Template engines
-      htmldjango = { "prettier", "djlint" },
-      jinja = { "djlint" },
-      jinja2 = { "djlint" },
 
       ---Shell
       sh = { "shfmt" },
@@ -61,7 +57,12 @@ return {
         args = { "-ln", "zsh", "-i", "2" },
         stdin = true,
       },
+      taplo = {
+        command = "taplo",
+        args = { "format", "--option", "align_entries=true", 'indent_string="  "', "-" },
+      },
     },
+
     -- NOTE: Do NOT set format_on_save here - LazyVim handles it automatically
   },
 }

@@ -24,8 +24,18 @@ vim.opt.rtp:prepend(lazypath)
 
 local opts = {
   spec = {
+    {
+      "William-Blackie/neotest-python",
+      name = "neotest-python",
+      branch = "williamblackie/docker-path-mappings",
+    },
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
     { import = "plugins" },
+    { import = "plugins.lang.django" },
+    { import = "plugins.lang.python" },
+    { import = "plugins.lang.python-dap" },
+    { import = "plugins.lang.html-css-js" },
+    { import = "plugins.lang.shell" },
   },
   defaults = {
     lazy = false,

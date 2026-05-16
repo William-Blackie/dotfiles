@@ -43,3 +43,9 @@ vim.keymap.set("v", "p", '"_dP', { desc = "Paste without yank" })
 -- Terminal
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal" })
 vim.keymap.set("t", "<C-]>", "<C-\\><C-n>", { desc = "Exit terminal" })
+
+-- Codedocs apply annotation
+vim.keymap.set("n", "gcd", "<cmd>Codedocs<CR>", { desc = "Insert annotation" })
+
+-- nvim-html-css html peaking
+vim.keymap.set("n", "<leader>cp", "<cmd>HtmlCssPeek<CR>", { desc = "Peek CSS source" })

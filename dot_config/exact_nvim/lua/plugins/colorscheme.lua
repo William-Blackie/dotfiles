@@ -1,6 +1,5 @@
 ---Catppuccin colorscheme configuration
 --- https://github.com/catppuccin/nvim
----@type LazyPluginSpec
 return {
   {
     "catppuccin",
@@ -8,6 +7,19 @@ return {
     opts = {
       flavour = "mocha",
       transparent_background = true,
+      integrations = {
+        cmp = true,
+        blink_cmp = true,
+        gitsigns = true,
+        nvimtree = true,
+        treesitter = true,
+        treesitter_context = true,
+        notify = false,
+        mini = {
+          enabled = true,
+          indentscope_color = "",
+        },
+      },
     },
   },
   {

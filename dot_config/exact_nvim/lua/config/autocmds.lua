@@ -1,20 +1,5 @@
 -- Filetype detection
 vim.filetype.add({
-  extension = {
-    j2 = "htmldjango",
-    jinja = "htmldjango",
-    jinja2 = "htmldjango",
-    html = function(path, _)
-      local dir = vim.fs.dirname(path)
-      if dir:match("templates") then
-        local root = vim.fs.root(0, { "manage.py", "pyproject.toml" })
-        if root then
-          return "htmldjango"
-        end
-      end
-      return "html"
-    end,
-  },
   filename = {
     ["compose.yaml"] = "yaml.docker-compose",
     ["compose.yml"] = "yaml.docker-compose",

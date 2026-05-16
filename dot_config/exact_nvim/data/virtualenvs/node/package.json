@@ -1,0 +1,20 @@
+{
+  "name": "nvim-node-env",
+  "version": "1.0.0",
+  "description": "Neovim Node provider environment",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.1.2",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "dependencies": {
+    "neovim": "^5.4.0",
+    "obsidian-headless": "^0.0.8"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
+  }
+}

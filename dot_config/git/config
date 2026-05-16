@@ -68,10 +68,10 @@
 	ui = auto
 
 [diff]
-	tool = vimdiff
+	tool = nvimdiff
 
 [merge]
-	tool = vimdiff
+	tool = nvimdiff
 
 [interactive]
 	diffFilter = delta --color-only

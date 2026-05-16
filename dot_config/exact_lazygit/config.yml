@@ -51,26 +51,3 @@ customCommands:
     context: "files"
     loadingText: "opening git mergetool"
     output: terminal
-  # Commitizen
-  - key: "<c-v>"
-    context: "global"
-    description: "Commit with Commitizen"
-    command: "cz commit"
-    loadingText: "opening Commitizen"
-    output: terminal
-  - key: "<c-b>"
-    context: "global"
-    description: "Preview Commitizen version bump"
-    command: "cz bump --dry-run --changelog"
-    loadingText: "previewing version bump"
-    output: terminal
-  - key: "B"
-    context: "global"
-    description: "Commitizen version bump"
-    prompts:
-      - type: "confirm"
-        title: "Version bump"
-        body: "Run cz bump --changelog?"
-    command: "cz bump --changelog"
-    loadingText: "bumping version"
-    output: terminal

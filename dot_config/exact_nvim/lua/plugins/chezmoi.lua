@@ -34,9 +34,4 @@ return {
       vim.g["chezmoi#use_external"] = 1
     end,
   },
-  {
-    "petertriho/cmp-git",
-    ft = { "gitcommit", "gitconfig", "gitconfig.chezmoitmpl" },
-    opts = {},
-  },
 }

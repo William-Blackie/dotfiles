@@ -15,8 +15,10 @@ return {
   ---@see https://github.com/obsidian-nvim/obsidian.nvim
   "obsidian-nvim/obsidian.nvim",
   version = "*",
-  cmd = "Obsidian",
-  ft = "markdown",
+  lazy = false,
+  dependencies = {
+    "ibhagwan/fzf-lua",
+  },
   keys = {
     { "<leader>n", group = "Notes" },
     { "<leader>nn", "<CMD>Obsidian quick_switch<CR>", desc = "Quick Switch" },
@@ -29,6 +31,7 @@ return {
   opts = {
     legacy_commands = false,
     picker = { name = "fzf-lua" },
+    ui = { enable = false },
     workspaces = (function()
       local workspaces = {
         { name = "notes", path = vim.env.OBSIDIAN_NOTES_PATH or "~/Obsidian" },
@@ -43,17 +46,5 @@ return {
       end
       return workspaces
     end)(),
-  },
-  {
-    "ibhagwan/fzf-lua",
-    -- optional for icon support
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    -- or if using mini.icons/mini.nvim
-    -- dependencies = { "nvim-mini/mini.icons" },
-    ---@module "fzf-lua"
-    ---@type fzf-lua.Config|{}
-    ---@diagnostic disable: missing-fields
-    opts = {},
-    ---@diagnostic enable: missing-fields
   },
 }

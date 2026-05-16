@@ -1,226 +1,190 @@
----@class PythonConfig
----Python testing and debugging configuration
+local root_markers = { "manage.py", "pyproject.toml", "pytest.ini", "setup.cfg", ".git" }
+local debug_port = tonumber(vim.env.NEOTEST_DOCKER_DEBUG_PORT or "5678")
 
----@class DapConfiguration
----Debug Adapter Protocol configuration
----@field type string Adapter type
----@field request string Request type (launch, attach)
----@field name string Configuration name
-
----Find Python binary in virtualenv
----@param root? string Project root directory
----@return string Path to Python interpreter
-local function python_bin(root)
-  local candidates = {
-    root and (root .. "/.venv/bin/python") or nil,
-    root and (root .. "/venv/bin/python") or nil,
-    vim.fn.exepath("python3"),
-    vim.fn.exepath("python"),
-  }
-  for _, c in ipairs(candidates) do
-    if c and c ~= "" and vim.fn.executable(c) == 1 then
-      return c
-    end
-  end
-  return "python3"
+---@param path string|nil
+---@return string|nil
+local function resolve(path)
+  return path and path ~= "" and vim.fn.resolve(path) or path
 end
 
----Find manage.py for Django projects
----@return string Path to manage.py
-local function manage_py()
-  local cwd = vim.uv.cwd()
-  local buf = vim.api.nvim_buf_get_name(0)
-  local candidates = {
-    cwd and (cwd .. "/manage.py") or nil,
-    cwd and (cwd .. "/django/manage.py") or nil,
-    buf ~= "" and (vim.fs.dirname(buf) .. "/manage.py") or nil,
-  }
-  for _, c in ipairs(candidates) do
-    if c and vim.fn.filereadable(c) == 1 then
-      return c
-    end
-  end
-  local roots = {}
-  if buf ~= "" then
-    table.insert(roots, vim.fs.dirname(buf))
-  end
-  if cwd and cwd ~= "" then
-    table.insert(roots, cwd)
-  end
-  for _, root in ipairs(roots) do
-    local found = vim.fs.find("manage.py", { path = root, upward = true, limit = 1 })[1]
-    if found then
-      return found
-    end
-  end
-  return "manage.py"
+---@param path string
+---@return string
+local function project_root(path)
+  return vim.fs.root(path, root_markers) or vim.uv.cwd()
 end
 
----Get Django project root
----@return string Directory path of manage.py
-local function django_root()
-  return vim.fs.dirname(manage_py())
+---@param root string
+---@return string|nil
+local function compose_file(root)
+  local found = vim.fs.find({ "compose.yaml", "compose.yml", "docker-compose.yml" }, {
+    path = root,
+    upward = true,
+    limit = 1,
+  })[1]
+  return found and resolve(found) or nil
 end
 
----Find Docker Compose file
----@return string Path to compose file
-local function compose_file()
-  local root = django_root()
-  local files = { root .. "/compose.yaml", root .. "/docker-compose.yml" }
-  for _, f in ipairs(files) do
-    if vim.fn.filereadable(f) == 1 then
-      return f
-    end
-  end
-  return "compose.yaml"
+---@return string
+local function docker_service()
+  return vim.env.NEOTEST_DOCKER_SERVICE or "django-app"
 end
 
----Get Docker binary path
----@return string Path to docker executable
-local function docker_bin()
-  local p = vim.fn.exepath("docker")
-  return p ~= "" and p or "docker"
+---@return string
+local function docker_root()
+  return vim.env.NEOTEST_DOCKER_ROOT or "/app"
 end
 
----Get application port
----@return string Port number
-local function app_port()
-  return vim.env.PORT_APP or "8001"
+---@return string
+local function docker_python()
+  return vim.env.NEOTEST_DOCKER_PYTHON or "python"
 end
 
----Port for debugpy listener
----@type number
-local debugpy_port = 5678
-
----Open terminal with command
----@param cmd string Command to run in terminal
-local function open_term(cmd)
-  vim.cmd("botright split | resize 15 | terminal " .. cmd)
+---@return string
+local function host_tmp()
+  return resolve(vim.uv.os_tmpdir() or vim.env.TMPDIR or "/tmp")
 end
 
----Join shell arguments safely
----@param parts string[] Arguments to join
----@return string Joined shell command
+---@return string
+local function neotest_python_root()
+  local script = vim.api.nvim_get_runtime_file("neotest.py", true)[1]
+  return script and resolve(vim.fs.dirname(script)) or ""
+end
+
+---@param parts string[]
+---@return string
 local function shell_join(parts)
   return table.concat(vim.tbl_map(vim.fn.shellescape, parts), " ")
 end
 
----Start Django debug container
-local function start_django_debug()
-  local base =
-    shell_join({ docker_bin(), "compose", "-f", compose_file(), "stop", "django-app" })
-  local run = shell_join({
-    docker_bin(),
-    "compose",
-    "-f",
-    compose_file(),
+---@param root string
+---@return string[]
+local function docker_prefix(root)
+  local cmd = { "docker", "compose" }
+  local file = compose_file(root)
+  if file then
+    vim.list_extend(cmd, { "-f", file })
+  end
+  return cmd
+end
+
+---@param root string
+---@return table<string, string>
+local function path_mappings(root)
+  local mappings = {
+    [resolve(root)] = docker_root(),
+    [host_tmp()] = "/tmp",
+  }
+
+  local plugin_root = neotest_python_root()
+  if plugin_root ~= "" then
+    mappings[plugin_root] = plugin_root
+  end
+
+  return mappings
+end
+
+---@param root string
+---@param publish_debug_port? boolean
+---@return string[]
+local function docker_run_prefix(root, publish_debug_port)
+  local cmd = docker_prefix(root)
+  vim.list_extend(cmd, {
     "run",
     "--rm",
-    "--publish",
-    app_port() .. ":80",
-    "--publish",
-    "5678:5678",
-    "--entrypoint",
-    "sh",
-    "-e",
-    "DJANGO_SETTINGS_MODULE=" .. django_settings_module(),
-    "-e",
-    "PYDEVD_DISABLE_FILE_VALIDATION=1",
-    "django-app",
-    "-lc",
-    "python -m pip show debugpy >/dev/null 2>&1 || uv pip install --system debugpy && exec python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 ./manage.py runserver 0.0.0.0:80 --noreload",
+    "-T",
+    "-v",
+    resolve(root) .. ":" .. docker_root(),
+    "-v",
+    host_tmp() .. ":/tmp",
+    "-w",
+    docker_root(),
   })
-  open_term("cd " .. vim.fn.shellescape(django_root()) .. " && " .. base .. " && " .. run)
+
+  local plugin_root = neotest_python_root()
+  if plugin_root ~= "" then
+    vim.list_extend(cmd, { "-v", plugin_root .. ":" .. plugin_root .. ":ro" })
+  end
+
+  if publish_debug_port then
+    vim.list_extend(cmd, { "--publish", debug_port .. ":" .. debug_port })
+  end
+
+  vim.list_extend(cmd, { "--entrypoint", docker_python(), docker_service() })
+  return cmd
 end
 
----Restore Django app container
-local function restore_django_app()
-  local cmd = shell_join({
-    docker_bin(),
-    "compose",
-    "-f",
-    compose_file(),
-    "up",
-    "-d",
-    "django-app",
+---@param root string
+---@return string[]
+local function docker_python_command(root)
+  return docker_run_prefix(root, false)
+end
+
+---@param context table
+local function start_docker_debug(context)
+  local cmd = docker_run_prefix(context.root, true)
+  vim.list_extend(cmd, {
+    "-m",
+    "debugpy",
+    "--listen",
+    "0.0.0.0:" .. debug_port,
+    "--wait-for-client",
+    context.container_script_path,
   })
-  open_term("cd " .. vim.fn.shellescape(django_root()) .. " && " .. cmd)
+  vim.list_extend(cmd, context.script_args)
+
+  vim.cmd("botright split | resize 15 | terminal " .. shell_join(cmd))
 end
 
----Check if debugpy is listening on port
----@return boolean True if debugpy is listening
-local function debugpy_listening()
-  vim.fn.system({ "lsof", "-nP", "-iTCP:" .. debugpy_port, "-sTCP:LISTEN" })
-  return vim.v.shell_error == 0
-end
-
----Run Django debug attach configuration
-local function run_django_attach()
-  ---@type DapConfiguration
-  require("dap").run({
+---@param context table
+---@return table
+local function docker_attach_config(context)
+  start_docker_debug(context)
+  return {
     type = "python",
     request = "attach",
-    name = "Django: attach docker",
-    connect = { host = "127.0.0.1", port = debugpy_port },
-    pathMappings = { { localRoot = django_root(), remoteRoot = docker_remote_root() } },
+    name = "Neotest Docker Debugger",
+    connect = { host = "127.0.0.1", port = debug_port },
+    pathMappings = {
+      { localRoot = resolve(context.root), remoteRoot = docker_root() },
+    },
     justMyCode = false,
-  })
+  }
 end
 
----Wait for Django debug container to start
----@param attempt? number Current attempt count
-local function wait_for_django_debug(attempt)
-  attempt = attempt or 1
-  if debugpy_listening() then
-    run_django_attach()
-    return
-  end
-  if attempt >= 60 then
-    vim.notify(
-      "debugpy did not start on 127.0.0.1:" .. debugpy_port,
-      vim.log.levels.ERROR
-    )
-    return
-  end
-  vim.defer_fn(function()
-    wait_for_django_debug(attempt + 1)
-  end, 500)
-end
-
----Attach to Django debug container
-local function attach_django_debug()
-  if debugpy_listening() then
-    run_django_attach()
-    return
-  end
-  vim.notify("Starting Django debug container...", vim.log.levels.INFO)
-  start_django_debug()
-  wait_for_django_debug()
-end
-
----@type LazyPluginSpec
+---@type LazyPluginSpec[]
 return {
-  ---Python test adapter (forked for Docker support)
-  ---@see https://github.com/William-Blackie/neotest-python.git
   {
     "nvim-neotest/neotest-python",
     url = "https://github.com/William-Blackie/neotest-python.git",
     branch = "williamblackie/docker-path-mappings",
   },
-  ---Test runner
-  ---@see https://github.com/nvim-neotest/neotest
+
   {
     "nvim-neotest/neotest",
     opts = {
-      adapters = { ["neotest-python"] = { runner = "pytest", python = python_bin } },
+      adapters = {
+        ["neotest-python"] = {
+          runner = "pytest",
+          root = function(path)
+            return project_root(path)
+          end,
+          python = function(root)
+            return docker_python_command(root)
+          end,
+          path_mappings = function(root)
+            return path_mappings(root)
+          end,
+          dap = function(_, _, _, context)
+            return docker_attach_config(context)
+          end,
+        },
+      },
     },
   },
-  ---Debug adapter
-  ---@see https://github.com/mfussenegger/nvim-dap
+
   {
     "mfussenegger/nvim-dap",
     dependencies = {
-      "mfussenegger/nvim-dap-python",
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
     },
@@ -238,13 +202,6 @@ return {
           require("dap").continue()
         end,
         desc = "Continue",
-      },
-      {
-        "<leader>da",
-        function()
-          attach_django_debug()
-        end,
-        desc = "Attach Django Docker",
       },
       {
         "<leader>di",
@@ -272,96 +229,22 @@ return {
         function()
           require("dapui").toggle()
         end,
-        desc = "Toggle Dap UI",
-      },
-      {
-        "<leader>ds",
-        function()
-          start_django_debug()
-        end,
-        desc = "Start Django Debug Container",
-      },
-      {
-        "<leader>dR",
-        function()
-          restore_django_app()
-        end,
-        desc = "Restore Django Container",
-      },
-      {
-        "<leader>dt",
-        function()
-          require("dap-python").test_method()
-        end,
-        desc = "Debug Test Method",
-      },
-      {
-        "<leader>dT",
-        function()
-          require("dap-python").test_class()
-        end,
-        desc = "Debug Test Class",
+        desc = "Toggle DAP UI",
       },
     },
     config = function()
-      local dap = require("dap")
       local dapui = require("dapui")
+
       dapui.setup()
       require("nvim-dap-virtual-text").setup()
-      dap.listeners.on_config["django_debug_auto_start"] = function(config)
-        if config.name == "Django: attach docker" and not debugpy_listening() then
-          vim.schedule(attach_django_debug)
-          config.type = dap.ABORT
-          return config
-        end
-        return config
-      end
-      ---@type DapConfiguration[]
-      dap.configurations.python = {
-        {
-          type = "python",
-          request = "launch",
-          name = "Python: current file",
-          program = "${file}",
-          python = function()
-            return python_bin(django_root())
-          end,
-          console = "integratedTerminal",
-          justMyCode = false,
-        },
-        {
-          type = "python",
-          request = "launch",
-          name = "Django: runserver",
-          program = manage_py,
-          cwd = django_root,
-          args = { "runserver", "0.0.0.0:8000" },
-          python = function()
-            return python_bin(django_root())
-          end,
-          django = true,
-          console = "integratedTerminal",
-          justMyCode = false,
-          env = { DJANGO_SETTINGS_MODULE = django_settings_module() },
-        },
-        {
-          type = "python",
-          request = "attach",
-          name = "Django: attach docker",
-          connect = { host = "127.0.0.1", port = 5678 },
-          pathMappings = {
-            { localRoot = django_root, remoteRoot = docker_remote_root() },
-          },
-          justMyCode = false,
-        },
-      }
-      dap.listeners.after.event_initialized["dapui_config"] = function()
+
+      require("dap").listeners.after.event_initialized["dapui_config"] = function()
         dapui.open()
       end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
+      require("dap").listeners.before.event_terminated["dapui_config"] = function()
         dapui.close()
       end
-      dap.listeners.before.event_exited["dapui_config"] = function()
+      require("dap").listeners.before.event_exited["dapui_config"] = function()
         dapui.close()
       end
     end,

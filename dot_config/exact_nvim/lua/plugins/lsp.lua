@@ -9,59 +9,49 @@ return {
       ensure_installed = {
         -- General LSPs
         "bash-language-server",
+        "json-lsp",
         "lua-language-server",
         "marksman",
       },
     },
   },
-
-  -- nvim-cmp: Autocompletion
+  -- Core config-file LSPs. neoconf health still checks lspconfig's legacy
+  -- manager registry, so these are set up through lspconfig directly.
   {
-    "hrsh7th/nvim-cmp",
-    dependencies = {
-      "neovim/nvim-lspconfig",
-      "petertriho/cmp-git",
+    "neovim/nvim-lspconfig",
+    opts = {
+      servers = {
+        jsonls = {},
+        lua_ls = {},
+      },
+      setup = {
+        jsonls = function(_, opts)
+          require("lspconfig").jsonls.setup(opts)
+          return true
+        end,
+        lua_ls = function(_, opts)
+          require("lspconfig").lua_ls.setup(opts)
+          return true
+        end,
+      },
     },
+  },
+  -- Tree-sitter parser required by neoconf for JSONC settings files.
+  {
+    "nvim-treesitter/nvim-treesitter",
+    init = function()
+      local json_parser = vim.api.nvim_get_runtime_file("parser/json.*", false)[1]
+      if json_parser then
+        pcall(vim.treesitter.language.add, "jsonc", {
+          path = json_parser,
+          symbol_name = "json",
+        })
+      end
+    end,
     opts = function(_, opts)
-      local cmp = require("cmp")
-      opts.mapping = vim.tbl_extend("force", opts.mapping or {}, {
-        ["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
-        ["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
-        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-        ["<C-f>"] = cmp.mapping.scroll_docs(4),
-        ["<C-Space>"] = cmp.mapping.complete(),
-        ["<C-e>"] = cmp.mapping.abort(),
-        ["<CR>"] = cmp.mapping.confirm({ select = true }),
-        ["<Tab>"] = cmp.mapping.confirm({ select = true }),
+      opts.ensure_installed = vim.list_extend(opts.ensure_installed or {}, {
+        "json",
       })
-      opts.sources = cmp.config.sources({
-        { name = "nvim_lsp" },
-        { name = "luasnip" },
-        { name = "buffer" },
-        { name = "path" },
-      })
-      cmp.setup.filetype("gitcommit", {
-        sources = cmp.config.sources({
-          { name = "git" },
-        }, {
-          { name = "buffer" },
-        }),
-      })
-      cmp.setup.filetype("gitconfig", {
-        sources = cmp.config.sources({
-          { name = "git" },
-        }, {
-          { name = "buffer" },
-        }),
-      })
-      cmp.setup.filetype("gitconfig.chezmoitmpl", {
-        sources = cmp.config.sources({
-          { name = "git" },
-        }, {
-          { name = "buffer" },
-        }),
-      })
-      return opts
     end,
   },
 }
