@@ -1,0 +1,6 @@
+node_modules/
+pnpm-lock.yaml
+**/pnpm-lock.yaml
+**/uv.lock
+dot_config/exact_nvim/data/
+dot_config/exact_bat/themes/

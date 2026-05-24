@@ -3,5 +3,10 @@
 Makefile
 README.md
 .chezmoiignore
+.husky/
+.prettierignore
+package.json
+pnpm-lock.yaml
+taplo.toml
 chezmoi/
 node_modules/

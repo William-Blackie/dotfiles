@@ -40,7 +40,7 @@ _william_configure_keybindings() {
   bindkey -M vicmd '^n' down-line-or-beginning-search
 }
 _william_configure_keybindings
-zvm_after_init() { _william_configure_keybindings }
+zvm_after_init() { _william_configure_keybindings; }
 
 if [[ -z "$STARSHIP_SHELL" ]] && command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"

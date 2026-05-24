@@ -1,71 +1,71 @@
 [".local/share/omzsh/oh-my-zsh"]
-type = "git-repo"
-url = "https://github.com/ohmyzsh/ohmyzsh.git"
+type      = "git-repo"
+url       = "https://github.com/ohmyzsh/ohmyzsh.git"
 pull.args = ["--ff-only"]
 
 [".local/share/omzsh/custom/plugins/fzf-tab"]
-type = "git-repo"
-url = "https://github.com/Aloxaf/fzf-tab.git"
+type      = "git-repo"
+url       = "https://github.com/Aloxaf/fzf-tab.git"
 pull.args = ["--ff-only"]
 
 [".local/share/omzsh/custom/plugins/zsh-autosuggestions"]
-type = "git-repo"
-url = "https://github.com/zsh-users/zsh-autosuggestions.git"
+type      = "git-repo"
+url       = "https://github.com/zsh-users/zsh-autosuggestions.git"
 pull.args = ["--ff-only"]
 
 [".local/share/omzsh/custom/plugins/zsh-completions"]
-type = "git-repo"
-url = "https://github.com/zsh-users/zsh-completions.git"
+type      = "git-repo"
+url       = "https://github.com/zsh-users/zsh-completions.git"
 pull.args = ["--ff-only"]
 
 [".local/share/omzsh/custom/plugins/zsh-syntax-highlighting"]
-type = "git-repo"
-url = "https://github.com/zsh-users/zsh-syntax-highlighting.git"
+type      = "git-repo"
+url       = "https://github.com/zsh-users/zsh-syntax-highlighting.git"
 pull.args = ["--ff-only"]
 
 [".local/share/omzsh/custom/plugins/zsh-vi-mode"]
-type = "git-repo"
-url = "https://github.com/jeffreytse/zsh-vi-mode.git"
+type      = "git-repo"
+url       = "https://github.com/jeffreytse/zsh-vi-mode.git"
 pull.args = ["--ff-only"]
 
 [".local/share/tmux/plugins/tpm"]
-type = "git-repo"
-url = "https://github.com/tmux-plugins/tpm"
+type      = "git-repo"
+url       = "https://github.com/tmux-plugins/tpm"
 pull.args = ["--ff-only"]
 
 [".local/src/neovim"]
-type = "git-repo"
-url = "https://github.com/neovim/neovim.git"
-branch = "release-0.12"
-pull.args = ["--ff-only"]
+type       = "git-repo"
+url        = "https://github.com/neovim/neovim.git"
+branch     = "release-0.12"
+pull.args  = ["--ff-only"]
 clone.args = ["--branch release-0.12"]
 
 [".local/src/typeshed"]
-type = "git-repo"
-url = "https://github.com/python/typeshed.git"
+type      = "git-repo"
+url       = "https://github.com/python/typeshed.git"
 pull.args = ["--ff-only"]
 
 ["./Projects/nvim/conform.nvim"]
-type = "git-repo"
-url = "https://github.com/William-Blackie/conform.nvim"
+type      = "git-repo"
+url       = "https://github.com/William-Blackie/conform.nvim"
 pull.args = ["--ff-only"]
 
 ["./Projects/nvim/nvim-lspconfig"]
-type = "git-repo"
-url = "https://github.com/William-Blackie/nvim-lspconfig"
+type      = "git-repo"
+url       = "https://github.com/William-Blackie/nvim-lspconfig"
 pull.args = ["--ff-only"]
 
 ["./Projects/nvim/grove.nvim"]
-type = "git-repo"
-url = "https://github.com/William-Blackie/grove.nvim"
+type      = "git-repo"
+url       = "https://github.com/William-Blackie/grove.nvim"
 pull.args = ["--ff-only"]
 
 ["./Projects/nvim/neotest-python"]
-type = "git-repo"
-url = "https://github.com/William-Blackie/neotest-python.git"
+type      = "git-repo"
+url       = "https://github.com/William-Blackie/neotest-python.git"
 pull.args = ["--ff-only"]
 
 ["./Projects/nvim/nvim-lint"]
-type = "git-repo"
-url = "https://github.com/William-Blackie/nvim-lint"
+type      = "git-repo"
+url       = "https://github.com/William-Blackie/nvim-lint"
 pull.args = ["--ff-only"]

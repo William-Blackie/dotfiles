@@ -9,9 +9,11 @@ PERL_MODULE="Neovim::Ext"
 
 SOURCE_DIR="{{ .chezmoi.sourceDir }}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}"
+XDG_STATE_HOME="${XDG_STATE_HOME:-${HOME}/.local/state}"
 
 MANIFEST_ROOT="${SOURCE_DIR}/dot_config/exact_nvim/data/virtualenvs"
 ENV_ROOT="${XDG_DATA_HOME}/nvim/env"
+STATE_DIR="${XDG_STATE_HOME}/chezmoi/nvim-env"
 
 PYTHON_MANIFEST_DIR="${MANIFEST_ROOT}/python"
 NODE_MANIFEST_DIR="${MANIFEST_ROOT}/node"
@@ -33,6 +35,53 @@ brew_prefix() {
 
     has_cmd brew || return 1
     brew --prefix "$formula" 2>/dev/null
+}
+
+file_hash() {
+    local file="$1"
+
+    if [[ ! -f "$file" ]]; then
+        printf 'missing\n'
+        return 0
+    fi
+
+    if has_cmd shasum; then
+        shasum -a 256 "$file" | awk '{ print $1 }'
+    elif has_cmd sha256sum; then
+        sha256sum "$file" | awk '{ print $1 }'
+    else
+        cksum "$file" | awk '{ print $1 "-" $2 }'
+    fi
+}
+
+file_stamp_content() {
+    local file
+
+    for file in "$@"; do
+        printf '%s=%s\n' "$file" "$(file_hash "$file")"
+    done
+}
+
+stamp_file() {
+    printf '%s/%s.txt\n' "$STATE_DIR" "$1"
+}
+
+cache_hit() {
+    local name="$1"
+    local marker="$2"
+    local content="$3"
+    local stamp
+
+    stamp="$(stamp_file "$name")"
+    [[ -e "$marker" && -f "$stamp" ]] && [[ "$(cat "$stamp")" == "$content" ]]
+}
+
+write_stamp() {
+    local name="$1"
+    local content="$2"
+
+    mkdir -p "$STATE_DIR"
+    printf '%s\n' "$content" >"$(stamp_file "$name")"
 }
 
 sync_file() {
@@ -99,6 +148,19 @@ EOF
 sync_python_env() {
     [[ -f "${PYTHON_MANIFEST_DIR}/pyproject.toml" ]] || return 0
 
+    local stamp_content
+    stamp_content=$(
+        printf 'python_version=%s\n' "$PYTHON_VERSION"
+        file_stamp_content \
+            "${PYTHON_MANIFEST_DIR}/.python-version" \
+            "${PYTHON_MANIFEST_DIR}/pyproject.toml" \
+            "${PYTHON_MANIFEST_DIR}/uv.lock"
+    )
+
+    if cache_hit python "${PYTHON_ENV_DIR}/.venv/bin/python" "$stamp_content"; then
+        return 0
+    fi
+
     if ! has_cmd uv; then
         echo "Skipping Neovim Python env build: missing required command: uv"
         return 0
@@ -109,10 +171,27 @@ sync_python_env() {
         --project "$PYTHON_MANIFEST_DIR" \
         --python "$PYTHON_VERSION" \
         --no-install-project
+    write_stamp python "$stamp_content"
 }
 
 sync_node_env() {
     [[ -f "${NODE_MANIFEST_DIR}/package.json" && -f "${NODE_MANIFEST_DIR}/pnpm-lock.yaml" ]] || return 0
+
+    local node_major stamp_content
+    stamp_content=$(
+        printf 'node_major=%s\n' "$NODE_MAJOR"
+        printf 'pnpm_version=%s\n' "$PNPM_VERSION"
+        file_stamp_content \
+            "${NODE_MANIFEST_DIR}/.nvmrc" \
+            "${NODE_MANIFEST_DIR}/package.json" \
+            "${NODE_MANIFEST_DIR}/pnpm-lock.yaml" \
+            "${NODE_MANIFEST_DIR}/pnpm-workspace.yaml"
+    )
+
+    if cache_hit node "${NODE_BIN_DIR}/neovim-node-host" "$stamp_content" &&
+        [[ -x "${NODE_BIN_DIR}/node" && -x "${NODE_BIN_DIR}/ob" ]]; then
+        return 0
+    fi
 
     NVM_DIR="${NVM_DIR:-${XDG_DATA_HOME}/nvm}"
     if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
@@ -156,10 +235,20 @@ sync_node_env() {
     ln -sfn "$(command -v node)" "${NODE_BIN_DIR}/node"
     ln -sfn "${NODE_ENV_DIR}/node_modules/neovim/bin/cli.js" "${NODE_BIN_DIR}/neovim-node-host"
     write_node_bin_wrapper "${NODE_ENV_DIR}/node_modules/obsidian-headless/cli.js" "${NODE_BIN_DIR}/ob" "0.0.8"
+    write_stamp node "$stamp_content"
 }
 
 sync_ruby_env() {
     local ruby_prefix ruby_bin gem_bin
+    local stamp_content
+
+    stamp_content=$(
+        printf 'ruby_gem_version=%s\n' "$RUBY_GEM_VERSION"
+    )
+
+    if cache_hit ruby "${RUBY_BIN_DIR}/neovim-ruby-host" "$stamp_content"; then
+        return 0
+    fi
 
     if ! ruby_prefix="$(brew_prefix ruby)" || [[ ! -x "${ruby_prefix}/bin/ruby" || ! -x "${ruby_prefix}/bin/gem" ]]; then
         echo "Skipping Neovim Ruby env build: missing Homebrew ruby"
@@ -184,10 +273,20 @@ sync_ruby_env() {
 
     mkdir -p "$RUBY_BIN_DIR"
     write_ruby_host_wrapper "$ruby_bin" "${RUBY_BIN_DIR}/neovim-ruby-host"
+    write_stamp ruby "$stamp_content"
 }
 
 sync_perl_env() {
     local perl_prefix perl_bin cpanm_prefix cpanm_bin
+    local stamp_content
+
+    stamp_content=$(
+        printf 'perl_module=%s\n' "$PERL_MODULE"
+    )
+
+    if cache_hit perl "${PERL_BIN_DIR}/perl" "$stamp_content"; then
+        return 0
+    fi
 
     if ! perl_prefix="$(brew_prefix perl)" || [[ ! -x "${perl_prefix}/bin/perl" ]]; then
         echo "Skipping Neovim Perl env build: missing Homebrew perl"
@@ -210,6 +309,7 @@ sync_perl_env() {
 
     mkdir -p "$PERL_BIN_DIR"
     write_perl_wrapper "$perl_bin" "${PERL_BIN_DIR}/perl"
+    write_stamp perl "$stamp_content"
 }
 
 mkdir -p "$PYTHON_ENV_DIR" "$NODE_ENV_DIR" "$RUBY_ENV_DIR" "$PERL_ENV_DIR"

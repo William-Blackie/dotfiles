@@ -11,9 +11,13 @@ return {
         pattern = {
           [".chezmoiscripts/.*"] = function(path, buf)
             local shebang = vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or ""
-            if shebang:match("^#!.*/bin/zsh") or shebang:match("^#!.*/usr/bin/env zsh") then
+            if
+              shebang:match("^#!.*/bin/zsh") or shebang:match("^#!.*/usr/bin/env zsh")
+            then
               return "zsh"
-            elseif shebang:match("^#!.*/bin/bash") or shebang:match("^#!.*/usr/bin/env bash") then
+            elseif
+              shebang:match("^#!.*/bin/bash") or shebang:match("^#!.*/usr/bin/env bash")
+            then
               return "bash"
             elseif shebang:match("^#!.*/bin/sh") then
               return "sh"

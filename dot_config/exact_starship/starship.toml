@@ -1,28 +1,28 @@
 # Starship Configuration (Refined for Go, Node, Kube, Docker, and Python)
 # Theme: Catppuccin Mocha
 
-palette = "catppuccin_mocha"
+palette     = "catppuccin_mocha"
 add_newline = true
 
 [palettes.catppuccin_mocha]
 rosewater = "#F5E0DC"
-flamingo = "#F2CDCD"
-pink = "#F5C2E7"
-mauve = "#CBA6F7"
-red = "#F38BA8"
-maroon = "#EBA0AC"
-peach = "#FAB387"
-yellow = "#F9E2AF"
-green = "#A6E3A1"
-teal = "#94E2D5"
-sky = "#89DCEB"
-sapphire = "#74C7EC"
-blue = "#89B4FA"
-lavender = "#B4BEFE"
-text = "#CDD6F4"
-subtext1 = "#BAC2DE"
-surface0 = "#313244"
-base = "#1E1E2E"
+flamingo  = "#F2CDCD"
+pink      = "#F5C2E7"
+mauve     = "#CBA6F7"
+red       = "#F38BA8"
+maroon    = "#EBA0AC"
+peach     = "#FAB387"
+yellow    = "#F9E2AF"
+green     = "#A6E3A1"
+teal      = "#94E2D5"
+sky       = "#89DCEB"
+sapphire  = "#74C7EC"
+blue      = "#89B4FA"
+lavender  = "#B4BEFE"
+text      = "#CDD6F4"
+subtext1  = "#BAC2DE"
+surface0  = "#313244"
+base      = "#1E1E2E"
 
 # Line 1: Context (Dir, Git, Languages, Infra)
 # Line 2: Action (Character)
@@ -33,51 +33,51 @@ $character"""
 command_timeout = 2000
 
 [directory]
-style = "bold fg:blue"
-format = "[$path]($style) "
+style             = "bold fg:blue"
+format            = "[$path]($style) "
 truncation_length = 3
 truncation_symbol = "…/"
-read_only = " 󰌾"
+read_only         = " 󰌾"
 
 
 [git_branch]
-symbol = " "
-style = "fg:mauve"
-format = "[$symbol$branch]($style) "
+symbol            = " "
+style             = "fg:mauve"
+format            = "[$symbol$branch]($style) "
 truncation_length = 24
 
 [git_status]
-style = "fg:subtext1"
-format = "([$all_status$ahead_behind]($style) )"
+style      = "fg:subtext1"
+format     = "([$all_status$ahead_behind]($style) )"
 conflicted = "="
-ahead = "⇡${count}"
-behind = "⇣${count}"
-diverged = "⇕${ahead_count}/${behind_count}"
-modified = "!${count}"
-staged = "+${count}"
-untracked = "?${count}"
-deleted = "✕${count}"
-renamed = "»${count}"
+ahead      = "⇡${count}"
+behind     = "⇣${count}"
+diverged   = "⇕${ahead_count}/${behind_count}"
+modified   = "!${count}"
+staged     = "+${count}"
+untracked  = "?${count}"
+deleted    = "✕${count}"
+renamed    = "»${count}"
 
 [character]
 success_symbol = "[❯](fg:green)"
-error_symbol = "[❯](fg:red)"
-vimcmd_symbol = "[❮](fg:blue)"
+error_symbol   = "[❯](fg:red)"
+vimcmd_symbol  = "[❮](fg:blue)"
 
 [golang]
 symbol = " "
-style = "bold cyan"
+style  = "bold cyan"
 format = "[$symbol($version )]($style)"
 
 [nodejs]
 symbol = " "
-style = "bold green"
+style  = "bold green"
 format = "[$symbol($version )]($style)"
 
 [python]
-symbol = " "
-style = "bold yellow"
-format = "[$symbol($version )(\\($virtualenv\\) )]($style)"
+symbol       = " "
+style        = "bold yellow"
+format       = "[$symbol($version )(\\($virtualenv\\) )]($style)"
 pyenv_prefix = "pyenv "
 # Only show Python when relevant files are present (faster detection)
 detect_extensions = ["py", "ipynb", "pyc", "pyo"]
@@ -94,29 +94,29 @@ detect_files = [
 
 [rust]
 symbol = " "
-style = "bold maroon"
+style  = "bold maroon"
 format = "[$symbol($version )]($style)"
 
 [lua]
 symbol = " "
-style = "bold blue"
+style  = "bold blue"
 format = "[$symbol($version )]($style)"
 
 [docker_context]
 symbol = " "
-style = "bold sky"
+style  = "bold sky"
 format = "[$symbol$context]($style) "
 
 [kubernetes]
-symbol = "󱃾 "
-style = "bold blue"
+symbol   = "󱃾 "
+style    = "bold blue"
 disabled = false
-format = "[$symbol$context( \\($namespace\\))]($style) "
+format   = "[$symbol$context( \\($namespace\\))]($style) "
 
 [cmd_duration]
 min_time = 2_000
-style = "fg:yellow"
-format = "took [$duration]($style) "
+style    = "fg:yellow"
+format   = "took [$duration]($style) "
 
 [aws]
 disabled = true
