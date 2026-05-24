@@ -1,7 +1,9 @@
 -- blink.cmp
+---@type LazyPluginSpec
 return {
   "saghen/blink.cmp",
   dependencies = {
+    "saghen/blink.compat",
     "rafamadriz/friendly-snippets",
     "jdrupal-dev/css-vars.nvim",
     "alexandre-abrioux/blink-cmp-npm.nvim",
@@ -11,26 +13,29 @@ return {
   },
   opts = {
     keymap = { preset = "default" },
-    completion = { documentation = { auto_show = false } },
+    completion = {
+      documentation = {
+        auto_show = true,
+        auto_show_delay_ms = 100,
+        update_delay_ms = 50,
+        window = {
+          max_width = math.min(80, vim.o.columns),
+          border = "rounded",
+        },
+      },
+    },
 
     -- (Default) list of enabled providers defined so that you can extend it
     -- elsewhere in your config, without redefining it, due to `opts_extend`
     sources = {
-      compat = { "conventional_commits" },
-      default = {
-        "lsp",
-        "path",
-        "snippets",
-        "buffer",
-        "spell",
-      },
       per_filetype = {
-        gitcommit = { "git", "conventional_commits", "buffer" },
-        css = { "lsp", "path", "snippets", "buffer", "css_vars" },
-        javascript = { "lsp", "path", "snippets", "buffer", "css_vars", "npm" },
-        javascriptreact = { "lsp", "path", "snippets", "buffer", "css_vars", "npm" },
-        typescript = { "lsp", "path", "snippets", "buffer", "css_vars", "npm" },
-        typescriptreact = { "lsp", "path", "snippets", "buffer", "css_vars", "npm" },
+        gitcommit = { inherit_defaults = true, "git", "conventional_commits" },
+        css = { inherit_defaults = true, "css_vars" },
+        javascript = { inherit_defaults = true, "css_vars", "npm" },
+        javascriptreact = { inherit_defaults = true, "css_vars", "npm" },
+        typescript = { inherit_defaults = true, "css_vars", "npm" },
+        typescriptreact = { inherit_defaults = true, "css_vars", "npm" },
+        cmd = { "path", "buffer" },
       },
       providers = {
         css_vars = {
@@ -71,13 +76,6 @@ return {
           end,
           opts = {
             -- See Configuration section below for available options
-          },
-        },
-        spell = {
-          name = "Spell",
-          module = "blink-cmp-spell",
-          opts = {
-            enable_in_contexts = { "markdown", "gitcommit", "python", "lua", "javascript", "typescript", "rust", "go" },
           },
         },
       },

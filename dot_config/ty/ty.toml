@@ -1,0 +1,2 @@
+[analysis]
+allowed-unresolved-imports = ["django.tasks", "django.tasks.**"]

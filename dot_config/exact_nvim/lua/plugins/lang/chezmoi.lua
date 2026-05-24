@@ -4,31 +4,24 @@
 ---This adds: filetype detection, LSP, linting, formatting for chezmoi source files
 ---@type LazySpec
 return {
-  -- Filetype detection for chezmoi scripts and config files
   {
     "folke/snacks.nvim",
     opts = function(_, opts)
       vim.filetype.add({
         pattern = {
-          -- Chezmoi scripts by shebang
           [".chezmoiscripts/.*"] = function(path, buf)
             local shebang = vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or ""
-            if
-              shebang:match("^#!.*/bin/zsh") or shebang:match("^#!.*/usr/bin/env zsh")
-            then
+            if shebang:match("^#!.*/bin/zsh") or shebang:match("^#!.*/usr/bin/env zsh") then
               return "zsh"
-            elseif
-              shebang:match("^#!.*/bin/bash") or shebang:match("^#!.*/usr/bin/env bash")
-            then
+            elseif shebang:match("^#!.*/bin/bash") or shebang:match("^#!.*/usr/bin/env bash") then
               return "bash"
             elseif shebang:match("^#!.*/bin/sh") then
               return "sh"
             end
           end,
-          -- Config files with explicit types
-          ["dot_config/kitty/.*%.conf"] = "kitty",
-          ["dot_config/tmux/.*%.conf"] = "tmux",
-          ["dot_config/readline/.*"] = "readline",
+          ["dot_configs/kitty/.*%.conf"] = "kitty",
+          ["dot_configs/tmux/.*%.conf"] = "tmux",
+          ["dot_configs/readline/.*"] = "readline",
           ["dot_zshrc"] = "zsh",
           [".zshrc"] = "zsh",
           [".zshenv"] = "zsh",
@@ -53,75 +46,6 @@ return {
       return opts
     end,
   },
-
-  -- LSP: bash-language-server for sh/bash scripts and templates.
-  -- zsh intentionally stays off bashls; zsh uses Treesitter + zsh -n.
-  {
-    "neovim/nvim-lspconfig",
-    opts = {
-      servers = {
-        bashls = {
-          filetypes = {
-            "sh",
-            "bash",
-            "sh.chezmoitmpl",
-            "bash.chezmoitmpl",
-          },
-        },
-        taplo = {
-          keys = {
-            {
-              "K",
-              function()
-                if vim.bo.filetype == "toml" or vim.bo.filetype == "toml.chezmoitmpl" then
-                  local win = vim.api.nvim_get_current_win()
-                  local cursor = vim.api.nvim_win_get_cursor(win)
-                  vim.lsp.buf.hover()
-                  vim.api.nvim_win_set_cursor(win, cursor)
-                end
-              end,
-              mode = "n",
-              buffer = 0,
-              desc = "Show hover (taplo)",
-            },
-          },
-        },
-      },
-    },
-  },
-
-  -- Formatting
-  {
-    "stevearc/conform.nvim",
-    optional = true,
-    opts = {
-      formatters_by_ft = {
-        ["sh.chezmoitmpl"] = { "shfmt" },
-        ["bash.chezmoitmpl"] = { "shfmt" },
-        ["zsh.chezmoitmpl"] = { "shfmt_zsh" },
-        ["yaml.chezmoitmpl"] = { "prettier" },
-        ["json.chezmoitmpl"] = { "prettier" },
-        ["jsonc.chezmoitmpl"] = { "prettier" },
-        ["toml.chezmoitmpl"] = { "taplo" },
-        ["css.chezmoitmpl"] = { "prettier" },
-        ["html.chezmoitmpl"] = { "prettier" },
-        ["gitconfig.chezmoitmpl"] = { "prettier" },
-        ["conf.chezmoitmpl"] = {},
-        ["kitty"] = { "shfmt" },
-        ["tmux"] = { "shfmt" },
-        ["readline"] = {},
-      },
-      formatters = {
-        shfmt_zsh = {
-          command = "shfmt",
-          args = { "-ln", "zsh", "-i", "2" },
-          stdin = true,
-        },
-      },
-    },
-  },
-
-  -- Linting
   {
     "mfussenegger/nvim-lint",
     optional = true,
@@ -135,8 +59,6 @@ return {
       },
     },
   },
-
-  -- Treesitter for config file syntax highlighting
   {
     "nvim-treesitter/nvim-treesitter",
     opts = function(_, opts)
@@ -146,8 +68,6 @@ return {
       })
     end,
   },
-
-  -- Mason
   {
     "mason-org/mason.nvim",
     opts = { ensure_installed = { "shfmt", "bash-language-server", "shellcheck" } },

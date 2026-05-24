@@ -22,13 +22,10 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-local opts = {
+---@overload fun(opts: LazyConfig)
+---@overload fun(spec:LazySpec, opts: LazyConfig)
+require("lazy").setup({
   spec = {
-    {
-      "William-Blackie/neotest-python",
-      name = "neotest-python",
-      branch = "williamblackie/docker-path-mappings",
-    },
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
     { import = "plugins" },
     { import = "plugins.lang.django" },
@@ -42,6 +39,15 @@ local opts = {
     version = false,
   },
   install = { colorscheme = { "catppuccin" } },
+  dev = {
+    -- Directory where you store your local plugin projects. If a function is used,
+    -- the plugin directory (e.g. `~/projects/plugin-name`) must be returned.
+    ---@type string | fun(plugin: LazyPlugin): string
+    path = "~/Projects/nvim/",
+    ---@type string[] plugins that match these patterns will use your local versions instead of being fetched from GitHub
+    patterns = {}, -- For example {"folke"}
+    fallback = false, -- Fallback to git when local plugin doesn't exist
+  },
   checker = { enabled = true, notify = false },
   performance = {
     rtp = {
@@ -54,6 +60,4 @@ local opts = {
       },
     },
   },
-}
-
-require("lazy").setup(opts)
+})

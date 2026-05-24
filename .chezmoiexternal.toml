@@ -44,3 +44,28 @@ clone.args = ["--branch release-0.12"]
 type = "git-repo"
 url = "https://github.com/python/typeshed.git"
 pull.args = ["--ff-only"]
+
+["./Projects/nvim/conform.nvim"]
+type = "git-repo"
+url = "https://github.com/William-Blackie/conform.nvim"
+pull.args = ["--ff-only"]
+
+["./Projects/nvim/nvim-lspconfig"]
+type = "git-repo"
+url = "https://github.com/William-Blackie/nvim-lspconfig"
+pull.args = ["--ff-only"]
+
+["./Projects/nvim/grove.nvim"]
+type = "git-repo"
+url = "https://github.com/William-Blackie/grove.nvim"
+pull.args = ["--ff-only"]
+
+["./Projects/nvim/neotest-python"]
+type = "git-repo"
+url = "https://github.com/William-Blackie/neotest-python.git"
+pull.args = ["--ff-only"]
+
+["./Projects/nvim/nvim-lint"]
+type = "git-repo"
+url = "https://github.com/William-Blackie/nvim-lint"
+pull.args = ["--ff-only"]

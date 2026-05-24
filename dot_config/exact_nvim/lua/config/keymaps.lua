@@ -1,3 +1,5 @@
+---Custom keymaps for Neovim
+
 -- Insert mode navigation
 vim.keymap.set("i", "<C-h>", "<Left>", { desc = "Move left" })
 vim.keymap.set("i", "<C-l>", "<Right>", { desc = "Move right" })
@@ -49,3 +51,14 @@ vim.keymap.set("n", "gcd", "<cmd>Codedocs<CR>", { desc = "Insert annotation" })
 
 -- nvim-html-css html peaking
 vim.keymap.set("n", "<leader>cp", "<cmd>HtmlCssPeek<CR>", { desc = "Peek CSS source" })
+
+vim.keymap.set("c", "<S-Enter>", function()
+  require("noice").redirect(vim.fn.getcmdline())
+end, { desc = "Redirect Cmdline" })
+
+vim.keymap.set("n", "<leader>tt", function()
+  local linters = require("lint").get_running()
+  local msg = (#linters == 0) and "No linters running"
+    or ("Running linters: " .. table.concat(linters, ", "))
+  require("noice").redirect('echo "' .. msg .. '"')
+end, { desc = "Show running linters" })

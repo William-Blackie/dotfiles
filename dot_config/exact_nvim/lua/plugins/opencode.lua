@@ -1,6 +1,7 @@
 ---@class OpencodeConfig
 ---Configuration for opencode.nvim
 
+---@type LazyPluginSpec
 return {
   ---Opencode AI assistant integration
   ---@see https://github.com/sudo-tee/opencode.nvim

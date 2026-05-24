@@ -33,6 +33,7 @@ export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
 unset NPM_CONFIG_INIT_MODULE NPM_CONFIG_TMP
 export NVM_DIR="$XDG_DATA_HOME/nvm"
 export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
+export PNPM_HOME="/Users/william/.local/share/pnpm"
 export PYENV_DISABLE_AUTO_REHASH=1
 export PYTHON_HISTORY="$XDG_STATE_HOME/python_history"
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
@@ -52,6 +53,7 @@ preferred_path=(
   "$HOME/.local/bin"
   "$XDG_DATA_HOME/nvim/mason/bin"
   "$HOME/bin"
+  "$PNPM_HOME/bin:$PATH"
   "$CARGO_HOME/bin"
   "$GOPATH/bin"
   "$PYENV_ROOT/shims"

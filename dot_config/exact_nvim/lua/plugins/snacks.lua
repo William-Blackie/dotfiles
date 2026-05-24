@@ -1,4 +1,5 @@
 -- https://github.com/folke/snacks.nvim
+---@type LazyPluginSpec[]
 return {
   {
     "folke/snacks.nvim",

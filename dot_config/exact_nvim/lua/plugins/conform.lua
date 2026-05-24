@@ -1,55 +1,91 @@
 ---@class ConformConfig
----Configuration for conform.nvim (formatting)
 ---@field formatters_by_ft table<string, string[]> Formatters mapped to filetypes
-
 ---@class ConformFormatterConfig
----@field command string Formatter executable command
+---@field command string|fun(ctx: table):string Formatter executable
 ---@field args? string[] Command-line arguments
 ---@field stdin? boolean Whether to use stdin
+---@field cwd? fun(self: table, ctx: table):string|nil Working directory
+---@field prepend_args? string[] Args to prepend to command
 
----Formatting with conform.nvim
----Note: LazyVim handles format_on_save automatically, don't set it here
----@type LazyPluginSpec
+---Helper to find project-local executable
+---@param root string|nil
+---@param exe string
+---@return string
+local function project_executable(root, exe)
+  local candidates = {
+    root and (root .. "/.venv/bin/" .. exe) or nil,
+    root and (root .. "/venv/bin/" .. exe) or nil,
+    root and (root .. "/django/.venv/bin/" .. exe) or nil,
+    vim.fn.exepath(exe),
+    vim.fn.stdpath("data") .. "/mason/bin/" .. exe,
+  }
+  for _, candidate in ipairs(candidates) do
+    if candidate and candidate ~= "" and vim.fn.executable(candidate) == 1 then
+      return candidate
+    end
+  end
+  return exe
+end
+
+---Django template root markers
+local django_template_root_markers =
+  { ".djlintrc", "pyproject.toml", "setup.cfg", "tox.ini", "manage.py", ".git" }
+local python_root_markers = {
+  "pyproject.toml",
+  "ruff.toml",
+  ".ruff.toml",
+  "setup.py",
+  "setup.cfg",
+  "requirements.txt",
+  "manage.py",
+  ".git",
+}
+
+local function python_root(ctx)
+  return vim.fs.root(ctx.filename, python_root_markers)
+end
+
+local function python_project_executable(exe)
+  return function(_, ctx)
+    return project_executable(python_root(ctx), exe)
+  end
+end
+
 return {
   "stevearc/conform.nvim",
-  ---@type ConformConfig
   opts = {
-    ---Formatters by filetype
-    ---Each filetype can have multiple formatters that run sequentially
-    --- https://github.com/stevearc/conform.nvim#customizing-formatters
+    log_level = vim.log.levels.DEBUG,
     formatters_by_ft = {
-      ---Web technologies
       html = { "prettier" },
+      htmldjango = { "djlint" },
       css = { "prettier" },
       scss = { "prettier" },
-
-      ---Data formats
       yaml = { "prettier" },
       json = { "prettier" },
       jsonc = { "prettier" },
       toml = { "taplo" },
-
-      ---Go
       go = { "gofumpt" },
-
-      ---Shell
       sh = { "shfmt" },
       bash = { "shfmt" },
       zsh = { "shfmt_zsh" },
-
-      ---Fish
       fish = { "fish_indent" },
-
-      ---Tmux (treated as shell script)
       tmux = { "shfmt" },
-
-      ---Git
       gitconfig = { "prettier" },
       gitignore = { "prettier" },
-
-      ---Config files
       kitty = { "shfmt" },
       readline = {},
+      python = { "ruff_fix", "ruff_organize_imports", "ruff_format", "docformatter" },
+      ["sh.chezmoitmpl"] = { "shfmt" },
+      ["bash.chezmoitmpl"] = { "shfmt" },
+      ["zsh.chezmoitmpl"] = { "shfmt_zsh" },
+      ["yaml.chezmoitmpl"] = { "prettier" },
+      ["json.chezmoitmpl"] = { "prettier" },
+      ["jsonc.chezmoitmpl"] = { "prettier" },
+      ["toml.chezmoitmpl"] = { "taplo" },
+      ["css.chezmoitmpl"] = { "prettier" },
+      ["html.chezmoitmpl"] = { "prettier" },
+      ["gitconfig.chezmoitmpl"] = { "prettier" },
+      ["conf.chezmoitmpl"] = {},
     },
     formatters = {
       shfmt_zsh = {
@@ -61,8 +97,36 @@ return {
         command = "taplo",
         args = { "format", "--option", "align_entries=true", 'indent_string="  "', "-" },
       },
+      djlint = {
+        command = function(_, ctx)
+          return project_executable(
+            vim.fs.root(ctx.filename, django_template_root_markers),
+            "djlint"
+          )
+        end,
+        cwd = function(_, ctx)
+          return vim.fs.root(ctx.filename, django_template_root_markers)
+        end,
+        prepend_args = { "--profile=django" },
+      },
+      ruff_fix = {
+        command = python_project_executable("ruff"),
+        cwd = function(_, ctx)
+          return python_root(ctx)
+        end,
+      },
+      ruff_organize_imports = {
+        command = python_project_executable("ruff"),
+        cwd = function(_, ctx)
+          return python_root(ctx)
+        end,
+      },
+      ruff_format = {
+        command = python_project_executable("ruff"),
+        cwd = function(_, ctx)
+          return python_root(ctx)
+        end,
+      },
     },
-
-    -- NOTE: Do NOT set format_on_save here - LazyVim handles it automatically
   },
 }

@@ -157,6 +157,7 @@ return {
     "nvim-neotest/neotest-python",
     url = "https://github.com/William-Blackie/neotest-python.git",
     branch = "williamblackie/docker-path-mappings",
+    dev = true,
   },
 
   {

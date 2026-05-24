@@ -1,7 +1,8 @@
 -- https://github.com/tris203/precognition.nvim
+---@type LazyPluginSpec
 return {
   "tris203/precognition.nvim",
-  --event = "VeryLazy",
+  event = "VeryLazy",
   opts = {
     -- startVisible = true,
     -- debounceMs = 0,

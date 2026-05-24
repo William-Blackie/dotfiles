@@ -1,3 +1,5 @@
+---Neovim options and provider configuration
+
 -- Python LSP: ty
 vim.g.lazyvim_python_lsp = "ty"
 vim.opt.textwidth = 80
@@ -16,7 +18,6 @@ local perl_bin = nvim_env .. "/perl/bin"
 local perl_lib = nvim_env .. "/perl/lib/perl5"
 
 if vim.fn.executable(python_host) == 1 then
-  vim.env.VIRTUAL_ENV = nvim_env .. "/python/.venv"
   vim.env.PATH = python_bin .. ":" .. vim.env.PATH
 end
 

@@ -1,5 +1,6 @@
 ---Catppuccin colorscheme configuration
 --- https://github.com/catppuccin/nvim
+---@type LazyPluginSpec[]
 return {
   {
     "catppuccin",
