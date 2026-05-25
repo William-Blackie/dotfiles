@@ -25,7 +25,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 -- Chezmoi auto apply
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  pattern = { os.getenv("HOME") .. "/.dotfiles/*" },
+  pattern = { os.getenv("HOME") .. "/dotfiles/*" },
   callback = function(ev)
     local bufnr = ev.buf
     local edit_watch = function()
