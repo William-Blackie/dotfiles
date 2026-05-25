@@ -69,10 +69,8 @@ return {
       bash = { "shfmt" },
       zsh = { "shfmt_zsh" },
       fish = { "fish_indent" },
-      tmux = { "shfmt" },
       gitconfig = { "prettier" },
       gitignore = { "prettier" },
-      kitty = { "shfmt" },
       readline = {},
       python = { "ruff_fix", "ruff_organize_imports", "ruff_format", "docformatter" },
       ["sh.chezmoitmpl"] = { "shfmt" },
@@ -85,7 +83,6 @@ return {
       ["css.chezmoitmpl"] = { "prettier" },
       ["html.chezmoitmpl"] = { "prettier" },
       ["gitconfig.chezmoitmpl"] = { "prettier" },
-      ["conf.chezmoitmpl"] = {},
     },
     formatters = {
       shfmt_zsh = {

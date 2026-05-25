@@ -34,10 +34,10 @@ url       = "https://github.com/tmux-plugins/tpm"
 pull.args = ["--ff-only"]
 
 [".local/src/neovim"]
-type       = "git-repo"
-url        = "https://github.com/neovim/neovim.git"
-branch     = "release-0.12"
-pull.args  = ["--ff-only"]
+type      = "git-repo"
+url       = "https://github.com/neovim/neovim.git"
+branch    = "release-0.12"
+pull.args = ["--ff-only"]
 
 [".local/src/typeshed"]
 type      = "git-repo"

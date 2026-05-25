@@ -37,6 +37,6 @@ return {
   },
   {
     "mason-org/mason.nvim",
-    opts = { ensure_installed = { "shfmt", "bash-language-server" } },
+    opts = { ensure_installed = { "shfmt", "bash-language-server", "prettier" } },
   },
 }

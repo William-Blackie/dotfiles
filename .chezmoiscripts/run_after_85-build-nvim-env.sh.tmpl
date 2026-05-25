@@ -46,11 +46,11 @@ file_hash() {
     fi
 
     if has_cmd shasum; then
-        shasum -a 256 "$file" | awk '{ print $1 }'
+        shasum -a 256 "$file" 2>/dev/null | awk '{ print $1 }' || printf 'error\n'
     elif has_cmd sha256sum; then
-        sha256sum "$file" | awk '{ print $1 }'
+        sha256sum "$file" 2>/dev/null | awk '{ print $1 }' || printf 'error\n'
     else
-        cksum "$file" | awk '{ print $1 "-" $2 }'
+        cksum "$file" 2>/dev/null | awk '{ print $1 "-" $2 }' || printf 'error\n'
     fi
 }
 
@@ -73,7 +73,7 @@ cache_hit() {
     local stamp
 
     stamp="$(stamp_file "$name")"
-    [[ -e "$marker" && -f "$stamp" ]] && [[ "$(cat "$stamp")" == "$content" ]]
+    [[ -e "$marker" && -f "$stamp" ]] && [[ "$(cat "$stamp" 2>/dev/null)" == "$content" ]]
 }
 
 write_stamp() {
@@ -167,11 +167,21 @@ sync_python_env() {
     fi
 
     echo "Syncing Neovim Python env with uv at ${PYTHON_ENV_DIR}..."
-    UV_PROJECT_ENVIRONMENT="${PYTHON_ENV_DIR}/.venv" uv sync \
-        --project "$PYTHON_MANIFEST_DIR" \
-        --python "$PYTHON_VERSION" \
-        --no-install-project
+    (
+        set +e
+        UV_PROJECT_ENVIRONMENT="${PYTHON_ENV_DIR}/.venv" uv sync \
+            --project "$PYTHON_MANIFEST_DIR" \
+            --python "$PYTHON_VERSION" \
+            --no-install-project
+        exit_code=$?
+        if [[ $exit_code -ne 0 ]]; then
+            echo "uv sync failed with exit code $exit_code. Skipping Python env build."
+            exit 0
+        fi
+    ) || return 0
+    
     write_stamp python "$stamp_content"
+    return 0
 }
 
 sync_node_env() {
@@ -193,49 +203,67 @@ sync_node_env() {
         return 0
     fi
 
-    NVM_DIR="${NVM_DIR:-${XDG_DATA_HOME}/nvm}"
-    if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
-        # shellcheck disable=SC1091
-        . "${NVM_DIR}/nvm.sh"
-    elif nvm_prefix="$(brew_prefix nvm)" && [[ -s "${nvm_prefix}/nvm.sh" ]]; then
-        # shellcheck disable=SC1090,SC1091
-        . "${nvm_prefix}/nvm.sh"
-    fi
-
-    if ! has_cmd nvm; then
-        echo "Skipping Neovim Node env build: missing required command: nvm"
-        return 0
-    fi
-
-    nvm install "$NODE_MAJOR"
-    nvm use "$NODE_MAJOR" >/dev/null
-
-    node_major="$(node -p 'process.versions.node.split(".")[0]')"
-    if [[ "$node_major" != "$NODE_MAJOR" ]]; then
-        echo "Skipping Neovim Node env build: expected Node ${NODE_MAJOR}.x, found $(node --version)."
-        return 0
-    fi
-
-    if ! has_cmd pnpm; then
-        if ! has_cmd corepack; then
-            echo "Skipping Neovim Node env build: missing required command: pnpm or corepack"
-            return 0
+    (
+        set +e
+        NVM_DIR="${NVM_DIR:-${XDG_DATA_HOME}/nvm}"
+        if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
+            # shellcheck disable=SC1091
+            . "${NVM_DIR}/nvm.sh" >/dev/null 2>&1
+        elif [[ -s "/opt/homebrew/opt/nvm/nvm.sh" ]]; then
+            # shellcheck disable=SC1091
+            . "/opt/homebrew/opt/nvm/nvm.sh" >/dev/null 2>&1
+        elif nvm_prefix="$(brew_prefix nvm)" && [[ -s "${nvm_prefix}/nvm.sh" ]]; then
+            # shellcheck disable=SC1090,SC1091
+            . "${nvm_prefix}/nvm.sh" >/dev/null 2>&1
         fi
-        corepack prepare "pnpm@${PNPM_VERSION}" --activate
-    fi
 
-    sync_file "${NODE_MANIFEST_DIR}/package.json" "${NODE_ENV_DIR}/package.json"
-    sync_file "${NODE_MANIFEST_DIR}/pnpm-lock.yaml" "${NODE_ENV_DIR}/pnpm-lock.yaml"
-    sync_file "${NODE_MANIFEST_DIR}/pnpm-workspace.yaml" "${NODE_ENV_DIR}/pnpm-workspace.yaml"
+        if ! has_cmd nvm; then
+            echo "Skipping Neovim Node env build: missing required command: nvm"
+            exit 0
+        fi
 
-    echo "Syncing Neovim Node env with pnpm at ${NODE_ENV_DIR}..."
-    pnpm --dir "$NODE_ENV_DIR" install --frozen-lockfile
+        if ! nvm use "$NODE_MAJOR" >/dev/null 2>&1; then
+            echo "Node ${NODE_MAJOR} not found, trying to install..."
+            nvm install "$NODE_MAJOR" >/dev/null 2>&1
+            nvm use "$NODE_MAJOR" >/dev/null 2>&1
+        fi
 
-    mkdir -p "$NODE_BIN_DIR"
-    ln -sfn "$(command -v node)" "${NODE_BIN_DIR}/node"
-    ln -sfn "${NODE_ENV_DIR}/node_modules/neovim/bin/cli.js" "${NODE_BIN_DIR}/neovim-node-host"
-    write_node_bin_wrapper "${NODE_ENV_DIR}/node_modules/obsidian-headless/cli.js" "${NODE_BIN_DIR}/ob" "0.0.8"
-    write_stamp node "$stamp_content"
+        node_major="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 'unknown')"
+        if [[ "$node_major" != "$NODE_MAJOR" ]]; then
+            echo "Skipping Neovim Node env build: expected Node ${NODE_MAJOR}.x, found ${node_major}."
+            exit 0
+        fi
+
+        if ! has_cmd pnpm; then
+            if ! has_cmd corepack; then
+                echo "Skipping Neovim Node env build: missing required command: pnpm or corepack"
+                exit 0
+            fi
+            corepack prepare "pnpm@${PNPM_VERSION}" --activate >/dev/null 2>&1
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to prepare pnpm via corepack. Skipping Node env build."
+                exit 0
+            fi
+        fi
+
+        sync_file "${NODE_MANIFEST_DIR}/package.json" "${NODE_ENV_DIR}/package.json"
+        sync_file "${NODE_MANIFEST_DIR}/pnpm-lock.yaml" "${NODE_ENV_DIR}/pnpm-lock.yaml"
+        sync_file "${NODE_MANIFEST_DIR}/pnpm-workspace.yaml" "${NODE_ENV_DIR}/pnpm-workspace.yaml"
+
+        echo "Syncing Neovim Node env with pnpm at ${NODE_ENV_DIR}..."
+        pnpm --dir "$NODE_ENV_DIR" install --frozen-lockfile
+        if [[ $? -ne 0 ]]; then
+            echo "pnpm install failed. Skipping Node env build."
+            exit 0
+        fi
+
+        mkdir -p "$NODE_BIN_DIR"
+        ln -sfn "$(command -v node)" "${NODE_BIN_DIR}/node"
+        ln -sfn "${NODE_ENV_DIR}/node_modules/neovim/bin/cli.js" "${NODE_BIN_DIR}/neovim-node-host"
+        write_node_bin_wrapper "${NODE_ENV_DIR}/node_modules/obsidian-headless/cli.js" "${NODE_BIN_DIR}/ob" "0.0.8"
+        write_stamp node "$stamp_content"
+    ) || return 0
+    return 0
 }
 
 sync_ruby_env() {
@@ -259,21 +287,30 @@ sync_ruby_env() {
     gem_bin="${ruby_prefix}/bin/gem"
 
     echo "Syncing Neovim Ruby env at ${RUBY_ENV_DIR}..."
-    GEM_HOME="${RUBY_ENV_DIR}/gems" \
-        GEM_PATH="${RUBY_ENV_DIR}/gems" \
-        PATH="$(dirname "$ruby_bin"):${RUBY_GEM_BIN_DIR}:${PATH}" \
-        "$gem_bin" install logger \
-        --no-document
-    GEM_HOME="${RUBY_ENV_DIR}/gems" \
-        GEM_PATH="${RUBY_ENV_DIR}/gems" \
-        PATH="$(dirname "$ruby_bin"):${RUBY_GEM_BIN_DIR}:${PATH}" \
-        "$gem_bin" install neovim \
-        --version "$RUBY_GEM_VERSION" \
-        --no-document
+    (
+        set +e
+        GEM_HOME="${RUBY_ENV_DIR}/gems" \
+            GEM_PATH="${RUBY_ENV_DIR}/gems" \
+            PATH="$(dirname "$ruby_bin"):${RUBY_GEM_BIN_DIR}:${PATH}" \
+            "$gem_bin" install logger \
+            --no-document &&
+            GEM_HOME="${RUBY_ENV_DIR}/gems" \
+            GEM_PATH="${RUBY_ENV_DIR}/gems" \
+            PATH="$(dirname "$ruby_bin"):${RUBY_GEM_BIN_DIR}:${PATH}" \
+            "$gem_bin" install neovim \
+            --version "$RUBY_GEM_VERSION" \
+            --no-document
+        exit_code=$?
+        if [[ $exit_code -ne 0 ]]; then
+            echo "Ruby gem installation failed with exit code $exit_code. Skipping Ruby env build."
+            exit 0
+        fi
+    ) || return 0
 
     mkdir -p "$RUBY_BIN_DIR"
     write_ruby_host_wrapper "$ruby_bin" "${RUBY_BIN_DIR}/neovim-ruby-host"
     write_stamp ruby "$stamp_content"
+    return 0
 }
 
 sync_perl_env() {
@@ -304,12 +341,21 @@ sync_perl_env() {
 
     perl_bin="${perl_prefix}/bin/perl"
     echo "Syncing Neovim Perl env at ${PERL_ENV_DIR}..."
-    PERL_CPANM_HOME="${PERL_ENV_DIR}/cpanm" \
-        "$cpanm_bin" -L "$PERL_ENV_DIR" -n App::cpanminus "$PERL_MODULE"
+    (
+        set +e
+        PERL_CPANM_HOME="${PERL_ENV_DIR}/cpanm" \
+            "$perl_bin" "$cpanm_bin" -L "$PERL_ENV_DIR" -n App::cpanminus "$PERL_MODULE"
+        exit_code=$?
+        if [[ $exit_code -ne 0 ]]; then
+            echo "Perl module installation failed with exit code $exit_code. Skipping Perl env build."
+            exit 0
+        fi
+    ) || return 0
 
     mkdir -p "$PERL_BIN_DIR"
     write_perl_wrapper "$perl_bin" "${PERL_BIN_DIR}/perl"
     write_stamp perl "$stamp_content"
+    return 0
 }
 
 mkdir -p "$PYTHON_ENV_DIR" "$NODE_ENV_DIR" "$RUBY_ENV_DIR" "$PERL_ENV_DIR"

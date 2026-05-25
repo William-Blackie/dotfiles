@@ -50,7 +50,6 @@ return {
       bash = { "shellcheck" },
       zsh = { "zsh" },
       ["zsh.chezmoitmpl"] = { "zsh" },
-      tmux = { "shellcheck" },
       python = { "ruff", "ty" },
       scss = { "stylelint" },
     },

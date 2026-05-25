@@ -71,7 +71,6 @@ plugins=(
   pyenv
   sudo
   william-1password
-  william-audio
   william-core
   william-local
   zoxide
