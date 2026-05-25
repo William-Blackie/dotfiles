@@ -38,7 +38,6 @@ type       = "git-repo"
 url        = "https://github.com/neovim/neovim.git"
 branch     = "release-0.12"
 pull.args  = ["--ff-only"]
-clone.args = ["--branch release-0.12"]
 
 [".local/src/typeshed"]
 type      = "git-repo"
