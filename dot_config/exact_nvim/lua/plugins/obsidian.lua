@@ -14,6 +14,7 @@ return {
   ---Obsidian integration for Neovim
   ---@see https://github.com/obsidian-nvim/obsidian.nvim
   "obsidian-nvim/obsidian.nvim",
+  enabled = false,
   version = "*",
   lazy = false,
   dependencies = {

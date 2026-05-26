@@ -7,6 +7,7 @@ INSTALL_PREFIX="${HOME}/.local"
 BUILD_TYPE="RelWithDebInfo"
 STATE_DIR="${HOME}/.local/state/chezmoi"
 STAMP_FILE="${STATE_DIR}/neovim-build.txt"
+BRANCH_NAME="release-0.12"
 
 if [[ ! -d "$REPO_DIR/.git" ]]; then
     exit 0
@@ -20,6 +21,9 @@ for cmd in git make cmake; do
 done
 
 mkdir -p "$INSTALL_PREFIX/bin" "$STATE_DIR"
+
+git -C "${REPO_DIR}" fetch --all
+git -C "${REPO_DIR}" checkout "${BRANCH_NAME}"
 
 HEAD="$(git -C "$REPO_DIR" rev-parse HEAD)"
 STAMP_CONTENT=$'repo='"$REPO_DIR"$'\nhead='"$HEAD"$'\nprefix='"$INSTALL_PREFIX"$'\nbuild_type='"$BUILD_TYPE"

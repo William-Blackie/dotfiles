@@ -115,6 +115,8 @@ return {
     opts = {
       ensure_installed = {
         "css-lsp",
+        "stylelint-language-server",
+        "stylelint",
         "css-variables-language-server",
         "cssmodules-language-server",
         "html-lsp",

@@ -52,6 +52,7 @@ return {
       ["zsh.chezmoitmpl"] = { "zsh" },
       python = { "ruff", "ty" },
       scss = { "stylelint" },
+      markdown = { "markdownlint-cli2" },
     },
     -- LazyVim extension to easily override linter options
     -- or add custom linters.
