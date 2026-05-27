@@ -118,8 +118,20 @@
 	tabs = 2
 	navigate = true
 
-[url "git@github.com:"]
-	insteadOf = https://github.com/
+[user]
+    name = William Blackie
+
+[user]
+  signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIONHSxUVGSX1xgPZ+jyicMOJkF45tcdkq2IZCgIMrpc7
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+
+[commit]
+  gpgsign = true
 
 
 [include]
@@ -135,13 +147,6 @@
 	helper =
 	helper = /usr/local/share/gcm-core/git-credential-manager
 
-[credential "https://dev.azure.com"]
-	useHttpPath = true
 
-[credential "https://github.com"]
-	helper =
-	helper = !/opt/homebrew/bin/gh auth git-credential
-
-[credential "https://gist.github.com"]
-	helper =
-	helper = !/opt/homebrew/bin/gh auth git-credential
+[url "git@github.com:"]
+    insteadOf = https://github.com/

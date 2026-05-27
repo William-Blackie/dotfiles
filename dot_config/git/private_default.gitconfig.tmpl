@@ -1,4 +1,0 @@
-{{- $item := onepassword "pf3r6daan5ca5u2koxqm4vhhim" "Private" "my.1password.com" -}}
-[user]
-	name = {{ range $item.fields }}{{ if eq .label "name" }}{{ .value }}{{ end }}{{ end }}
-	email = {{ range $item.fields }}{{ if eq .label "email" }}{{ .value }}{{ end }}{{ end }}

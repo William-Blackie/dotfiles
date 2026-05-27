@@ -23,7 +23,7 @@ done
 mkdir -p "$INSTALL_PREFIX/bin" "$STATE_DIR"
 
 git -C "${REPO_DIR}" fetch --all
-git -C "${REPO_DIR}" checkout "${BRANCH_NAME}"
+git -C "${REPO_DIR}" switch ${BRANCH_NAME}
 
 HEAD="$(git -C "$REPO_DIR" rev-parse HEAD)"
 STAMP_CONTENT=$'repo='"$REPO_DIR"$'\nhead='"$HEAD"$'\nprefix='"$INSTALL_PREFIX"$'\nbuild_type='"$BUILD_TYPE"

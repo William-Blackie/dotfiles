@@ -38,7 +38,6 @@ end
 ---@type LazyPluginSpec
 return {
   "mfussenegger/nvim-lint",
-  dev = true,
   event = "LazyFile",
   ---@type LintConfig
   opts = {
