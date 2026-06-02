@@ -30,6 +30,9 @@ gui:
     "release/*": "#cba6f7"
     "support/*": "#94e2d5"
 
+git:
+  overrideGpg: true
+
 customCommands:
   - key: "G"
     command: "gh pr view -w {{.SelectedLocalBranch.Name}}"

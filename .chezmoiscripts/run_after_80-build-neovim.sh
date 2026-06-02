@@ -22,7 +22,8 @@ done
 
 mkdir -p "$INSTALL_PREFIX/bin" "$STATE_DIR"
 
-git -C "${REPO_DIR}" fetch --all
+git -C "${REPO_DIR}" fetch --all --force
+git -C "${REPO_DIR}" pull
 git -C "${REPO_DIR}" switch ${BRANCH_NAME}
 
 HEAD="$(git -C "$REPO_DIR" rev-parse HEAD)"

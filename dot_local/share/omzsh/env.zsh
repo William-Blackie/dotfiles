@@ -33,11 +33,12 @@ export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
 unset NPM_CONFIG_INIT_MODULE NPM_CONFIG_TMP
 export NVM_DIR="$XDG_DATA_HOME/nvm"
 export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
-export PNPM_HOME="/Users/william/.local/share/pnpm"
+export PNPM_HOME="$XDG_DATA_HOME/pnpm"
 export PYENV_DISABLE_AUTO_REHASH=1
 export PYTHON_HISTORY="$XDG_STATE_HOME/python_history"
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
 export SHELL_SESSIONS_DISABLE=1
+# TODO: sort out postgresql paths.
 
 if [[ "$OSTYPE" == darwin* ]]; then
   _op_ssh_sock="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
@@ -53,11 +54,12 @@ preferred_path=(
   "$HOME/.local/bin"
   "$XDG_DATA_HOME/nvim/mason/bin"
   "$HOME/bin"
-  "$PNPM_HOME/bin:$PATH"
+  "$PNPM_HOME/bin"
   "$CARGO_HOME/bin"
   "$GOPATH/bin"
   "$PYENV_ROOT/shims"
   "$PYENV_ROOT/bin"
+  "/opt/homebrew/opt/postgresql@16/bin"
 )
 
 if [[ -r "$NVM_DIR/alias/default" ]]; then

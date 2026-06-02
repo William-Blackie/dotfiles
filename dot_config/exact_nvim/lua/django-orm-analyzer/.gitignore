@@ -1,0 +1,19 @@
+# Python local artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Testing / coverage
+.cache
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+
+# Typing
+.mypy_cache/
+
+# Virtual Environment
+.venv/

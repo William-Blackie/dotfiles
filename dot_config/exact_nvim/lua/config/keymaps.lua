@@ -46,19 +46,55 @@ vim.keymap.set("v", "p", '"_dP', { desc = "Paste without yank" })
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal" })
 vim.keymap.set("t", "<C-]>", "<C-\\><C-n>", { desc = "Exit terminal" })
 
--- Codedocs apply annotation
+-- Codedocs
+-- apply annotation
 vim.keymap.set("n", "gcd", "<cmd>Codedocs<CR>", { desc = "Insert annotation" })
 
--- nvim-html-css html peaking
+-- nvim-html-css
+-- html peaking
 vim.keymap.set("n", "<leader>cp", "<cmd>HtmlCssPeek<CR>", { desc = "Peek CSS source" })
 
 vim.keymap.set("c", "<S-Enter>", function()
   require("noice").redirect(vim.fn.getcmdline())
 end, { desc = "Redirect Cmdline" })
 
-vim.keymap.set("n", "<leader>tt", function()
-  local linters = require("lint").get_running()
-  local msg = (#linters == 0) and "No linters running"
-    or ("Running linters: " .. table.concat(linters, ", "))
-  require("noice").redirect('echo "' .. msg .. '"')
-end, { desc = "Show running linters" })
+-- Grep
+-- vim.keymap.set("n", "<Leader>g", ":Grep ", { noremap = true })
+--
+-- Replace
+vim.keymap.set("n", "<Leader>r", function()
+  vim.api.nvim_feedkeys(":Replace <Tab>", "t", false)
+end, { noremap = true, silent = true })
+
+-- Diffview
+-- Helpers
+
+-- Toggle diffview if already open, otherwise open with the given command
+local function toggle_diffview(cmd)
+  if next(require("diffview.lib").views) == nil then
+    vim.cmd(cmd)
+  else
+    vim.cmd("DiffviewClose")
+  end
+end
+
+-- Show current diff
+vim.keymap.del("n", "<leader>gd") -- Remove default mapping
+
+vim.keymap.set("n", "<leader>gd", function()
+  toggle_diffview("DiffviewOpen")
+end, { desc = "Diff file" })
+
+-- Show diff to origin
+vim.keymap.del("n", "<leader>gD") -- Remove default mapping
+
+vim.keymap.set("n", "<leader>gD", function()
+  toggle_diffview("DiffviewOpen main")
+end, { desc = "Diff file (origin)" })
+
+-- Show file history
+vim.keymap.del("n", "<leader>gf") -- Remove default mapping
+
+vim.keymap.set("n", "<leader>gf", function()
+  toggle_diffview("DiffviewFileHistory %")
+end, { desc = "Current file history" })

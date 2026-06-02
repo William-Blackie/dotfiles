@@ -19,7 +19,6 @@
 [fetch]
     prune = true
     pruneTags = true
-    all = true
 
 [branch]
     sort = -committerdate
@@ -128,6 +127,7 @@
   format = ssh
 
 [gpg "ssh"]
+  allowedSignersFile = ~/.config/git/allowed_signers
   program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 
 [commit]

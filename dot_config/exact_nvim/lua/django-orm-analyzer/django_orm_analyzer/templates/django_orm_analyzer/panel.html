@@ -1,0 +1,1032 @@
+<!-- Django ORM Analyzer Floating Dashboard Panel -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" integrity="sha512-4KpDQQrenGWc3mDLOy9fKS14TusJj6EC29dqTlh8oY532454bH84n44Qz8S1L5X+74pA61iN1J7+0z6V8a5Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<style>
+  /* --- DESIGN SYSTEM & CSS TOKENS --- */
+  :root {
+    --doa-bg-glass: rgba(10, 11, 18, 0.95);
+    --doa-border: rgba(255, 255, 255, 0.08);
+    --doa-border-glow: rgba(99, 102, 241, 0.15);
+    
+    /* Neon Palettes */
+    --doa-primary: #6366f1; /* Indigo */
+    --doa-primary-glow: rgba(99, 102, 241, 0.3);
+    
+    --doa-success: #10b981; /* Emerald */
+    --doa-success-glow: rgba(16, 185, 129, 0.2);
+    
+    --doa-warning: #f59e0b; /* Amber */
+    --doa-warning-glow: rgba(245, 158, 11, 0.2);
+    
+    --doa-danger: #f43f5e; /* Rose */
+    --doa-danger-glow: rgba(244, 63, 94, 0.25);
+    
+    --doa-text-main: #f3f4f6;
+    --doa-text-muted: #9ca3af;
+    --doa-bg-card: rgba(31, 41, 55, 0.4);
+    --doa-bg-pre: rgba(17, 24, 39, 0.6);
+  }
+
+  #doa-widget-container {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--doa-text-main);
+    z-index: 999999;
+    position: relative;
+  }
+
+  /* --- FLOATING BADGE TRIGGER --- */
+  .doa-trigger {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--doa-primary), #4f46e5);
+    box-shadow: 0 4px 20px var(--doa-primary-glow), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .doa-trigger:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 30px var(--doa-primary-glow);
+  }
+  .doa-trigger svg {
+    width: 28px;
+    height: 28px;
+    fill: #ffffff;
+    transition: transform 0.3s ease;
+  }
+  .doa-trigger:hover svg {
+    transform: rotate(15deg);
+  }
+  .doa-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--doa-primary);
+    opacity: 0.4;
+    z-index: -1;
+    animation: doa-pulsing 2s infinite;
+  }
+  @keyframes doa-pulsing {
+    0% { transform: scale(1); opacity: 0.4; }
+    70% { transform: scale(1.3); opacity: 0; }
+    100% { transform: scale(1.3); opacity: 0; }
+  }
+
+  /* Warning Badge Counter */
+  .doa-badge-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--doa-danger);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-shadow: 0 2px 8px var(--doa-danger-glow);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* --- SLIDE PANELS --- */
+  .doa-panel {
+    position: fixed;
+    top: 0;
+    right: -600px;
+    width: 580px;
+    height: 100vh;
+    background: var(--doa-bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+    border-left: 1px solid var(--doa-border);
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000001;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .doa-panel.open {
+    right: 0;
+  }
+
+  .doa-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000000;
+  }
+  .doa-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* --- PANEL COMPONENTS --- */
+  
+  /* Header */
+  .doa-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--doa-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.1);
+  }
+  .doa-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .doa-logo svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--doa-primary);
+  }
+  .doa-logo h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff, #9ca3af);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .doa-close-btn {
+    background: none;
+    border: none;
+    color: var(--doa-text-muted);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .doa-close-btn:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--doa-text-main);
+  }
+
+  /* Stats Section */
+  .doa-stats-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--doa-border);
+  }
+  .doa-stat-card {
+    background: var(--doa-bg-card);
+    border: 1px solid var(--doa-border);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  .doa-stat-card:hover {
+    border-color: rgba(255,255,255,0.15);
+    background: rgba(31, 41, 55, 0.55);
+  }
+  .doa-stat-val {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-family: 'Fira Code', monospace;
+  }
+  .doa-stat-lbl {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--doa-text-muted);
+    font-weight: 600;
+  }
+  .doa-score-perfect { color: var(--doa-success); text-shadow: 0 0 10px var(--doa-success-glow); }
+  .doa-score-warning { color: var(--doa-warning); text-shadow: 0 0 10px var(--doa-warning-glow); }
+  .doa-score-danger { color: var(--doa-danger); text-shadow: 0 0 10px var(--doa-danger-glow); }
+
+  /* Filters */
+  .doa-filter-bar {
+    padding: 12px 24px;
+    display: flex;
+    gap: 12px;
+    border-bottom: 1px solid var(--doa-border);
+    background: rgba(0,0,0,0.05);
+  }
+  .doa-search {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--doa-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: white;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+  .doa-search:focus {
+    border-color: var(--doa-primary);
+    box-shadow: 0 0 8px var(--doa-primary-glow);
+  }
+  .doa-select {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--doa-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: white;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+  
+  /* Tabs */
+  .doa-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--doa-border);
+    padding: 0 24px;
+    background: rgba(0,0,0,0.1);
+  }
+  .doa-tab {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--doa-text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  .doa-tab:hover {
+    color: var(--doa-text-main);
+  }
+  .doa-tab.active {
+    color: var(--doa-primary);
+    border-bottom-color: var(--doa-primary);
+    font-weight: 600;
+  }
+
+  /* Body Content */
+  .doa-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+  .doa-tab-content {
+    display: none;
+  }
+  .doa-tab-content.active {
+    display: block;
+  }
+
+  /* --- QUERY ROW (ACCORDION) --- */
+  .doa-query-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--doa-border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+  .doa-query-item:hover {
+    border-color: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+  }
+  .doa-query-item.has-danger {
+    border-left: 4px solid var(--doa-danger);
+    background: rgba(244, 63, 94, 0.02);
+  }
+  .doa-query-item.has-warning {
+    border-left: 4px solid var(--doa-warning);
+    background: rgba(245, 158, 11, 0.02);
+  }
+  .doa-query-item.has-success {
+    border-left: 4px solid var(--doa-success);
+  }
+
+  /* Accordion Header */
+  .doa-query-head {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .doa-qh-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .doa-q-id {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--doa-text-muted);
+  }
+  .doa-q-type {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .doa-q-caller {
+    font-size: 12px;
+    color: var(--doa-text-muted);
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .doa-qh-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .doa-q-time {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .doa-chevron {
+    width: 16px;
+    height: 16px;
+    fill: var(--doa-text-muted);
+    transition: transform 0.3s ease;
+  }
+  .doa-query-item.open .doa-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Accordion Content */
+  .doa-query-body {
+    display: none;
+    padding: 0 16px 16px 16px;
+    border-top: 1px solid var(--doa-border);
+    background: rgba(0, 0, 0, 0.15);
+  }
+  .doa-query-item.open .doa-query-body {
+    display: block;
+  }
+
+  /* Complexity badges */
+  .doa-complexity-section {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0;
+    flex-wrap: wrap;
+  }
+  .doa-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .doa-badge-time {
+    background: rgba(99, 102, 241, 0.1);
+    color: #a5b4fc;
+    border-color: rgba(99, 102, 241, 0.2);
+  }
+  .doa-badge-space {
+    background: rgba(16, 185, 129, 0.1);
+    color: #a7f3d0;
+    border-color: rgba(16, 185, 129, 0.2);
+  }
+  .doa-badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fde68a;
+    border-color: rgba(245, 158, 11, 0.2);
+  }
+  .doa-badge-danger {
+    background: rgba(244, 63, 94, 0.1);
+    color: #fecdd3;
+    border-color: rgba(244, 63, 94, 0.2);
+  }
+
+  /* Alerts inside queries */
+  .doa-alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .doa-alert-warning {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+  }
+  .doa-alert-danger {
+    background: rgba(244, 63, 94, 0.08);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    color: #fda4af;
+  }
+  .doa-alert svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    fill: currentColor;
+  }
+
+  /* Code Sections */
+  .doa-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--doa-text-muted);
+    letter-spacing: 1px;
+    margin: 16px 0 8px 0;
+  }
+  .doa-pre-wrapper {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid var(--doa-border);
+  }
+  .doa-pre-wrapper pre {
+    margin: 0 !important;
+    padding: 12px 14px !important;
+    font-size: 12px !important;
+    background: var(--doa-bg-pre) !important;
+    overflow-x: auto;
+  }
+  .doa-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    color: var(--doa-text-muted);
+    padding: 4px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .doa-copy-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: white;
+  }
+
+  /* Code Line Snippet */
+  .doa-code-snippet {
+    background: var(--doa-bg-pre);
+    border: 1px solid var(--doa-border);
+    border-radius: 8px;
+    padding: 10px 0;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    overflow-x: auto;
+  }
+  .doa-code-line {
+    display: flex;
+    padding: 1px 16px;
+    line-height: 1.5;
+  }
+  .doa-code-line.target {
+    background: rgba(244, 63, 94, 0.12);
+    border-left: 3px solid var(--doa-danger);
+    font-weight: 500;
+    color: #ffe4e6;
+  }
+  .doa-code-num {
+    color: rgba(255,255,255,0.25);
+    width: 32px;
+    text-align: right;
+    margin-right: 16px;
+    user-select: none;
+  }
+  
+  /* Explain Table */
+  .doa-explain-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-bottom: 12px;
+    border: 1px solid var(--doa-border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .doa-explain-table th {
+    background: rgba(0,0,0,0.3);
+    padding: 8px 10px;
+    text-align: left;
+    color: var(--doa-text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--doa-border);
+  }
+  .doa-explain-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.01);
+  }
+  .doa-explain-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Suggestions List */
+  .doa-suggestion-box {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 12px;
+  }
+  .doa-sugg-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6ee7b7;
+    margin-bottom: 6px;
+  }
+  .doa-sugg-title svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  .doa-sugg-desc {
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: #a7f3d0;
+  }
+
+  /* Tab 2: Improvements Tab */
+  .doa-improv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .doa-improv-item {
+    background: var(--doa-bg-card);
+    border: 1px solid var(--doa-border);
+    border-radius: 12px;
+    padding: 16px;
+    border-left: 4px solid var(--doa-primary);
+  }
+  .doa-improv-item.severe {
+    border-left-color: var(--doa-danger);
+  }
+  .doa-improv-item.warn {
+    border-left-color: var(--doa-warning);
+  }
+  .doa-improv-meta {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--doa-text-muted);
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .doa-improv-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .doa-improv-desc {
+    font-size: 13px;
+    color: var(--doa-text-muted);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+</style>
+
+<div id="doa-widget-container">
+  <!-- Trigger Widget Button -->
+  <div class="doa-trigger" id="doa-trigger">
+    <div class="doa-pulse"></div>
+    <svg viewBox="0 0 24 24">
+      <path d="M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M4,9V12C4,14.21 7.58,16 12,16C16.42,16 20,14.21 20,12V9C20,11.21 16.42,13 12,13C7.58,13 4,11.21 4,9M4,14V17C4,19.21 7.58,21 12,21C16.42,21 20,19.21 20,17V14C20,16.21 16.42,18 12,18C7.58,18 4,16.21 4,14Z" />
+    </svg>
+    {% if summary.warnings_count > 0 %}
+      <span class="doa-badge-count">{{ summary.warnings_count }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Overlay Back Drop -->
+  <div class="doa-overlay" id="doa-overlay"></div>
+
+  <!-- Slide-out Drawer Panel -->
+  <div class="doa-panel" id="doa-panel">
+    <!-- Header -->
+    <div class="doa-header">
+      <div class="doa-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,19H5V5H19V19M17,17H7V15H17V17M17,13H7V11H17V13M17,9H7V7H17V9Z" />
+        </svg>
+        <h2>Django ORM Analyzer</h2>
+      </div>
+      <button class="doa-close-btn" id="doa-close">
+        <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="doa-stats-container">
+      <div class="doa-stat-card">
+        <div class="doa-stat-val">{{ summary.total_queries }}</div>
+        <div class="doa-stat-lbl">Queries</div>
+      </div>
+      <div class="doa-stat-card">
+        <div class="doa-stat-val">{{ summary.total_time_ms|floatformat:1 }}<span style="font-size:10px;color:var(--doa-text-muted);">ms</span></div>
+        <div class="doa-stat-lbl">ORM Time</div>
+      </div>
+      <div class="doa-stat-card">
+        <div class="doa-stat-val">{{ summary.total_rows_fetched }}</div>
+        <div class="doa-stat-lbl">Rows Fetched</div>
+      </div>
+      <div class="doa-stat-card">
+        <div class="doa-stat-val" id="doa-health-val">100%</div>
+        <div class="doa-stat-lbl">ORM Score</div>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="doa-filter-bar">
+      <input type="text" class="doa-search" id="doa-search" placeholder="Search SQL, tables, callers..." />
+      <select class="doa-select" id="doa-filter-severity">
+        <option value="ALL">All Queries</option>
+        <option value="WARNING">Warnings</option>
+        <option value="CRITICAL">Critical Issues</option>
+        <option value="OPTIMAL">Optimal (O(1)/O(log N))</option>
+      </select>
+    </div>
+
+    <!-- Tabs Header -->
+    <div class="doa-tabs">
+      <div class="doa-tab active" data-tab="queries">Query Log ({{ summary.total_queries }})</div>
+      <div class="doa-tab" data-tab="warnings">Optimizations ({{ summary.warnings_count }})</div>
+      <div class="doa-tab" data-tab="metrics">System Metrics</div>
+    </div>
+
+    <!-- Scrollable Panel Body -->
+    <div class="doa-body">
+      <!-- TAB 1: QUERY LOG -->
+      <div class="doa-tab-content active" id="tab-queries">
+        {% for q in queries %}
+          <div class="doa-query-item {% if q.warnings %}has-{% if 'N+1' in q.warnings.0 or 'Full table scan' in q.warnings.0 %}danger{% else %}warning{% endif %}{% else %}has-success{% endif %}" 
+               data-query-type="{{ q.query_type }}" 
+               data-sql="{{ q.sql|escape }}"
+               data-caller="{{ q.caller.filename|escape }} {{ q.caller.line_content|escape }}"
+               data-warnings-count="{{ q.warnings|length }}">
+            
+            <!-- Accordion Header -->
+            <div class="doa-query-head" onclick="toggleQuery(this)">
+              <div class="doa-qh-left">
+                <span class="doa-q-id">Q{{ q.id }}</span>
+                <span class="doa-q-type" style="color: {% if q.query_type == 'SELECT' %}#a5b4fc{% elif q.query_type == 'INSERT' %}#34d399{% elif q.query_type == 'UPDATE' %}#fbbf24{% else %}#f87171{% endif %};">{{ q.query_type }}</span>
+                <span class="doa-q-caller">{% if q.caller %}{{ q.caller.filename|slice:"-30:" }}:{{ q.caller.lineno }}{% else %}Internal/Direct{% endif %}</span>
+              </div>
+              <div class="doa-qh-right">
+                <span class="doa-q-time" style="color: {% if q.duration_ms > 20 %}#fda4af{% elif q.duration_ms > 5 %}#fde68a{% else %}#a7f3d0{% endif %};">{{ q.duration_ms }}ms</span>
+                <svg class="doa-chevron" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Accordion Body -->
+            <div class="doa-query-body">
+              <!-- Complexity Badges -->
+              <div class="doa-complexity-section">
+                <span class="doa-badge doa-badge-time">
+                  <svg style="width:12px;height:12px;" viewBox="0 0 24 24"><path fill="currentColor" d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/></svg>
+                  Time: {{ q.complexity }}
+                </span>
+                <span class="doa-badge doa-badge-space">
+                  <svg style="width:12px;height:12px;" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6Z"/></svg>
+                  Space: O(R * C) ({{ q.rows_fetched }} rows fetched)
+                </span>
+              </div>
+
+              <!-- Alerts -->
+              {% for warning in q.warnings %}
+                <div class="doa-alert {% if 'N+1' in warning or 'Full table scan' in warning or 'Inefficient' in warning %}doa-alert-danger{% else %}doa-alert-warning{% endif %}">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12,2L1,21H23L12,2M12,6L19.53,19H4.47L12,6M11,10V14H13V10H11M11,16V18H13V16H11Z" />
+                  </svg>
+                  <div><strong>Warning:</strong> {{ warning }}</div>
+                </div>
+              {% endfor %}
+
+              <!-- SQL Query -->
+              <div class="doa-section-title">SQL Query</div>
+              <div class="doa-pre-wrapper">
+                <button class="doa-copy-btn" onclick="copyToClipboard(this, `{{ q.sql|escapejs }}`)">Copy</button>
+                <pre><code class="language-sql">{{ q.sql }}</code></pre>
+              </div>
+
+              <!-- Python Caller Line -->
+              {% if q.caller %}
+                <div class="doa-section-title">ORM Code Origin</div>
+                <div style="font-size: 11px; color: var(--doa-text-muted); margin-bottom: 6px; font-family: monospace;">
+                  File: {{ q.caller.filename }}<br>
+                  Function: {{ q.caller.function }}()
+                </div>
+                
+                {% if q.code_snippet %}
+                  <div class="doa-code-snippet">
+                    {% for line in q.code_snippet %}
+                      <div class="doa-code-line {% if line.is_target %}target{% endif %}">
+                        <span class="doa-code-num">{{ line.line_no }}</span>
+                        <span>{{ line.content }}</span>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="doa-code-snippet" style="padding: 10px 16px; color: var(--doa-text-muted);">
+                    {{ q.caller.line_content }}
+                  </div>
+                {% endif %}
+              {% endif %}
+
+              <!-- EXPLAIN Execution Plan -->
+              {% if q.plan %}
+                <div class="doa-section-title">Database Query Plan (EXPLAIN)</div>
+                <table class="doa-explain-table">
+                  <thead>
+                    <tr>
+                      {% if 'sqlite' in q.engine %}
+                        <th>Select ID</th>
+                        <th>Order</th>
+                        <th>From</th>
+                        <th>Detail Plan</th>
+                      {% else %}
+                        <th>Plan execution steps</th>
+                      {% endif %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in q.plan %}
+                      <tr>
+                        {% for cell in row %}
+                          <td>{{ cell }}</td>
+                        {% endfor %}
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% endif %}
+
+              <!-- Actionable suggestions -->
+              {% if q.suggestions %}
+                {% for sugg in q.suggestions %}
+                  <div class="doa-suggestion-box">
+                    <div class="doa-sugg-title">
+                      <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/></svg>
+                      Recommendation
+                    </div>
+                    <div class="doa-sugg-desc">{{ sugg }}</div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- TAB 2: OPTIMIZATIONS -->
+      <div class="doa-tab-content" id="tab-warnings">
+        <div class="doa-improv-list">
+          {% if summary.warnings_count == 0 %}
+            <div style="text-align: center; padding: 40px 0; color: var(--doa-text-muted);">
+              <svg style="width: 48px; height: 48px; fill: var(--doa-success); margin-bottom: 12px;" viewBox="0 0 24 24">
+                <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L7.5,13L8.91,11.59L11,13.67L15.09,9.58L16.5,11L11,16.5Z" />
+              </svg>
+              <h3 style="color: white; margin-bottom: 6px;">Zero Database Warnings!</h3>
+              <p style="font-size: 13px;">Your ORM queries are perfectly indexed and structured.</p>
+            </div>
+          {% else %}
+            {% for q in queries %}
+              {% if q.warnings %}
+                {% for warning in q.warnings %}
+                  <div class="doa-improv-item {% if 'N+1' in warning or 'Full table scan' in warning %}severe{% else %}warn{% endif %}">
+                    <div class="doa-improv-meta">Query {{ q.id }} &bull; {{ q.complexity }}</div>
+                    <div class="doa-improv-title">{{ warning }}</div>
+                    <div class="doa-improv-desc">
+                      Executed in **{{ q.duration_ms }}ms** fetching **{{ q.rows_fetched }} rows**.
+                      Triggered from line `{{ q.caller.lineno }}` in `{{ q.caller.filename|slice:"-30:" }}`.
+                    </div>
+                    {% if q.suggestions %}
+                      {% for sugg in q.suggestions %}
+                        <div class="doa-suggestion-box" style="margin: 0; background: rgba(255,255,255,0.03); border-color: var(--doa-border);">
+                          <div class="doa-sugg-desc" style="color: white;">{{ sugg }}</div>
+                        </div>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- TAB 3: SYSTEM METRICS -->
+      <div class="doa-tab-content" id="tab-metrics">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: var(--doa-bg-card); padding: 16px; border-radius: 10px; border: 1px solid var(--doa-border);">
+            <h4 style="margin: 0 0 10px 0; color: white;">Database Context</h4>
+            <div style="font-size: 13px; display: grid; grid-template-columns: 100px 1fr; gap: 6px; color: var(--doa-text-muted);">
+              <div>Engine:</div><div style="color: white; font-family: monospace;">{{ queries.0.engine }}</div>
+              <div>Host:</div><div style="color: white; font-family: monospace;">Localhost/In-Memory</div>
+              <div>Total Calls:</div><div style="color: white; font-family: monospace;">{{ summary.total_queries }} queries</div>
+              <div>Active Path:</div><div style="color: white; font-family: monospace;">{{ path }}</div>
+            </div>
+          </div>
+          <div style="background: var(--doa-bg-card); padding: 16px; border-radius: 10px; border: 1px solid var(--doa-border);">
+            <h4 style="margin: 0 0 10px 0; color: white;">Complexity Diagnostics</h4>
+            <p style="font-size: 13px; line-height: 1.5; color: var(--doa-text-muted); margin: 0 0 12px 0;">
+              Queries are graded based on their algorithmic time complexity.
+            </p>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span>Constant Time Lookups (O(1) / O(log N)):</span>
+                <span style="color: var(--doa-success); font-weight:700;">Good</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span>Linear Table Scans (O(N)):</span>
+                <span style="color: var(--doa-warning); font-weight:700;">{{ summary.table_scan_warnings_count }} detected</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px;">
+                <span>N+1 Query Loop Roundtrips (O(K)):</span>
+                <span style="color: var(--doa-danger); font-weight:700;">{{ summary.n1_warnings_count }} locations</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts for Interaction and Highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js" integrity="sha512-9hn8Ax8qqNW7jVw5w0jO60Qk25I9ec347T865P2a8G843QzK7S0l2k5zZzH+6N4X/60X6p/a83U4y/7vX9/A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-S59YQ+yvUec2514+A+QE1VvPDLwPdb95vV471wI1D84B9M3M1v8X3s72X7f5zH/7O5/2U/Ld5O/D/4c44A/Zg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+  (function() {
+    // --- UI Controls ---
+    const trigger = document.getElementById('doa-trigger');
+    const closeBtn = document.getElementById('doa-close');
+    const panel = document.getElementById('doa-panel');
+    const overlay = document.getElementById('doa-overlay');
+    const tabs = document.querySelectorAll('.doa-tab');
+    const tabContents = document.querySelectorAll('.doa-tab-content');
+    const searchInput = document.getElementById('doa-search');
+    const severitySelect = document.getElementById('doa-filter-severity');
+    const healthVal = document.getElementById('doa-health-val');
+
+    // Calculate Database Health Score
+    function calculateHealthScore() {
+      let score = 100;
+      // Severe N+1 deducts 20pts each, up to 60pts
+      const n1Count = parseInt("{{ summary.n1_warnings_count }}") || 0;
+      score -= Math.min(n1Count * 25, 60);
+
+      // Table scans deduct 15pts each, up to 30pts
+      const scansCount = parseInt("{{ summary.table_scan_warnings_count }}") || 0;
+      score -= Math.min(scansCount * 15, 30);
+
+      // Other general warnings deduct 5pts each, up to 10pts
+      const totalWarnings = parseInt("{{ summary.warnings_count }}") || 0;
+      const genericWarnings = Math.max(0, totalWarnings - n1Count - scansCount);
+      score -= Math.min(genericWarnings * 5, 10);
+      
+      score = Math.max(0, score);
+      healthVal.textContent = score + "%";
+      
+      if (score >= 90) {
+        healthVal.className = "doa-stat-val doa-score-perfect";
+      } else if (score >= 60) {
+        healthVal.className = "doa-stat-val doa-score-warning";
+      } else {
+        healthVal.className = "doa-stat-val doa-score-danger";
+      }
+    }
+    calculateHealthScore();
+
+    // Toggle panel view
+    function openPanel() {
+      panel.classList.add('open');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden'; // prevent page scroll
+    }
+
+    function closePanel() {
+      panel.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    trigger.addEventListener('click', openPanel);
+    closeBtn.addEventListener('click', closePanel);
+    overlay.addEventListener('click', closePanel);
+
+    // Tab Switching
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.getAttribute('data-tab');
+        
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById('tab-' + targetTab).classList.add('active');
+      });
+    });
+
+    // Real-time Search and Filtering
+    function filterQueries() {
+      const searchVal = searchInput.value.toLowerCase();
+      const severityVal = severitySelect.value;
+      const items = document.querySelectorAll('.doa-query-item');
+
+      items.forEach(item => {
+        const sql = item.getAttribute('data-sql').toLowerCase();
+        const caller = item.getAttribute('data-caller').toLowerCase();
+        const qType = item.getAttribute('data-query-type').toLowerCase();
+        const warningsCount = parseInt(item.getAttribute('data-warnings-count')) || 0;
+        const hasDanger = item.classList.contains('has-danger');
+
+        const matchesSearch = sql.includes(searchVal) || caller.includes(searchVal) || qType.includes(searchVal);
+        
+        let matchesSeverity = true;
+        if (severityVal === 'WARNING') {
+          matchesSeverity = warningsCount > 0;
+        } else if (severityVal === 'CRITICAL') {
+          matchesSeverity = hasDanger;
+        } else if (severityVal === 'OPTIMAL') {
+          matchesSeverity = warningsCount === 0;
+        }
+
+        if (matchesSearch && matchesSeverity) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', filterQueries);
+    severitySelect.addEventListener('change', filterQueries);
+
+    // Accordion Toggle function (declared globally to be called by onclick)
+    window.toggleQuery = function(element) {
+      const parent = element.parentElement;
+      parent.classList.toggle('open');
+    };
+
+    // Copy to clipboard
+    window.copyToClipboard = function(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = "Copied!";
+        btn.style.background = "var(--doa-success)";
+        btn.style.color = "white";
+        
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = "";
+          btn.style.color = "";
+        }, 1500);
+      });
+    };
+  })();
+</script>

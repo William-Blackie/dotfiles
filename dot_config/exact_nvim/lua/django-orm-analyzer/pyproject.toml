@@ -1,0 +1,51 @@
+[project]
+name            = "django-orm-analyzer"
+version         = "0.1.0"
+description     = "A Neovim plugin to highlight, evaluate, and suggest performance improvements for Django ORM queries."
+requires-python = ">=3.10"
+dependencies    = ["django>=4.2"]
+
+[build-system]
+requires      = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length    = 80
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # Pyflakes
+  "I",   # isort (import sorting)
+  "C90", # mccabe complexity
+  "B",   # flake8-bugbear
+  "D",   # pydocstyle (docstring checking)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.mypy]
+python_version = "3.10"
+strict         = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts    = "-ra -q"
+testpaths  = ["tests"]
+
+[dependency-groups]
+dev = [
+  "django-stubs>=6.0.5",
+  "django-stubs-ext>=6.0.5",
+  "mypy>=2.1.0",
+  "pytest>=9.0.3",
+  "pytest-cov>=7.1.0",
+  "ruff>=0.15.15",
+  "types-pygments>=2.20.0.20260518",
+]

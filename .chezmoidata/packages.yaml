@@ -27,7 +27,6 @@ packages:
       - "ninja"
       - "nvm"
       - "perl"
-      - "pnpm"
       - "pyenv"
       - "ripgrep"
       - "ruby"

@@ -11,6 +11,11 @@
     "prepare": "husky"
   },
   "lint-staged": {
+    "*.py": [
+      "ruff format",
+      "ruff check --fix",
+      "mypy --config-file dot_config/exact_nvim/lua/django-orm-analyzer/pyproject.toml"
+    ],
     "*.{md,json,yml,yaml}": "prettier --write --ignore-unknown --config dot_prettierrc.toml",
     "*.md": "markdownlint-cli2 --config dot_markdownlint.toml",
     "*.toml": [

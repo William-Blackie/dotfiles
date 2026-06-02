@@ -49,7 +49,7 @@ return {
       bash = { "shellcheck" },
       zsh = { "zsh" },
       ["zsh.chezmoitmpl"] = { "zsh" },
-      python = { "ruff", "ty" },
+      python = { "ruff" },
       scss = { "stylelint" },
       markdown = { "markdownlint-cli2" },
     },
@@ -61,13 +61,6 @@ return {
         cmd = function()
           return project_executable(python_root(), "ruff")
         end,
-        cwd = python_root,
-      },
-      ty = {
-        cmd = function()
-          return project_executable(python_root(), "ty")
-        end,
-        cwd = python_root,
       },
       -- -- Example of using selene only when a selene.toml file is present
       -- selene = {

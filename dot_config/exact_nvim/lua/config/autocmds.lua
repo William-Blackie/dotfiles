@@ -93,10 +93,12 @@ local function LatestGreps()
   return keys
 end
 
+-- Grep
 vim.api.nvim_create_user_command("Grep", function(opts)
   Grep(opts.fargs[1], opts.fargs[2])
 end, { nargs = "+", complete = "file" })
 
+-- Replace
 vim.api.nvim_create_user_command("Replace", function(opts)
   Replace(opts.fargs[1], opts.fargs[2], opts.fargs[3])
 end, {
@@ -105,8 +107,3 @@ end, {
     return LatestGreps()
   end,
 })
-
-vim.keymap.set("n", "<Leader>g", ":Grep ", { noremap = true })
-vim.keymap.set("n", "<Leader>r", function()
-  vim.api.nvim_feedkeys(":Replace <Tab>", "t", false)
-end, { noremap = true, silent = true })

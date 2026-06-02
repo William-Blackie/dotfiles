@@ -26,7 +26,7 @@ end
 
 ---@return string
 local function docker_service()
-  return vim.env.NEOTEST_DOCKER_SERVICE or "django-app"
+  return vim.env.NEOTEST_DOCKER_SERVICE or "django-admin"
 end
 
 ---@return string
@@ -37,6 +37,35 @@ end
 ---@return string
 local function docker_python()
   return vim.env.NEOTEST_DOCKER_PYTHON or "python"
+end
+
+---@param root string
+---@param position table|nil
+---@return string|nil
+local function django_settings_module(root, position)
+  local path = position and (position.path or position.id) or ""
+  local site = path:match("/sites/([^/]+)/")
+  if
+    site and vim.fn.filereadable(root .. "/sites/" .. site .. "/settings/test.py") == 1
+  then
+    return "sites." .. site .. ".settings.test"
+  end
+
+  if
+    path:find("/oauth2/", 1, true)
+    and vim.fn.filereadable(root .. "/sites/app/settings/test.py") == 1
+  then
+    return "sites.app.settings.test"
+  end
+
+  if
+    path:find("/extensions/", 1, true)
+    and vim.fn.filereadable(root .. "/sites/common/settings/test.py") == 1
+  then
+    return "sites.common.settings.test"
+  end
+
+  return nil
 end
 
 ---@return string
@@ -171,6 +200,12 @@ return {
           end,
           python = function(root)
             return docker_python_command(root)
+          end,
+          args = function(_, position)
+            local path = position and (position.path or position.id)
+            local root = path and project_root(path) or vim.uv.cwd()
+            local settings = django_settings_module(root, position)
+            return settings and { "--ds=" .. settings } or {}
           end,
           path_mappings = function(root)
             return path_mappings(root)
