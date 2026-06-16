@@ -17,7 +17,7 @@ return {
       documentation = {
         auto_show = true,
         auto_show_delay_ms = 100,
-        update_delay_ms = 50,
+        update_delay_ms = 100,
         window = {
           max_width = math.min(80, vim.o.columns),
           border = "rounded",
