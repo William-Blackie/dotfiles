@@ -1,9 +1,9 @@
 packages:
   darwin:
     brews:
+      - "bash-completion@2"
       - "bat"
       - "bitwarden-cli"
-      - "bash-completion@2"
       - "blueutil"
       - "chezmoi"
       - "cmake"
@@ -43,13 +43,14 @@ packages:
     casks:
       - "1password"
       - "1password-cli"
-      - "nikitabobko/tap/aerospace"
       - "bitwarden"
       - "chatgpt"
       - "firefox"
       - "google-chrome"
       - "keymapp"
       - "kitty"
+      - "nikitabobko/tap/aerospace"
       - "notion"
       - "obsidian"
+      - "vorssaint"
       - "whatsapp"
