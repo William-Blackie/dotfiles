@@ -1,3 +1,10 @@
+[".config/k9s/skins"]
+type            = "archive"
+url             = "https://github.com/catppuccin/k9s/archive/main.tar.gz"
+include         = ["k9s-main/dist/**"]
+stripComponents = 2
+refreshPeriod   = "168h"
+
 [".local/share/tmux/plugins/tpm"]
 type      = "git-repo"
 url       = "https://github.com/tmux-plugins/tpm"

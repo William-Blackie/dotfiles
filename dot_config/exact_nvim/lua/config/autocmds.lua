@@ -340,13 +340,33 @@ vim.api.nvim_create_user_command("SortPythonDict", function()
     return
   end
 
+  if node:has_error() then
+    vim.notify("Cannot sort a dictionary with syntax errors", vim.log.levels.ERROR)
+    return
+  end
+
   local dict_start_row, _, dict_end_row = node:range()
   local entries = {}
 
   for child in node:iter_children() do
+    if child:named() and child:type() ~= "pair" and child:type() ~= "comment" then
+      vim.notify("Dictionary unpacking is not supported", vim.log.levels.ERROR)
+      return
+    end
     if child:type() == "pair" then
       local key_node = child:named_child(0)
-      local pair_start_row, _, pair_end_row = child:range()
+      local pair_start_row, _, pair_end_row, pair_end_col = child:range()
+      local separator = child:next_sibling()
+      while separator and separator:type() == "comment" do
+        separator = separator:next_sibling()
+      end
+      if separator and separator:type() == "," then
+        local separator_row = separator:range()
+        if separator_row ~= pair_end_row then
+          vim.notify("Commas must follow their dictionary values", vim.log.levels.ERROR)
+          return
+        end
+      end
 
       if not key_node then
         vim.notify("Could not read a dictionary key", vim.log.levels.ERROR)
@@ -358,6 +378,11 @@ vim.api.nvim_create_user_command("SortPythonDict", function()
           "Each key and the closing brace must start on separate lines",
           vim.log.levels.ERROR
         )
+        return
+      end
+
+      if entries[#entries] and pair_start_row <= entries[#entries].pair_end_row then
+        vim.notify("Each dictionary entry must have its own lines", vim.log.levels.ERROR)
         return
       end
 
@@ -373,6 +398,7 @@ vim.api.nvim_create_user_command("SortPythonDict", function()
         key = key:lower(),
         pair_start_row = pair_start_row,
         pair_end_row = pair_end_row,
+        pair_end_col = pair_end_col,
       })
     end
   end
@@ -432,6 +458,13 @@ vim.api.nvim_create_user_command("SortPythonDict", function()
     end
 
     entry.lines = vim.api.nvim_buf_get_lines(bufnr, entry.start_row, end_row, false)
+    -- Include a separator before any inline comment, even for the original last pair.
+    local line_index = entry.pair_end_row - entry.start_row + 1
+    local line = entry.lines[line_index]
+    local suffix = line:sub(entry.pair_end_col + 1)
+    if not suffix:match("^%s*,") then
+      entry.lines[line_index] = line:sub(1, entry.pair_end_col) .. "," .. suffix
+    end
   end
 
   local replacement_start = entries[1].start_row
@@ -463,7 +496,7 @@ end, {
 vim.api.nvim_create_autocmd("Filetype", {
   pattern = "sql",
   callback = function()
-    vim.keymap.del("i", "<left>", { buffer = true })
-    vim.keymap.del("i", "<right>", { buffer = true })
+    pcall(vim.keymap.del, "i", "<left>", { buffer = true })
+    pcall(vim.keymap.del, "i", "<right>", { buffer = true })
   end,
 })

@@ -1,0 +1,50 @@
+plugins:
+  rollout-status:
+    shortCut: Shift-5
+    description: Rollout status
+    scopes:
+      - dp
+      - sts
+      - ds
+    command: env
+    background: true
+    overwriteOutput: true
+    args:
+      - KUBECONFIG=$KUBECONFIG
+      - kubectl
+      - --context
+      - $CONTEXT
+      - --namespace
+      - $NAMESPACE
+      - --request-timeout=15s
+      - rollout
+      - status
+      - $RESOURCE_NAME/$NAME
+      - --watch=false
+  resource-events:
+    shortCut: Shift-6
+    description: Watch resource events
+    scopes:
+      - po
+      - dp
+      - sts
+      - ds
+      - rs
+      - svc
+      - job
+      - cj
+      - pvc
+      - ing
+    command: env
+    background: false
+    args:
+      - KUBECONFIG=$KUBECONFIG
+      - kubectl
+      - --context
+      - $CONTEXT
+      - --namespace
+      - $NAMESPACE
+      - events
+      - --for
+      - $RESOURCE_NAME/$NAME
+      - --watch

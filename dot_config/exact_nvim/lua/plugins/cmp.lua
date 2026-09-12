@@ -46,8 +46,8 @@ return {
     -- (Default) list of enabled providers defined so that you can extend it
     -- elsewhere in your config, without redefining it, due to `opts_extend`
     sources = {
+      default = { "lsp", "path", "snippets", "buffer", "ecolog" },
       per_filetype = {
-        default = { "lsp", "path", "snippets", "buffer", "ecolog" },
         gitcommit = { inherit_defaults = true, "git", "conventional_commits", "emoji" },
         markdown = { inherit_defaults = true, "emoji" },
         css = { inherit_defaults = true, "css_vars" },

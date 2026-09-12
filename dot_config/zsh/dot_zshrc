@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+export PATH="/opt/homebrew/bin:$PATH"
+
 setopt extendedglob autocd interactivecomments
 setopt appendhistory sharehistory hist_ignore_space hist_ignore_all_dups \
   hist_save_no_dups hist_ignore_dups hist_find_no_dups
@@ -96,6 +98,12 @@ if [[ -r "$XDG_CONFIG_HOME/fzf/fzf.zsh" ]] || command -v fzf >/dev/null 2>&1; th
 --color=marker:#a6e3a1,fg+:#f5e0dc,prompt:#89b4fa,hl+:#cba6f7,border:#45475a"
   # fzf --zsh registers zle widgets, so only load it for real terminals.
   [[ -t 0 && -t 1 && -r "$XDG_CONFIG_HOME/fzf/fzf.zsh" ]] && source "$XDG_CONFIG_HOME/fzf/fzf.zsh"
+
+  if (($+widgets[fzf - completion])); then
+    bindkey -M emacs '^I' fzf-completion
+    bindkey -M viins '^I' fzf-completion
+    bindkey -M vicmd '^I' fzf-completion
+  fi
 fi
 
 # Sources the first readable file from a list.

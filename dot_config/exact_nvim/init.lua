@@ -1,3 +1,3 @@
+require("lib.project_env").setup()
 require("config.lazy")
-require("config.keymaps")
 pcall(require, "config.local")

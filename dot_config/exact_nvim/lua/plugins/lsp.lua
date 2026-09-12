@@ -81,23 +81,12 @@ return {
         focus = true,
         style = "minimal",
       },
-      -- Resolved from the git root (not nvim's launch-time cwd, which is
-      -- stale the moment you `:cd` into a project after starting nvim) and
-      -- globbed across every site under django/build/static/css/*, so hover
-      -- works no matter which site (app, www, xp, rubrics, ...) you're in.
-      style_sheets = (function()
-        local root = utils.git_root() or vim.uv.cwd()
-        local sheets = {}
-        for _, file in
-          ipairs(vim.fn.glob(root .. "/django/build/static/css/*/*.css", false, true))
-        do
-          table.insert(sheets, file)
-        end
-        return sheets
-      end)(),
+      -- Project stylesheets are attached per buffer by lib.project_styles.
+      style_sheets = {},
     },
     config = function(_, opts)
       require("html-css").setup(opts)
+      require("lib.project_styles").setup(opts)
 
       -- html-css's own hover keymap (hover.lua) is a plain global
       -- `vim.keymap.set`, but LazyVim registers its "K" through
@@ -164,30 +153,30 @@ return {
           settings = {
             ty = ty_settings(),
           },
-          cmd_env = {
-            DJANGO_SETTINGS_MODULE = utils.get_django_settings_module(),
-          },
         },
         -- https://github.com/joshuadavidthomas/django-language-server/blob/main/docs/clients/neovim.md
         djlsp = {
           filetypes = { "htmldjango" },
           root_dir = django_root_dir,
-          init_options = {
-            env_directories = vim.env.VIRTUAL_ENV or ".env",
-            django_settings_module = utils.get_django_settings_module(),
-            docker_compose_service = utils.get_django_docker_compose_service(),
-            docker_compose_file = utils.get_django_docker_compose_file(),
-          },
+          before_init = function(_, config)
+            config.init_options = vim.tbl_extend("force", config.init_options or {}, {
+              env_directories = vim.env.VIRTUAL_ENV or ".env",
+              django_settings_module = utils.get_django_settings_module(),
+              docker_compose_service = utils.get_django_docker_compose_service(),
+              docker_compose_file = utils.get_django_docker_compose_file(),
+            })
+          end,
         },
         djls = {
           cmd = { "djls", "serve" },
           filetypes = { "htmldjango", "html", "python" },
           root_markers = utils.django_root_markers,
-          init_options = {
-            django_settings_module = utils.get_django_settings_module(),
-          },
+          before_init = function(_, config)
+            config.init_options = config.init_options or {}
+            config.init_options.django_settings_module =
+              utils.get_django_settings_module()
+          end,
           venv_path = utils.get_python_venv,
-          env_file = vim.env.VIRTUAL_ENV,
         },
         tombi = {
           keys = {

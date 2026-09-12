@@ -81,36 +81,3 @@ end, { desc = "Redirect Cmdline" })
 vim.keymap.set("n", "<Leader>r", function()
   vim.api.nvim_feedkeys(":Replace <Tab>", "t", false)
 end, { noremap = true, silent = true })
-
--- Diffview
--- Helpers
-
--- Toggle diffview if already open, otherwise open with the given command
-local function toggle_diffview(cmd)
-  if next(require("diffview.lib").views) == nil then
-    vim.cmd(cmd)
-  else
-    vim.cmd("DiffviewClose")
-  end
-end
-
--- Show current diff
-pcall(vim.keymap.del, "n", "<leader>gd")
-
-vim.keymap.set("n", "<leader>gd", function()
-  toggle_diffview("DiffviewOpen")
-end, { desc = "Diff file" })
-
--- Show diff to origin
-pcall(vim.keymap.del, "n", "<leader>gD")
-
-vim.keymap.set("n", "<leader>gD", function()
-  toggle_diffview("DiffviewOpen main")
-end, { desc = "Diff file (origin)" })
-
--- Show file history
-pcall(vim.keymap.del, "n", "<leader>gf")
-
-vim.keymap.set("n", "<leader>gf", function()
-  toggle_diffview("DiffviewFileHistory %")
-end, { desc = "Current file history" })

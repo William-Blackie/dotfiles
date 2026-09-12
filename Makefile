@@ -11,88 +11,133 @@ LUA_FILES := $(shell git ls-files '*.lua' | while IFS= read -r f; do [ -f "$$f" 
 
 .DEFAULT_GOAL := help
 
-.PHONY: help
-help:
-	@printf 'Targets:\n'
-	@printf '  install        Install Node dependencies\n'
-	@printf '  check          Run format checks and linters\n'
-	@printf '  lint           Run linters\n'
-	@printf '  format         Format files\n'
-	@printf '  format-check   Check formatting\n'
-	@printf '  lint-staged    Run lint-staged\n'
+PHONY = \
+	help \
+	install \
+	apply \
+	check \
+	test-neovim \
+	lint \
+	format \
+	format-check \
+	lint-staged \
+	format-prettier \
+	format-prettier-check \
+	lint-markdown \
+	format-toml \
+	format-toml-check \
+	lint-toml \
+	format-shell \
+	format-shell-check \
+	lint-shell \
+	format-zsh \
+	format-zsh-check \
+	lint-zsh \
+	format-lua \
+	format-lua-check 
 
-.PHONY: install
+
+## Show this help message
+help:
+	@awk '\
+	  BEGIN {FS = ":"} \
+	  /^### / {section=substr($$0,5); next} \
+	  /^##/ {sub(/^## ?/, "", $$0); helpMsg = $$0; next} \
+	  /^[a-zA-Z0-9_.-]+:/ { \
+	    sub(/:.*/, "", $$1); \
+	    if (helpMsg) { \
+	      if (section) { \
+	        printf "\n\033[1m%s\033[0m\n", section; \
+	        section = ""; \
+	      } \
+	      printf "  \033[36m%-20s\033[0m %s\n", $$1, helpMsg; \
+	      helpMsg = ""; \
+	    } \
+	  }' $(MAKEFILE_LIST)
+
+##
 install:
 	pnpm install
 
-.PHONY: check
-check: format-check lint
+### Chezmoi
+## apply the chezmoi configuration to the home directory
+apply:
+	chezmoi apply -R --force
 
-.PHONY: lint
+### Utils
+## format, lint, and test all files
+check: format-check lint test-neovim
+
+## test neovim configuration
+test-neovim:
+	nvim --headless -u NONE -i NONE -l tests/neovim.lua
+	nvim --headless -u NONE -i NONE -l tests/neovim-keymaps.lua
+
+## lint all files
 lint: lint-markdown lint-toml lint-shell lint-zsh
 
-.PHONY: format
+## format all files
 format: format-prettier format-toml format-shell format-zsh format-lua
 
-.PHONY: format-check
+## check formatting of all files
 format-check: format-prettier-check format-toml-check format-shell-check format-zsh-check format-lua-check
 
-.PHONY: lint-staged
+## lint files staged for commit
 lint-staged:
 	pnpm exec lint-staged
 
-.PHONY: format-prettier
+## format files staged for commit
 format-prettier:
 	pnpm exec prettier --write --ignore-unknown --config dot_prettierrc.toml $(PRETTIER_GLOBS)
 
-.PHONY: format-prettier-check
+## check formatting of files staged for commit
 format-prettier-check:
 	pnpm exec prettier --check --ignore-unknown --config dot_prettierrc.toml $(PRETTIER_GLOBS)
 
-.PHONY: lint-markdown
+## lint markdown files
 lint-markdown:
 	pnpm exec markdownlint-cli2 --config dot_markdownlint.toml $(MARKDOWN_FILES)
 
-.PHONY: format-toml
+## format toml files
 format-toml:
 	pnpm exec tombi format $(TOML_FILES)
 
-.PHONY: format-toml-check
+## check formatting of toml files
 format-toml-check:
 	pnpm exec tombi format --check $(TOML_FILES)
 
-.PHONY: lint-toml
+## lint toml files
 lint-toml:
 	pnpm exec tombi lint --error-on-warnings $(TOML_FILES)
 
-.PHONY: format-shell
+## format shell files
 format-shell:
 	shfmt -w -i 4 -ci -bn $(SHELL_FILES)
 
-.PHONY: format-shell-check
+## check formatting of shell files
 format-shell-check:
 	shfmt -d -i 4 -ci -bn $(SHELL_FILES)
 
-.PHONY: lint-shell
+## lint shell files
 lint-shell:
 	shellcheck $(SHELL_FILES) $(SHELLCHECK_TEMPLATE_FILES)
 
-.PHONY: format-zsh
+## format zsh files
 format-zsh:
 	shfmt -w -ln zsh -i 2 $(ZSH_FILES)
 
-.PHONY: format-zsh-check
+## check formatting of zsh files
 format-zsh-check:
 	shfmt -d -ln zsh -i 2 $(ZSH_FILES)
 
-.PHONY: lint-zsh
+## lint zsh files
 lint-zsh:
 	zsh -n $(ZSH_FILES)
 
-.PHONY: format-lua
+## format lua files
 format-lua:
 	pnpm exec stylua --config-path dot_config/exact_nvim/stylua.toml $(LUA_FILES)
 
-.PHONY: format-lua-check
+## check lua files
 format-lua-check:
 	pnpm exec stylua --check --config-path dot_config/exact_nvim/stylua.toml $(LUA_FILES)

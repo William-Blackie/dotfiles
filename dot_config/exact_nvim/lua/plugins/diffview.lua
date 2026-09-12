@@ -1,48 +1,80 @@
-return {
-  "sindrets/diffview.nvim",
-  cmd = { "DiffviewOpen", "DiffviewFileHistory" },
-  keys = {
-    { "<Leader>gd", "<cmd>DiffviewFileHistory %<CR>", desc = "Diff File" },
-    { "<Leader>gv", "<cmd>DiffviewOpen<CR>", desc = "Diff View" },
-  },
-  opts = function()
-    local actions = require("diffview.actions")
-    vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
-      group = vim.api.nvim_create_augroup("rafi_diffview", {}),
-      pattern = "diffview:///panels/*",
-      callback = function()
-        vim.opt_local.cursorline = true
-        vim.opt_local.winhighlight = "CursorLine:WildMenu"
-      end,
-    })
+-- The diff cookbook workflow, using LazyVim's Git keymap group.
+local function compare_branch(remote)
+  local root = vim.fs.root(0, { ".git" }) or vim.fn.getcwd()
+  for _, name in ipairs({ "main", "master" }) do
+    local branch = remote and ("origin/" .. name) or name
+    local ref = remote and ("refs/remotes/" .. branch) or ("refs/heads/" .. branch)
+    if
+      vim.system({ "git", "rev-parse", "--verify", ref }, { cwd = root }):wait().code == 0
+    then
+      vim.cmd("DiffviewOpen " .. (remote and "HEAD.." or "") .. branch)
+      return
+    end
+  end
+  vim.notify(
+    "No "
+      .. (remote and "origin/main or origin/master" or "main or master")
+      .. " branch found",
+    vim.log.levels.WARN
+  )
+end
 
-    ---@type LazyPluginSpec
-    return {
-      enhanced_diff_hl = true, -- See ':h diffview-config-enhanced_diff_hl'
-      keymaps = {
-        view = {
-          { "n", "q", actions.close },
-          { "n", "<Tab>", actions.select_next_entry },
-          { "n", "<S-Tab>", actions.select_prev_entry },
-          { "n", "<LocalLeader>a", actions.focus_files },
-          { "n", "<LocalLeader>e", actions.toggle_files },
-        },
-        file_panel = {
-          { "n", "q", actions.close },
-          { "n", "h", actions.prev_entry },
-          { "n", "o", actions.focus_entry },
-          { "n", "gf", actions.goto_file },
-          { "n", "sg", actions.goto_file_split },
-          { "n", "st", actions.goto_file_tab },
-          { "n", "<C-r>", actions.refresh_files },
-          { "n", "<LocalLeader>e", actions.toggle_files },
-        },
-        file_history_panel = {
-          { "n", "q", "<cmd>DiffviewClose<CR>" },
-          { "n", "o", actions.focus_entry },
-          { "n", "O", actions.options },
-        },
+return {
+  {
+    "folke/snacks.nvim",
+    optional = true,
+    keys = {
+      { "<leader>gd", false },
+      { "<leader>gD", false },
+    },
+  },
+  {
+    "ibhagwan/fzf-lua",
+    optional = true,
+    keys = { { "<leader>gd", false } },
+  },
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewFileHistory", "DiffviewClose" },
+    keys = {
+      { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Diffview: Working Changes" },
+      {
+        "<leader>gD",
+        function()
+          compare_branch(false)
+        end,
+        desc = "Diffview: Compare main/master",
       },
-    }
-  end,
+      {
+        "<leader>gf",
+        "<cmd>DiffviewFileHistory --follow %<cr>",
+        desc = "Diffview: File History",
+      },
+      {
+        "<leader>gF",
+        "<cmd>DiffviewFileHistory<cr>",
+        desc = "Diffview: Repository History",
+      },
+      {
+        "<leader>gH",
+        "<cmd>.DiffviewFileHistory --follow<cr>",
+        desc = "Diffview: Line History",
+      },
+      {
+        "<leader>gH",
+        "<Esc><Cmd>'<,'>DiffviewFileHistory --follow<CR>",
+        mode = "v",
+        desc = "Diffview: Selection History",
+      },
+      {
+        "<leader>gM",
+        function()
+          compare_branch(true)
+        end,
+        desc = "Diffview: Compare origin/main/master",
+      },
+      { "<leader>gq", "<cmd>DiffviewClose<cr>", desc = "Diffview: Close" },
+    },
+    opts = {},
+  },
 }

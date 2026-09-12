@@ -1,0 +1,17 @@
+hotKeys:
+  pods:
+    shortCut: Shift-1
+    description: Pods
+    command: pods
+  deployments:
+    shortCut: Shift-2
+    description: Deployments
+    command: deployments
+  services:
+    shortCut: Shift-3
+    description: Services
+    command: services
+  events:
+    shortCut: Shift-4
+    description: Events
+    command: events

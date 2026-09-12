@@ -9,7 +9,7 @@ local nvim_env = vim.fn.stdpath("data") .. "/env"
 local python_host = nvim_env .. "/python/.venv/bin/python"
 local python_bin = nvim_env .. "/python/.venv/bin"
 local node_bin = nvim_env .. "/node/bin:" .. nvim_env .. "/node/node_modules/.bin"
-local node_host = nvim_env .. "/node/node_modules/.bin/neovim-node-host"
+local node_host = nvim_env .. "/node/node_modules/neovim/bin/cli.js"
 local ruby_host = nvim_env .. "/ruby/bin/neovim-ruby-host"
 local ruby_bin = "/opt/homebrew/opt/ruby/bin"
 local ruby_gems = nvim_env .. "/ruby/gems"
@@ -40,7 +40,7 @@ if vim.fn.executable(python_host) == 1 then
   vim.g.python3_host_prog = python_host
 end
 
-if vim.fn.executable(node_host) == 1 then
+if vim.fn.filereadable(node_host) == 1 then
   vim.g.node_host_prog = node_host
 end
 
@@ -50,6 +50,8 @@ end
 
 if vim.fn.executable(perl_host) == 1 then
   vim.g.perl_host_prog = perl_host
+else
+  vim.g.loaded_perl_provider = 0
 end
 
 -- Indentation: 4 spaces for Python

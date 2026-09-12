@@ -3,28 +3,6 @@
 ---@field linters_by_ft table<string, string[]> Linters mapped to filetypes
 ---@field linters table<string, table> Custom linter configurations
 
-local utils = require("lib.utils")
-
-local function python_root()
-  return vim.fs.root(0, utils.python_root_markers) or vim.fn.getcwd()
-end
-
-local function project_executable(root, exe)
-  local candidates = {
-    root and (root .. "/.venv/bin/" .. exe) or nil,
-    root and (root .. "/venv/bin/" .. exe) or nil,
-    root and (root .. "/django/.venv/bin/" .. exe) or nil,
-    vim.fn.exepath(exe),
-    vim.fn.stdpath("data") .. "/mason/bin/" .. exe,
-  }
-  for _, candidate in ipairs(candidates) do
-    if candidate and candidate ~= "" and vim.fn.executable(candidate) == 1 then
-      return candidate
-    end
-  end
-  return exe
-end
-
 ---Linting with nvim-lint
 ---@type LazyPluginSpec
 return {
@@ -40,7 +18,6 @@ return {
       bash = { "shellcheck" },
       zsh = { "zsh" },
       ["zsh.chezmoitmpl"] = { "zsh" },
-      python = { "ruff" },
       scss = { "stylelint" },
       markdown = { "markdownlint-cli2" },
     },
@@ -48,11 +25,6 @@ return {
     -- or add custom linters.
     ---@type table<string,table>
     linters = {
-      ruff = {
-        cmd = function()
-          return project_executable(python_root(), "ruff")
-        end,
-      },
       -- -- Example of using selene only when a selene.toml file is present
       -- selene = {
       --   -- `condition` is another LazyVim extension that allows you to

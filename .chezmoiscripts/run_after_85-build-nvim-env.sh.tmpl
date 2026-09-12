@@ -404,16 +404,8 @@ sync_node_env() {
 # Returns:
 #   0 even when Homebrew Ruby or gem installation is unavailable.
 sync_ruby_env() {
-    local ruby_prefix ruby_bin gem_bin
+    local ruby_prefix ruby_bin gem_bin ruby_version
     local stamp_content
-
-    stamp_content=$(
-        printf 'ruby_gem_version=%s\n' "$RUBY_GEM_VERSION"
-    )
-
-    if cache_hit ruby "${RUBY_BIN_DIR}/neovim-ruby-host" "$stamp_content"; then
-        return 0
-    fi
 
     if ! ruby_prefix="$(brew_prefix ruby)" || [[ ! -x "${ruby_prefix}/bin/ruby" || ! -x "${ruby_prefix}/bin/gem" ]]; then
         echo "Skipping Neovim Ruby env build: missing Homebrew ruby"
@@ -422,6 +414,16 @@ sync_ruby_env() {
 
     ruby_bin="${ruby_prefix}/bin/ruby"
     gem_bin="${ruby_prefix}/bin/gem"
+    ruby_version="$("$ruby_bin" -e 'print RUBY_VERSION' 2>/dev/null || echo 'unknown')"
+
+    stamp_content=$(
+        printf 'ruby_version=%s\n' "$ruby_version"
+        printf 'ruby_gem_version=%s\n' "$RUBY_GEM_VERSION"
+    )
+
+    if cache_hit ruby "${RUBY_BIN_DIR}/neovim-ruby-host" "$stamp_content"; then
+        return 0
+    fi
 
     echo "Syncing Neovim Ruby env at ${RUBY_ENV_DIR}..."
     (
@@ -461,16 +463,8 @@ sync_ruby_env() {
 # Returns:
 #   0 even when Homebrew Perl, cpanm, or module installation is unavailable.
 sync_perl_env() {
-    local perl_prefix perl_bin cpanm_prefix cpanm_bin
+    local perl_prefix perl_bin cpanm_prefix cpanm_bin perl_version
     local stamp_content
-
-    stamp_content=$(
-        printf 'perl_module=%s\n' "$PERL_MODULE"
-    )
-
-    if cache_hit perl "${PERL_BIN_DIR}/perl" "$stamp_content"; then
-        return 0
-    fi
 
     if ! perl_prefix="$(brew_prefix perl)" || [[ ! -x "${perl_prefix}/bin/perl" ]]; then
         echo "Skipping Neovim Perl env build: missing Homebrew perl"
@@ -487,6 +481,16 @@ sync_perl_env() {
     fi
 
     perl_bin="${perl_prefix}/bin/perl"
+    perl_version="$("$perl_bin" -e 'print $^V' 2>/dev/null || echo 'unknown')"
+
+    stamp_content=$(
+        printf 'perl_version=%s\n' "$perl_version"
+        printf 'perl_module=%s\n' "$PERL_MODULE"
+    )
+
+    if cache_hit perl "${PERL_BIN_DIR}/perl" "$stamp_content"; then
+        return 0
+    fi
     echo "Syncing Neovim Perl env at ${PERL_ENV_DIR}..."
     (
         set +e

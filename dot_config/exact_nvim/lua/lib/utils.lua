@@ -61,15 +61,15 @@ function lib.get_python_venv()
 end
 
 function lib.get_django_settings_module()
-  return vim.env.DJANGO_SETTINGS_MODULE or "sites.admin.settings.prod"
+  return vim.env.DJANGO_SETTINGS_MODULE
 end
 
 function lib.get_django_docker_compose_service()
-  return vim.env.DJANGO_DOCKER_COMPOSE_SERVICE or "django-admin"
+  return vim.env.DJANGO_DOCKER_COMPOSE_SERVICE
 end
 
 function lib.get_django_docker_compose_file()
-  return vim.env.DJANGO_DOCKER_COMPOSE_FILE or "compose.yaml"
+  return vim.env.DJANGO_DOCKER_COMPOSE_FILE
 end
 
 return lib
