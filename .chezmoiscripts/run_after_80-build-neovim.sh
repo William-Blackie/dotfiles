@@ -36,7 +36,7 @@ git_neovim() {
     GIT_CONFIG_GLOBAL=/dev/null git -C "$REPO_DIR" "$@"
 }
 
-if git_neovim fetch origin "refs/heads/${BRANCH_NAME}:refs/remotes/origin/${BRANCH_NAME}"; then
+if git_neovim fetch --force origin "refs/heads/${BRANCH_NAME}:refs/remotes/origin/${BRANCH_NAME}"; then
     echo "Neovim repository updated successfully."
 else
     echo "Skipping Neovim build: unable to fetch latest changes from origin"

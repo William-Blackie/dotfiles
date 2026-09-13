@@ -13,7 +13,7 @@ pull.args = ["--ff-only"]
 [".local/src/neovim"]
 type      = "git-repo"
 url       = "https://github.com/neovim/neovim.git"
-pull.args = ["--ff-only"]
+pull.args = ["--ff-only", "--force"]
 
 [".local/src/typeshed"]
 type      = "git-repo"
