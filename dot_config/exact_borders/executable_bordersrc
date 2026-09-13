@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# JankyBorders Catppuccin Mocha Configuration
+borders \
+    style=round \
+    width=5.0 \
+    hidpi=on \
+    active_color="gradient(top_left=0xffcba6f7,bottom_right=0xff89b4fa)" \
+    inactive_color=0xff313244 \
+    blacklist="Vorssaint,Recordly"

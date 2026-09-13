@@ -3,7 +3,7 @@ SHELL := /bin/bash
 
 PRETTIER_GLOBS := "**/*.{md,json,yml,yaml}"
 MARKDOWN_FILES := $(shell git ls-files '*.md')
-SHELL_FILES := $(shell git ls-files '*.sh' 'dot_zshenv' | while IFS= read -r f; do [ -f "$$f" ] && printf '%s\n' "$$f"; done)
+SHELL_FILES := $(shell git ls-files '*.sh' 'dot_zshenv' 'dot_config/exact_borders/executable_bordersrc' | while IFS= read -r f; do [ -f "$$f" ] && printf '%s\n' "$$f"; done)
 SHELLCHECK_TEMPLATE_FILES := .chezmoiscripts/run_after_85-build-nvim-env.sh.tmpl .chezmoiscripts/run_onchange_after_90-rebuild-bat-cache.sh.tmpl
 ZSH_FILES := $(shell git ls-files '*.zsh' 'dot_config/zsh/dot_zprofile' 'dot_config/zsh/dot_zshenv' 'dot_config/zsh/dot_zshrc' | while IFS= read -r f; do [ -f "$$f" ] && printf '%s\n' "$$f"; done)
 TOML_FILES := $(shell git ls-files '*.toml' | while IFS= read -r f; do [ -f "$$f" ] && printf '%s\n' "$$f"; done)

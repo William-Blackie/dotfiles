@@ -85,6 +85,9 @@ the keyboard firmware aligned with this modifier contract:
 - `Ctrl-h/j/k/l` navigates Neovim splits and tmux panes.
 - `Alt-h/j/k/l` navigates AeroSpace windows.
 - `Alt-Shift-h/j/k/l` moves AeroSpace windows.
+- `Alt-p/n` (or `Alt-[/]`) cycles previous/next AeroSpace workspaces.
+- `Alt-Shift-p/n` (or `Alt-Shift-[/]`) moves windows between workspaces.
+- `Alt-m` / `Alt-Shift-m` focuses or moves windows to the next monitor.
 - tmux uses `C-Space` as the primary prefix, with `C-b` kept as a fallback.
 
 The proposed Oryx layout is documented in

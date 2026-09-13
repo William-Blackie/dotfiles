@@ -45,6 +45,12 @@ This makes the core app chords ergonomic:
 - AeroSpace windows: hold `F` for `Option`, press `h/j/k/l`.
 - AeroSpace move windows: hold `F` for `Option` plus either `Shift`, press
   `h/j/k/l`.
+- AeroSpace workspaces: hold `F` for `Option`, press `p`/`n` (or `[`/`]`) for
+  previous/next workspace without stretching to the number row.
+- AeroSpace move window to workspace: hold `F` for `Option` plus `Shift`, press
+  `p`/`n` (or `[`/`]`).
+- AeroSpace monitors: hold `F` for `Option`, press `m` to focus the next
+  monitor, or `Shift-m` to move the window to the next monitor.
 
 ## Nav Layer
 

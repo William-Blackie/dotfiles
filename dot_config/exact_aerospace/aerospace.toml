@@ -1,6 +1,6 @@
 config-version = 2
 
-after-startup-command = []
+after-startup-command = ["exec-and-forget borders"]
 start-at-login        = true
 auto-reload-config    = true
 
@@ -95,6 +95,20 @@ alt-shift-0 = "move-node-to-workspace 10"
 alt-tab       = "workspace-back-and-forth"
 alt-shift-tab = "move-workspace-to-monitor --wrap-around next"
 
+# Vim-style relative workspace cycling ([p]rev / [n]ext & unimpaired brackets)
+alt-p                        = "workspace --wrap-around prev"
+alt-n                        = "workspace --wrap-around next"
+alt-shift-p                  = "move-node-to-workspace --wrap-around prev"
+alt-shift-n                  = "move-node-to-workspace --wrap-around next"
+alt-leftSquareBracket        = "workspace --wrap-around prev"
+alt-rightSquareBracket       = "workspace --wrap-around next"
+alt-shift-leftSquareBracket  = "move-node-to-workspace --wrap-around prev"
+alt-shift-rightSquareBracket = "move-node-to-workspace --wrap-around next"
+
+# Multi-monitor focus and window movement
+alt-m       = "focus-monitor --wrap-around next"
+alt-shift-m = "move-node-to-monitor --wrap-around next"
+
 alt-shift-c = "reload-config"
 
 alt-r               = "mode resize"
@@ -120,3 +134,68 @@ alt-shift-h = ["join-with left", "mode main"]
 alt-shift-j = ["join-with down", "mode main"]
 alt-shift-k = ["join-with up", "mode main"]
 alt-shift-l = ["join-with right", "mode main"]
+
+[[on-window-detected]]
+if.app-id = "com.vorssaint.utils"
+run       = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "dev.recordly.app"
+run       = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "com.1password.1password"
+run       = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "com.bitwarden.desktop"
+run       = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "io.zsa.keymapp"
+run       = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "com.openai.chat"
+run       = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "com.apple.systempreferences"
+run       = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "com.apple.ActivityMonitor"
+run       = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "com.apple.archiveutility"
+run       = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "com.apple.calculator"
+run       = "layout floating"
+
+# Primary workflow app routing
+[[on-window-detected]]
+if.app-id = "net.kovidgoyal.kitty"
+run       = "move-node-to-workspace 1"
+
+[[on-window-detected]]
+if.app-id = "com.google.Chrome"
+run       = "move-node-to-workspace 2"
+
+[[on-window-detected]]
+if.app-id = "org.mozilla.firefox"
+run       = "move-node-to-workspace 2"
+
+[[on-window-detected]]
+if.app-id = "md.obsidian"
+run       = "move-node-to-workspace 3"
+
+[[on-window-detected]]
+if.app-id = "notion.id"
+run       = "move-node-to-workspace 3"
+
+[[on-window-detected]]
+if.app-id = "net.whatsapp.WhatsApp"
+run       = "move-node-to-workspace 4"
