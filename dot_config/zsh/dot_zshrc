@@ -28,6 +28,7 @@ alias vim="nvim"
 alias vimdiff="nvim -d"
 command -v bat >/dev/null 2>&1 && alias cat="bat -pp"
 command -v lazygit >/dev/null 2>&1 && alias lg="lazygit"
+command -v wget >/dev/null 2>&1 && alias wget='wget --hsts-file="$XDG_DATA_HOME/wget-hsts"'
 
 ## Kubernetes
 command -v kubectl >/dev/null 2>&1 && alias k="kubectl"
@@ -120,10 +121,6 @@ _source_first() {
   return 1
 }
 
-if command -v pyenv >/dev/null 2>&1; then
-  eval "$(pyenv init - zsh)"
-fi
-
 # Prints the first readable nvm loader script.
 #
 # Globals:
@@ -172,6 +169,51 @@ fi
 if command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook zsh)"
 fi
+
+# Attaches to or creates a tmux session, letting continuum handle restore.
+#
+# Arguments:
+#   session_name - Optional session name to attach or create (defaults to main).
+# Outputs:
+#   Interactive fzf selection interface when multiple sessions exist.
+# Returns:
+#   0 on success; non-zero if tmux or fzf fails.
+t() {
+  local session="${1:-}"
+
+  if [[ -n "$session" ]]; then
+    if [[ -n "${TMUX:-}" ]]; then
+      tmux has-session -t "$session" 2>/dev/null || tmux new-session -d -s "$session"
+      tmux switch-client -t "$session"
+    else
+      tmux new-session -A -s "$session"
+    fi
+    return
+  fi
+
+  if [[ -n "${TMUX:-}" ]]; then
+    local current_session
+    current_session="$(tmux display-message -p '#S')"
+    local target
+    target=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | grep -v "^${current_session}$" | fzf --reverse --header="Switch tmux session")
+    [[ -n "$target" ]] && tmux switch-client -t "$target"
+    return
+  fi
+
+  if tmux has-session 2>/dev/null; then
+    local sessions
+    sessions="$(tmux list-sessions -F "#{session_name}" 2>/dev/null)"
+    if [[ "$(echo "$sessions" | wc -l | tr -d ' ')" -eq 1 ]]; then
+      tmux attach-session -t "$sessions"
+    else
+      local target
+      target=$(echo "$sessions" | fzf --reverse --header="Select tmux session")
+      [[ -n "$target" ]] && tmux attach-session -t "$target"
+    fi
+  else
+    tmux new-session -A -s main
+  fi
+}
 
 # Selects and exports the active 1Password account for this shell.
 #

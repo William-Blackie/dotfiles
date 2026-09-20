@@ -21,22 +21,29 @@ elif [[ -x /usr/local/bin/brew ]]; then
   eval "$(/usr/local/bin/brew shellenv)"
 fi
 
+export ANDROID_USER_HOME="$XDG_DATA_HOME/android"
 export AWS_CONFIG_FILE="$XDG_CONFIG_HOME/aws/config"
 export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME/aws/credentials"
 export CARGO_HOME="$XDG_DATA_HOME/cargo"
-export DOCKER_CONFIG="${HOME}/.docker"
+export CLAUDE_CONFIG_DIR="$XDG_CONFIG_HOME/claude"
+export CODEX_HOME="$XDG_CONFIG_HOME/codex"
+export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
+export GEM_HOME="$XDG_DATA_HOME/gem"
+export GEM_SPEC_CACHE="$XDG_CACHE_HOME/gem"
 export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 export GOPATH="$XDG_DATA_HOME/go"
 export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
 export LESSHISTFILE="$XDG_STATE_HOME/lesshst"
 export NPM_CONFIG_CACHE="$XDG_CACHE_HOME/npm"
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 unset NPM_CONFIG_INIT_MODULE NPM_CONFIG_TMP
 export NVM_DIR="$XDG_DATA_HOME/nvm"
-export PYENV_ROOT="$XDG_DATA_HOME/pyenv"
+export PERL_CPANM_HOME="$XDG_CACHE_HOME/cpanm"
+export PI_CODING_AGENT_DIR="$XDG_CONFIG_HOME/pi/agent"
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"
-export PYENV_DISABLE_AUTO_REHASH=1
 export PYTHON_HISTORY="$XDG_STATE_HOME/python_history"
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/config"
+export RUSTUP_HOME="$XDG_DATA_HOME/rustup"
 export SHELL_SESSIONS_DISABLE=1
 
 if [[ "$OSTYPE" == darwin* ]]; then
@@ -56,9 +63,6 @@ preferred_path=(
   "$PNPM_HOME/bin"
   "$CARGO_HOME/bin"
   "$GOPATH/bin"
-  "$PYENV_ROOT/shims"
-  "$PYENV_ROOT/bin"
-  "/opt/homebrew/opt/postgresql@16/bin"
 )
 
 if [[ -r "$NVM_DIR/alias/default" ]]; then
