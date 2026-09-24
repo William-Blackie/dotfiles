@@ -42,77 +42,95 @@ gaps.outer.right      = 0
 9 = "sidecar"
 
 [mode.main.binding]
-# Voyager-friendly layers:
-# - Ctrl-h/j/k/l stays inside Neovim and tmux.
-# - Alt-h/j/k/l controls macOS windows through AeroSpace.
-alt-enter = "exec-and-forget open -na Kitty"
+# Reserve bare Alt bindings for Neovim. Option + ; enters a one-shot AeroSpace
+# prefix mode on both a US Mac keyboard and the Voyager.
+alt-semicolon = "mode wm"
 
-alt-h = "focus --boundaries-action wrap-around-the-workspace left"
-alt-j = "focus --boundaries-action wrap-around-the-workspace down"
-alt-k = "focus --boundaries-action wrap-around-the-workspace up"
-alt-l = "focus --boundaries-action wrap-around-the-workspace right"
+[mode.wm.binding]
+esc = "mode main"
 
-alt-shift-h = "move left"
-alt-shift-j = "move down"
-alt-shift-k = "move up"
-alt-shift-l = "move right"
+# Focus with home-row directions; move with the row above.
+h = ["focus --boundaries-action wrap-around-the-workspace left", "mode main"]
+j = ["focus --boundaries-action wrap-around-the-workspace down", "mode main"]
+k = ["focus --boundaries-action wrap-around-the-workspace up", "mode main"]
+l = ["focus --boundaries-action wrap-around-the-workspace right", "mode main"]
 
-alt-backslash = "join-with right"
-alt-v         = "join-with down"
+y = ["move left", "mode main"]
+u = ["move down", "mode main"]
+i = ["move up", "mode main"]
+o = ["move right", "mode main"]
 
-alt-f = "fullscreen"
+backslash = ["join-with right", "mode main"]
+v         = ["join-with down", "mode main"]
 
-alt-s           = "layout v_accordion"
-alt-w           = "layout h_accordion"
-alt-e           = "layout tiles horizontal vertical"
-alt-slash       = "layout tiles horizontal vertical"
-alt-comma       = "layout accordion horizontal vertical"
-alt-b           = "balance-sizes"
-alt-shift-space = "layout floating tiling"  # 'floating toggle' in i3
+f = ["fullscreen", "mode main"]
 
-alt-1 = "workspace 1"
-alt-2 = "workspace 2"
-alt-3 = "workspace 3"
-alt-4 = "workspace 4"
-alt-5 = "workspace 5"
-alt-6 = "workspace 6"
-alt-7 = "workspace 7"
-alt-8 = "workspace 8"
-alt-9 = "workspace 9"
-alt-0 = "workspace 10"
+s     = ["layout v_accordion", "mode main"]
+w     = ["layout h_accordion", "mode main"]
+e     = ["layout tiles horizontal vertical", "mode main"]
+slash = ["layout tiles horizontal vertical", "mode main"]
+comma = ["layout accordion horizontal vertical", "mode main"]
+b     = ["balance-sizes", "mode main"]
+space = ["layout floating tiling", "mode main"]
 
-alt-shift-1 = "move-node-to-workspace 1"
-alt-shift-2 = "move-node-to-workspace 2"
-alt-shift-3 = "move-node-to-workspace 3"
-alt-shift-4 = "move-node-to-workspace 4"
-alt-shift-5 = "move-node-to-workspace 5"
-alt-shift-6 = "move-node-to-workspace 6"
-alt-shift-7 = "move-node-to-workspace 7"
-alt-shift-8 = "move-node-to-workspace 8"
-alt-shift-9 = "move-node-to-workspace 9"
-alt-shift-0 = "move-node-to-workspace 10"
+"1" = ["workspace 1", "mode main"]
+"2" = ["workspace 2", "mode main"]
+"3" = ["workspace 3", "mode main"]
+"4" = ["workspace 4", "mode main"]
+"5" = ["workspace 5", "mode main"]
+"6" = ["workspace 6", "mode main"]
+"7" = ["workspace 7", "mode main"]
+"8" = ["workspace 8", "mode main"]
+"9" = ["workspace 9", "mode main"]
+"0" = ["workspace 10", "mode main"]
 
-alt-tab       = "workspace-back-and-forth"
-alt-shift-tab = "move-workspace-to-monitor --wrap-around next"
+shift-1 = ["move-node-to-workspace 1", "mode main"]
+shift-2 = ["move-node-to-workspace 2", "mode main"]
+shift-3 = ["move-node-to-workspace 3", "mode main"]
+shift-4 = ["move-node-to-workspace 4", "mode main"]
+shift-5 = ["move-node-to-workspace 5", "mode main"]
+shift-6 = ["move-node-to-workspace 6", "mode main"]
+shift-7 = ["move-node-to-workspace 7", "mode main"]
+shift-8 = ["move-node-to-workspace 8", "mode main"]
+shift-9 = ["move-node-to-workspace 9", "mode main"]
+shift-0 = ["move-node-to-workspace 10", "mode main"]
+
+tab       = ["workspace-back-and-forth", "mode main"]
+shift-tab = ["move-workspace-to-monitor --wrap-around next", "mode main"]
 
 # Vim-style relative workspace cycling ([p]rev / [n]ext & unimpaired brackets)
-alt-p                        = "workspace --wrap-around prev"
-alt-n                        = "workspace --wrap-around next"
-alt-shift-p                  = "move-node-to-workspace --wrap-around prev"
-alt-shift-n                  = "move-node-to-workspace --wrap-around next"
-alt-leftSquareBracket        = "workspace --wrap-around prev"
-alt-rightSquareBracket       = "workspace --wrap-around next"
-alt-shift-leftSquareBracket  = "move-node-to-workspace --wrap-around prev"
-alt-shift-rightSquareBracket = "move-node-to-workspace --wrap-around next"
+p                        = ["workspace --wrap-around prev", "mode main"]
+n                        = ["workspace --wrap-around next", "mode main"]
+shift-p                  = [
+  "move-node-to-workspace --wrap-around prev",
+  "mode main"
+]
+shift-n                  = [
+  "move-node-to-workspace --wrap-around next",
+  "mode main"
+]
+leftSquareBracket        = ["workspace --wrap-around prev", "mode main"]
+rightSquareBracket       = ["workspace --wrap-around next", "mode main"]
+shift-leftSquareBracket  = [
+  "move-node-to-workspace --wrap-around prev",
+  "mode main"
+]
+shift-rightSquareBracket = [
+  "move-node-to-workspace --wrap-around next",
+  "mode main"
+]
 
-# Multi-monitor focus and window movement
-alt-m       = "focus-monitor --wrap-around next"
-alt-shift-m = "move-node-to-monitor --wrap-around next"
+m       = ["focus-monitor --wrap-around next", "mode main"]
+shift-m = ["move-node-to-monitor --wrap-around next", "mode main"]
 
-alt-shift-c = "reload-config"
-
-alt-r               = "mode resize"
-alt-shift-semicolon = "mode service"
+c         = ["reload-config", "mode main"]
+enter     = ["exec-and-forget open -na Kitty", "mode main"]
+g         = [
+  "exec-and-forget /usr/bin/open -g 'hammerspoon://keyguide?scope=all'",
+  "mode main"
+]
+r         = "mode resize"
+semicolon = "mode service"
 
 [mode.resize.binding]
 h     = "resize width -50"
@@ -130,10 +148,10 @@ f         = ["layout floating tiling", "mode main"]
 b         = ["balance-sizes", "mode main"]
 backspace = ["close-all-windows-but-current", "mode main"]
 
-alt-shift-h = ["join-with left", "mode main"]
-alt-shift-j = ["join-with down", "mode main"]
-alt-shift-k = ["join-with up", "mode main"]
-alt-shift-l = ["join-with right", "mode main"]
+h = ["join-with left", "mode main"]
+j = ["join-with down", "mode main"]
+k = ["join-with up", "mode main"]
+l = ["join-with right", "mode main"]
 
 [[on-window-detected]]
 if.app-id = "com.vorssaint.utils"

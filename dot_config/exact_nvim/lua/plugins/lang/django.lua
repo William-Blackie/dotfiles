@@ -45,7 +45,6 @@ return {
     opts = {
       ensure_installed = {
         "djlint",
-        "django-language-server",
         "django-template-lsp",
         "ty",
       },

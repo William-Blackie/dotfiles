@@ -60,6 +60,28 @@ function lib.get_python_venv()
   return "python"
 end
 
+-- Get the active virtual-environment directory. Language servers such as
+-- djls expect the venv root, not the path to its Python executable.
+---@param root_dir string|nil
+---@return string|nil
+function lib.get_python_venv_path(root_dir)
+  local ok, venv = pcall(require, "venv-selector")
+  if ok and venv.venv() and venv.venv() ~= "" then
+    return venv.venv()
+  end
+
+  if vim.env.VIRTUAL_ENV and vim.env.VIRTUAL_ENV ~= "" then
+    return vim.env.VIRTUAL_ENV
+  end
+
+  if root_dir then
+    local project_venv = vim.fs.joinpath(root_dir, ".venv")
+    if vim.fn.isdirectory(project_venv) == 1 then
+      return project_venv
+    end
+  end
+end
+
 function lib.get_django_settings_module()
   return vim.env.DJANGO_SETTINGS_MODULE
 end

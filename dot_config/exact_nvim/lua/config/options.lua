@@ -1,5 +1,19 @@
 ---Neovim options and provider configuration
 
+-- Register filetypes before LazyVim opens the initial buffer.
+vim.filetype.add({
+  extension = {
+    rest = "http",
+  },
+  filename = {
+    ["compose.yaml"] = "yaml.docker-compose",
+    ["compose.yml"] = "yaml.docker-compose",
+    ["docker-compose.yaml"] = "yaml.docker-compose",
+    ["docker-compose.yml"] = "yaml.docker-compose",
+  },
+})
+vim.opt.exrc = true
+
 -- Python LSP: ty
 vim.g.lazyvim_python_lsp = "ty"
 vim.opt.textwidth = 80

@@ -29,6 +29,7 @@ require("lazy").setup({
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
     { import = "lazyvim.plugins.extras.test.core" },
     { import = "lazyvim.plugins.extras.lang.python" },
+    { import = "lazyvim.plugins.extras.lang.yaml" },
     { import = "plugins" },
     { import = "plugins.lang.django" },
     { import = "plugins.lang.python" },

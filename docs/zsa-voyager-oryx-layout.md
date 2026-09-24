@@ -33,7 +33,7 @@ Current home-row Option holds:
 
 | Position | Tap | Hold           | Why                                     |
 | -------- | --- | -------------- | --------------------------------------- |
-| `F`      | `F` | `Left Option`  | AeroSpace `Alt-h/j/k/l` from home row   |
+| `F`      | `F` | `Left Option`  | Cross-hand Alt chords and WM prefix     |
 | `J`      | `J` | `Right Option` | Option available from the opposite hand |
 
 The old Caps Word position is plain `Tab`.
@@ -42,15 +42,10 @@ This makes the core app chords ergonomic:
 
 - tmux prefix: hold left thumb `Ctrl`, tap right thumb `Space`.
 - Vim/tmux panes: hold left thumb `Ctrl`, press `h/j/k/l`.
-- AeroSpace windows: hold `F` for `Option`, press `h/j/k/l`.
-- AeroSpace move windows: hold `F` for `Option` plus either `Shift`, press
-  `h/j/k/l`.
-- AeroSpace workspaces: hold `F` for `Option`, press `p`/`n` (or `[`/`]`) for
-  previous/next workspace without stretching to the number row.
-- AeroSpace move window to workspace: hold `F` for `Option` plus `Shift`, press
-  `p`/`n` (or `[`/`]`).
-- AeroSpace monitors: hold `F` for `Option`, press `m` to focus the next
-  monitor, or `Shift-m` to move the window to the next monitor.
+- Neovim Alt actions: hold the opposite-hand `Option` key, then press the action
+  key.
+- AeroSpace: hold `F` for `Option`, tap `;`, release both, then press one action
+  key from the prefix table below.
 
 ## Nav Layer
 
@@ -118,39 +113,35 @@ Keep symbols on the right side and numbers/operators on the left side:
 | `,`      | Pipe       |
 | `.`      | `~`        |
 
-## Optional WM Layer
+## AeroSpace Prefix Mode
 
-If Oryx feels better with a dedicated window-manager layer than holding `Alt`,
-add a `WM` layer on a left-side hold key or a two-key combo.
+The same sequence works on both keyboards:
 
-| Base key  | WM output       |
-| --------- | --------------- |
-| `h`       | `Alt-h`         |
-| `j`       | `Alt-j`         |
-| `k`       | `Alt-k`         |
-| `l`       | `Alt-l`         |
-| `y`       | `Alt-Shift-h`   |
-| `u`       | `Alt-Shift-j`   |
-| `i`       | `Alt-Shift-k`   |
-| `o`       | `Alt-Shift-l`   |
-| `1`       | `Alt-1`         |
-| `2`       | `Alt-2`         |
-| `3`       | `Alt-3`         |
-| `4`       | `Alt-4`         |
-| `5`       | `Alt-5`         |
-| `6`       | `Alt-6`         |
-| `7`       | `Alt-7`         |
-| `8`       | `Alt-8`         |
-| `9`       | `Alt-9`         |
-| `0`       | `Alt-0`         |
-| `b`       | `Alt-b`         |
-| `f`       | `Alt-f`         |
-| `r`       | `Alt-r`         |
-| `v`       | `Alt-v`         |
-| Backslash | `Alt-Backslash` |
+- US Mac keyboard: hold `Option`, tap `;`, release both, then press an action
+  key.
+- Voyager: hold `F`, tap `;`, release both, then press an action key.
 
-Start without this layer. Add it only if holding `Alt` for AeroSpace still feels
-awkward after a day or two.
+Each action automatically returns AeroSpace to its main mode.
+
+| Key                 | Action                                 |
+| ------------------- | -------------------------------------- |
+| `h/j/k/l`           | Focus left/down/up/right               |
+| `y/u/i/o`           | Move window left/down/up/right         |
+| `e` or `/`          | Tile or rotate the tiled orientation   |
+| `s/w`               | Vertical/horizontal accordion          |
+| `b`                 | Balance tiled window sizes             |
+| `Space`             | Toggle the focused window floating     |
+| `1`-`0`             | Switch to workspace 1-10               |
+| `Shift-1`-`Shift-0` | Move window to workspace 1-10          |
+| `p/n`               | Switch to previous/next workspace      |
+| `m`                 | Focus the next monitor                 |
+| `Shift-m`           | Move the window to the next monitor    |
+| `f`                 | Toggle fullscreen                      |
+| `r`                 | Enter resize mode                      |
+| `g`                 | Open the searchable system key guide   |
+| `Enter`             | Open a new Kitty instance              |
+| `;`                 | Enter the less-common service commands |
+| `Esc`               | Cancel the prefix                      |
 
 ## Oryx Settings
 
@@ -167,9 +158,12 @@ Use conservative hold/tap behavior:
 2. Apply the Base, Nav, and Sym layers above.
 3. Flash with Keymapp.
 4. Test these chords:
-   - `Ctrl-h/j/k/l` moves through Neovim splits and tmux panes.
-   - `Alt-h/j/k/l` moves through AeroSpace windows.
-   - `Alt-Shift-h/j/k/l` moves AeroSpace windows.
-   - `C-Space` opens tmux prefix mode.
-5. If any dual-function key misfires, tune that key before adding the optional
-   `WM` layer.
+   - `Ctrl + h/j/k/l` moves through Neovim splits and tmux panes.
+   - Bare `Alt` bindings reach Neovim and Snacks.
+   - Hold `Option`, tap `;`, release, then tap `h/j/k/l` to move through
+     AeroSpace windows.
+   - Hold `Option`, tap `;`, release, then tap `y/u/i/o` to move AeroSpace
+     windows.
+   - Hold `Option`, tap `;`, release, then tap `g` to open the key guide.
+   - Hold `Control`, tap `Space`, release, then tap `g` to open the tmux guide.
+5. If any dual-function key misfires, tune that key before adding more layers.

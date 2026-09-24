@@ -82,13 +82,15 @@ k9s. The plugins use the already-managed `kubectl`.
 The ZSA Voyager layout is managed in Keymapp/Oryx, not in these dotfiles. Keep
 the keyboard firmware aligned with this modifier contract:
 
-- `Ctrl-h/j/k/l` navigates Neovim splits and tmux panes.
-- `Alt-h/j/k/l` navigates AeroSpace windows.
-- `Alt-Shift-h/j/k/l` moves AeroSpace windows.
-- `Alt-p/n` (or `Alt-[/]`) cycles previous/next AeroSpace workspaces.
-- `Alt-Shift-p/n` (or `Alt-Shift-[/]`) moves windows between workspaces.
-- `Alt-m` / `Alt-Shift-m` focuses or moves windows to the next monitor.
-- tmux uses `C-Space` as the primary prefix, with `C-b` kept as a fallback.
+- `Ctrl + h/j/k/l` navigates Neovim splits and tmux panes.
+- Bare `Alt` bindings belong to Neovim and its plugins.
+- `Option + ;` enters a one-shot AeroSpace prefix mode on either keyboard.
+- After the prefix, `h/j/k/l` focuses windows and `y/u/i/o` moves them.
+- After the prefix, `p/n` cycles workspaces and `m` focuses the next monitor.
+- After the prefix, `g` opens the searchable system-wide key guide.
+- tmux uses `Control + Space` as the primary prefix, with `Control + b` kept as
+  a fallback. Press `g` after the prefix to open its guide.
+- The menu-bar keyboard icon opens the complete guide from any app.
 
 The proposed Oryx layout is documented in
 [`docs/zsa-voyager-oryx-layout.md`](docs/zsa-voyager-oryx-layout.md).

@@ -18,6 +18,7 @@ return {
       bash = { "shellcheck" },
       zsh = { "zsh" },
       ["zsh.chezmoitmpl"] = { "zsh" },
+      yaml = { "kube_linter" },
       scss = { "stylelint" },
       markdown = { "markdownlint-cli2" },
     },
@@ -25,6 +26,20 @@ return {
     -- or add custom linters.
     ---@type table<string,table>
     linters = {
+      kube_linter = {
+        cmd = "kube-linter",
+        stdin = false,
+        stream = "stdout",
+        ignore_exitcode = true,
+        args = { "lint", "--format", "sarif" },
+        parser = require("lint.parser").for_sarif({
+          severity = vim.diagnostic.severity.WARN,
+        }),
+        -- Projects opt in only genuine, renderable Kubernetes manifests.
+        condition = function()
+          return vim.b.kube_linter == true
+        end,
+      },
       -- -- Example of using selene only when a selene.toml file is present
       -- selene = {
       --   -- `condition` is another LazyVim extension that allows you to

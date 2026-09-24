@@ -143,9 +143,23 @@ return {
             },
           },
         },
-
+        yamlls = {
+          filetypes = {
+            "yaml",
+            "yaml.chezmoitmpl",
+            "yaml.docker-compose",
+            "yaml.gitlab",
+            "yaml.helm-values",
+          },
+        },
         bashls = {
           filetypes = { "sh", "bash", "sh.chezmoitmpl", "bash.chezmoitmpl" },
+        },
+        make_ls = {
+          cmd = { "make-ls" },
+          filetypes = { "make" },
+          root_markers = { "Makefile", "makefile", "GNUmakefile" },
+          mason = false,
         },
         ty = {
           root_dir = django_root_dir,
@@ -154,30 +168,26 @@ return {
             ty = ty_settings(),
           },
         },
-        -- https://github.com/joshuadavidthomas/django-language-server/blob/main/docs/clients/neovim.md
+        -- https://github.com/fourdigits/django-template-lsp
         djlsp = {
           filetypes = { "htmldjango" },
           root_dir = django_root_dir,
           before_init = function(_, config)
+            local venv_path = utils.get_python_venv_path(config.root_dir)
             config.init_options = vim.tbl_extend("force", config.init_options or {}, {
-              env_directories = vim.env.VIRTUAL_ENV or ".env",
+              -- djlsp expects a list of venv directories. Passing the old
+              -- string value made it silently discard the setting.
+              env_directories = venv_path and { venv_path } or nil,
               django_settings_module = utils.get_django_settings_module(),
               docker_compose_service = utils.get_django_docker_compose_service(),
               docker_compose_file = utils.get_django_docker_compose_file(),
             })
           end,
         },
-        djls = {
-          cmd = { "djls", "serve" },
-          filetypes = { "htmldjango", "html", "python" },
-          root_markers = utils.django_root_markers,
-          before_init = function(_, config)
-            config.init_options = config.init_options or {}
-            config.init_options.django_settings_module =
-              utils.get_django_settings_module()
-          end,
-          venv_path = utils.get_python_venv,
-        },
+        -- djls 6.1.0 never finishes project analysis for larger settings
+        -- modules, so every completion request remains pending and blocks
+        -- blink.cmp. djlsp provides the Django template features here.
+        djls = { enabled = false },
         tombi = {
           keys = {
             {

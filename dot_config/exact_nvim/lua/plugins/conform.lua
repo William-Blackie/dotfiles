@@ -41,6 +41,10 @@ return {
     },
     ---@type table<string, table|fun(bufnr: integer): table|nil>
     formatters = {
+      prettier = {
+        -- Prettier cannot infer YAML from the final .tpl extension.
+        options = { ft_parsers = { yaml = "yaml" } },
+      },
       docformatter = {
         exit_codes = { 0, 1, 3 },
       },

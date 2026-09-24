@@ -31,9 +31,25 @@ return {
     },
   },
   opts = {
+    -- Blink installs CursorMoved listeners globally. Keep them inert while
+    -- navigating buffers; completion only needs to run in insert/select mode.
+    enabled = function()
+      return vim.api.nvim_get_mode().mode:match("^[is]") ~= nil
+    end,
+    -- Do not attach Blink to `/` or `?` searches (or `:` commands). This keeps
+    -- its buffer source and command-line keymaps out of search navigation.
+    cmdline = { enabled = false },
     keymap = { preset = "default" },
     completion = {
+      trigger = {
+        prefetch_on_insert = false,
+        show_on_insert = false,
+        show_on_insert_on_trigger_character = false,
+      },
       documentation = {
+        -- Resolve docs on demand with Ctrl-Space instead of while moving
+        -- through completion candidates.
+        auto_show = false,
         auto_show_delay_ms = 500,
         update_delay_ms = 500,
         window = {
