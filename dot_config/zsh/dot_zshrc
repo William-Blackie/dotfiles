@@ -43,6 +43,9 @@ command -v kubectl >/dev/null 2>&1 && alias kexec="kubectl exec -it"
 command -v kubectl >/dev/null 2>&1 && alias kcp="kubectl cp"
 command -v kubectl >/dev/null 2>&1 && alias ktop="kubectl top pods"
 
+## Git
+command -v git >/dev/null 2>&1 && alias tagpush="git tag -f $TAG && git push origin $TAG --force"
+
 typeset -U fpath FPATH
 [[ -d "${DOCKER_CONFIG}/completions" ]] && fpath=("${DOCKER_CONFIG}/completions" $fpath)
 [[ -d "$ZDOTDIR/functions" ]] && fpath=("$ZDOTDIR/functions" $fpath)

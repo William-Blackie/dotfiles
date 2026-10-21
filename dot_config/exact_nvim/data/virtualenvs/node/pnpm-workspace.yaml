@@ -1,3 +1,6 @@
 allowBuilds:
-  '@mistweaverco/kulala-fmt': true
+  '@mistweaverco/kulala-fmt': set this to true or false
   puppeteer: true
+minimumReleaseAgeExclude:
+  - dompurify@3.4.12 || 3.4.13
+  - mermaid@11.16.1

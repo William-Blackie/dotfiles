@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@mermaid-js/mermaid-cli": "^11.16.0",
-    "@mistweaverco/kulala-fmt": "^4.5.3",
     "jiti": "^2.7.0",
     "neovim": "^5.4.0"
   }

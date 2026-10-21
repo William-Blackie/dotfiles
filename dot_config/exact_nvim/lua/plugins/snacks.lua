@@ -36,6 +36,13 @@ return {
         resume_gh_review,
         desc = "Resume GitHub Review",
       },
+      {
+        "<leader>gn",
+        function()
+          Snacks.terminal.open({ "gh", "issue", "create" }, { cwd = LazyVim.root() })
+        end,
+        desc = "New GitHub Issue",
+      },
     },
     opts = {
       dashboard = { enabled = true },
