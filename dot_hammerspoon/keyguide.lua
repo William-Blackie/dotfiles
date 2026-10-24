@@ -17,6 +17,7 @@ local groups = {
       { "1 … 0", "Switch to workspace 1 … 10" },
       { "Shift + 1 … 0", "Move window to workspace 1 … 10" },
       { "p / n", "Previous / next workspace" },
+      { "Shift + p / n", "Move window to previous / next workspace" },
       { "[ / ]", "Previous / next workspace" },
       { "Shift + [ / ]", "Move window to previous / next workspace" },
       { "Tab", "Switch to previous workspace" },

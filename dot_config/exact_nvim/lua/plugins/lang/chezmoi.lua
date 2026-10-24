@@ -3,34 +3,40 @@
 ---LazyVim extra provides: chezmoi.vim, chezmoi.nvim picker, dashboard
 ---This adds: filetype detection, LSP, linting, formatting for chezmoi source files
 ---@type LazySpec
+local function detect_shell(_, buf, fallback)
+  local shebang = vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or ""
+  if shebang:match("^#!.*/bin/zsh") or shebang:match("^#!.*/usr/bin/env zsh") then
+    return "zsh"
+  elseif shebang:match("^#!.*/bin/bash") or shebang:match("^#!.*/usr/bin/env bash") then
+    return "bash"
+  elseif shebang:match("^#!.*/bin/sh") or shebang:match("^#!.*/usr/bin/env sh") then
+    return "sh"
+  end
+  return fallback
+end
+
 return {
   {
     "folke/snacks.nvim",
     opts = function(_, opts)
       vim.filetype.add({
         pattern = {
-          [".chezmoiscripts/.*"] = function(path, buf)
-            local shebang = vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] or ""
-            if
-              shebang:match("^#!.*/bin/zsh") or shebang:match("^#!.*/usr/bin/env zsh")
-            then
-              return "zsh"
-            elseif
-              shebang:match("^#!.*/bin/bash") or shebang:match("^#!.*/usr/bin/env bash")
-            then
-              return "bash"
-            elseif shebang:match("^#!.*/bin/sh") then
-              return "sh"
-            end
-          end,
-          [".zshrc"] = "zsh",
-          [".zshenv"] = "zsh",
-          [".zprofile"] = "zsh",
+          [".*/%.chezmoiscripts/.*"] = {
+            function(path, buf)
+              return detect_shell(path, buf)
+            end,
+            { priority = 10 },
+          },
         },
         filename = {
           [".chezmoiignore"] = "gitignore",
+          [".zshrc"] = "zsh",
+          [".zshenv"] = "zsh",
+          [".zprofile"] = "zsh",
           ["dot_zshrc"] = "zsh",
-          ["dot_zshenv"] = "zsh",
+          ["dot_zshenv"] = function(path, buf)
+            return detect_shell(path, buf, "zsh")
+          end,
           ["dot_zprofile"] = "zsh",
           ["dot_nvmrc"] = "sh",
         },

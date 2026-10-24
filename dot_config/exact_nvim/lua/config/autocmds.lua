@@ -130,7 +130,7 @@ local function escape_substitute(value, delimiter, is_replacement)
 end
 
 local function Replace(original, replacement, confirm)
-  if not original or original == "" or replacement == nil then
+  if not original or original == "" then
     return
   end
 
@@ -138,7 +138,12 @@ local function Replace(original, replacement, confirm)
   local delimiter = substitute_delimiter(original, replacement)
   local search = escape_substitute(original, delimiter, false)
   local replace = escape_substitute(replacement, delimiter, true)
-  local flags = confirm and "gce" or "ge"
+  local use_confirm = confirm ~= nil
+    and confirm ~= false
+    and confirm ~= ""
+    and confirm ~= "false"
+    and confirm ~= "0"
+  local flags = use_confirm and "gce" or "ge"
   vim.cmd(
     string.format(
       "cfdo %%s%s%s%s%s%s%s",
@@ -480,7 +485,7 @@ end, {
 })
 
 -- dadbod fix: https://github.com/neovim/neovim/issues/26977
-vim.api.nvim_create_autocmd("Filetype", {
+vim.api.nvim_create_autocmd("FileType", {
   pattern = "sql",
   callback = function()
     pcall(vim.keymap.del, "i", "<left>", { buffer = true })

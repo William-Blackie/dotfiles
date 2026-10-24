@@ -163,6 +163,110 @@ local ok, err = xpcall(function()
     assert(cache._buffers[buf_a]._sources[css_a])
     assert(cache._buffers[buf_a]._sources[linked])
   end)
+  check("chezmoi filetype rules detect scripts and shebangs", function()
+    local chezmoi_spec =
+      dofile(root .. "/dot_config/exact_nvim/lua/plugins/lang/chezmoi.lua")
+    chezmoi_spec[1].opts(nil, {})
+    local script_zsh = scratch .. "/.chezmoiscripts/run_once_test.sh"
+    write(script_zsh, { "#!/usr/bin/env zsh", "echo hi" })
+    vim.cmd.edit(script_zsh)
+    equal(vim.filetype.match({ buf = 0 }), "zsh")
+    local root_zshenv = scratch .. "/dot_zshenv"
+    write(root_zshenv, { "#!/bin/bash", "export ZDOTDIR=$HOME/.config/zsh" })
+    vim.cmd.edit(root_zshenv)
+    equal(vim.filetype.match({ buf = 0 }), "bash")
+    local zsh_zshenv = scratch .. "/zsh/dot_zshenv"
+    write(zsh_zshenv, { "#!/bin/zsh", "export LANG=en_GB.UTF-8" })
+    vim.cmd.edit(zsh_zshenv)
+    equal(vim.filetype.match({ buf = 0 }), "zsh")
+  end)
+  check("Replace command supports replacement, deletion, and false confirm", function()
+    local target = scratch .. "/replace_target.txt"
+    write(target, { "alpha beta alpha" })
+    vim.cmd.edit(target)
+    vim.fn.setqflist({ { filename = target, lnum = 1, col = 1, text = "alpha" } }, "r")
+    vim.cmd("Replace alpha gamma false")
+    equal(vim.api.nvim_buf_get_lines(0, 0, -1, false), { "gamma beta gamma" })
+    vim.cmd("Replace gamma")
+    equal(vim.api.nvim_buf_get_lines(0, 0, -1, false), { " beta " })
+  end)
+  check(
+    "django-orm-analyzer UI and core handle vim.NIL, O(K), and buffer switches",
+    function()
+      require("django-orm-analyzer").setup()
+      local core = require("django-orm-analyzer.core")
+      vim.cmd.enew({ bang = true })
+      local origin_buf = vim.api.nvim_get_current_buf()
+      vim.api.nvim_buf_set_lines(origin_buf, 0, -1, false, {
+        "def fetch():",
+        "    return Item.objects.all()[:5000]",
+      })
+      vim.api.nvim_win_set_cursor(0, { 2, 4 })
+
+      local orig_jobstart = vim.fn.jobstart
+      local captured_opts
+      vim.fn.jobstart = function(_, opts)
+        captured_opts = opts
+        return 1
+      end
+      core.analyze_query()
+      vim.fn.jobstart = orig_jobstart
+      assert(captured_opts ~= nil)
+
+      -- Switch to a different buffer before the async job finishes
+      vim.cmd.enew({ bang = true })
+      local other_buf = vim.api.nvim_get_current_buf()
+      vim.api.nvim_buf_set_lines(other_buf, 0, -1, false, { "other buffer" })
+
+      local payload = vim.fn.json_encode({
+        success = true,
+        complexity = "O(K) [Uncapped Slice Scan]",
+        engine = "mysql",
+        warnings = { "Limit warning" },
+        suggestions = { "Add index" },
+        sql = "SELECT * FROM items LIMIT 5000;",
+        plan = {
+          { 1, "SIMPLE", "items", vim.NIL, "ALL", 5000 },
+        },
+      })
+      captured_opts.on_stdout(1, { payload })
+      captured_opts.on_exit(1, 0)
+
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      local joined = table.concat(lines, "\n")
+      assert(joined:find("CRITICAL", 1, true))
+      assert(joined:find("1 | SIMPLE | items | NULL | ALL | 5000", 1, true))
+      vim.cmd.close()
+
+      local ns = vim.api.nvim_get_namespaces()["django-orm-analyzer"]
+      local origin_marks =
+        vim.api.nvim_buf_get_extmarks(origin_buf, ns, 0, -1, { details = true })
+      local other_marks = vim.api.nvim_buf_get_extmarks(other_buf, ns, 0, -1, {})
+      equal(#origin_marks, 1)
+      equal(origin_marks[1][4].virt_text[1][2], "DjangoORMVirtualTextCrit")
+      equal(#other_marks, 0)
+      equal(#vim.diagnostic.get(origin_buf, { namespace = ns }), 1)
+      equal(#vim.diagnostic.get(other_buf, { namespace = ns }), 0)
+    end
+  )
+  check("plugin specs and Hammerspoon keyguide load cleanly", function()
+    local coderabbit = dofile(root .. "/dot_config/exact_nvim/lua/plugins/coderabbit.lua")
+    assert(type(coderabbit.opts) == "table" and coderabbit.opts.cli.binary == "cr")
+    assert(coderabbit.setup == nil)
+    local django_spec =
+      dofile(root .. "/dot_config/exact_nvim/lua/plugins/lang/django.lua")
+    assert(#django_spec == 2)
+    local python_spec =
+      dofile(root .. "/dot_config/exact_nvim/lua/plugins/lang/python.lua")
+    equal(python_spec[1].opts.languages.python.default_style, "Google")
+    local cmp_spec = dofile(root .. "/dot_config/exact_nvim/lua/plugins/cmp.lua")
+    vim.bo.filetype = "markdown"
+    assert(cmp_spec.opts.sources.providers.emoji.should_show_items() == true)
+    vim.bo.filetype = "python"
+    assert(cmp_spec.opts.sources.providers.emoji.should_show_items() == false)
+    local keyguide = dofile(root .. "/dot_hammerspoon/keyguide.lua")
+    assert(keyguide.count("aerospace") > 20)
+  end)
 end, debug.traceback)
 
 vim.cmd.cd(root)
@@ -171,5 +275,5 @@ if not ok then
   io.stderr:write(err .. "\n")
   vim.cmd.cquit(1)
 end
-print(string.format("%d Neovim checks passed", count))
+io.stdout:write(string.format("%d Neovim checks passed\n", count))
 vim.cmd.qa({ bang = true })

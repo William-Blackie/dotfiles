@@ -1,9 +1,3 @@
-vim.filetype.add({
-  pattern = {
-    [".*/templates/.*%.html"] = "htmldjango",
-  },
-})
-
 local function pytest_args()
   return { "--log-level", "DEBUG" }
 end
@@ -37,7 +31,13 @@ end
 return {
   {
     "jeangiraldoo/codedocs.nvim",
-    languages = { python = { default_style = "google" } },
+    opts = {
+      languages = {
+        python = {
+          default_style = "Google",
+        },
+      },
+    },
   },
   {
     "mason-org/mason.nvim",

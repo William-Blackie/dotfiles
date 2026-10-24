@@ -2,9 +2,6 @@
 return {
   "smnatale/coderabbit.nvim",
   opts = {
-    -- Optional: Add any additional options here
-  },
-  setup = {
     cli = {
       binary = "cr",
       timeout = 0,

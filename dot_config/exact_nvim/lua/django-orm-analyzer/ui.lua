@@ -95,7 +95,11 @@ function M.show_panel(result, query_str)
     table.insert(content, "## 🛠️ Database Explain Plan")
     table.insert(content, "```text")
     for _, row in ipairs(result.plan) do
-      table.insert(content, table.concat(row, " | "))
+      local cells = {}
+      for _, cell in ipairs(row) do
+        table.insert(cells, cell == vim.NIL and "NULL" or tostring(cell))
+      end
+      table.insert(content, table.concat(cells, " | "))
     end
     table.insert(content, "```")
     table.insert(content, "")

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+XDG_DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}"
+export CARGO_HOME="${CARGO_HOME:-${XDG_DATA_HOME}/cargo}"
+export RUSTUP_HOME="${RUSTUP_HOME:-${XDG_DATA_HOME}/rustup}"
+
 if command -v rustup >/dev/null 2>&1 || command -v rustc >/dev/null 2>&1; then
     echo "Skipping Rust install, already installed"
     exit 0

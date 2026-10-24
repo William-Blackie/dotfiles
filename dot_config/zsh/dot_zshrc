@@ -44,7 +44,7 @@ command -v kubectl >/dev/null 2>&1 && alias kcp="kubectl cp"
 command -v kubectl >/dev/null 2>&1 && alias ktop="kubectl top pods"
 
 ## Git
-command -v git >/dev/null 2>&1 && alias tagpush="git tag -f $TAG && git push origin $TAG --force"
+command -v git >/dev/null 2>&1 && alias tagpush='git tag -f "$TAG" && git push origin "$TAG" --force'
 
 typeset -U fpath FPATH
 [[ -d "${DOCKER_CONFIG}/completions" ]] && fpath=("${DOCKER_CONFIG}/completions" $fpath)
@@ -103,7 +103,7 @@ if [[ -r "$XDG_CONFIG_HOME/fzf/fzf.zsh" ]] || command -v fzf >/dev/null 2>&1; th
   # fzf --zsh registers zle widgets, so only load it for real terminals.
   [[ -t 0 && -t 1 && -r "$XDG_CONFIG_HOME/fzf/fzf.zsh" ]] && source "$XDG_CONFIG_HOME/fzf/fzf.zsh"
 
-  if (($+widgets[fzf - completion])); then
+  if zle -l fzf-completion >/dev/null 2>&1; then
     bindkey -M emacs '^I' fzf-completion
     bindkey -M viins '^I' fzf-completion
     bindkey -M vicmd '^I' fzf-completion

@@ -9,14 +9,19 @@ ZSH_FILES := $(shell git ls-files '*.zsh' 'dot_config/zsh/dot_zprofile' 'dot_con
 TOML_FILES := $(shell git ls-files '*.toml' | while IFS= read -r f; do [ -f "$$f" ] && printf '%s\n' "$$f"; done)
 LUA_FILES := $(shell git ls-files '*.lua' | while IFS= read -r f; do [ -f "$$f" ] && printf '%s\n' "$$f"; done)
 
+PYTHON_PROJECT_DIR := dot_config/exact_nvim/lua/django-orm-analyzer
+PYTHON_UV_ENV := $(or $(XDG_CACHE_HOME),$(HOME)/.cache)/uv/envs/django-orm-analyzer
+PYTHON_UV_RUN := UV_PROJECT_ENVIRONMENT="$(PYTHON_UV_ENV)" PYTHONDONTWRITEBYTECODE=1 uv run --no-active --project $(PYTHON_PROJECT_DIR)
+
 .DEFAULT_GOAL := help
 
-PHONY = \
+.PHONY: \
 	help \
 	install \
 	apply \
 	check \
 	test-neovim \
+	test-python \
 	lint \
 	format \
 	format-check \
@@ -34,7 +39,10 @@ PHONY = \
 	format-zsh-check \
 	lint-zsh \
 	format-lua \
-	format-lua-check 
+	format-lua-check \
+	format-python \
+	format-python-check \
+	lint-python
 
 
 ## Show this help message
@@ -55,7 +63,7 @@ help:
 	    } \
 	  }' $(MAKEFILE_LIST)
 
-##
+## install node dependencies
 install:
 	pnpm install
 
@@ -66,31 +74,35 @@ apply:
 
 ### Utils
 ## format, lint, and test all files
-check: format-check lint test-neovim
+check: format-check lint test-neovim test-python
 
 ## test neovim configuration
 test-neovim:
 	nvim --headless -u NONE -i NONE -l tests/neovim.lua
 	nvim --headless -u NONE -i NONE -l tests/neovim-keymaps.lua
 
+## test python plugins
+test-python:
+	$(PYTHON_UV_RUN) pytest -o cache_dir="$(PYTHON_UV_ENV)/pytest_cache" $(PYTHON_PROJECT_DIR)/tests
+
 ## lint all files
-lint: lint-markdown lint-toml lint-shell lint-zsh
+lint: lint-markdown lint-toml lint-shell lint-zsh lint-python
 
 ## format all files
-format: format-prettier format-toml format-shell format-zsh format-lua
+format: format-prettier format-toml format-shell format-zsh format-lua format-python
 
 ## check formatting of all files
-format-check: format-prettier-check format-toml-check format-shell-check format-zsh-check format-lua-check
+format-check: format-prettier-check format-toml-check format-shell-check format-zsh-check format-lua-check format-python-check
 
 ## lint files staged for commit
 lint-staged:
 	pnpm exec lint-staged
 
-## format files staged for commit
+## format markdown, json, and yaml files
 format-prettier:
 	pnpm exec prettier --write --ignore-unknown --config dot_prettierrc.toml $(PRETTIER_GLOBS)
 
-## check formatting of files staged for commit
+## check formatting of markdown, json, and yaml files
 format-prettier-check:
 	pnpm exec prettier --check --ignore-unknown --config dot_prettierrc.toml $(PRETTIER_GLOBS)
 
@@ -141,3 +153,16 @@ format-lua:
 ## check lua files
 format-lua-check:
 	pnpm exec stylua --check --config-path dot_config/exact_nvim/stylua.toml $(LUA_FILES)
+
+## format python files
+format-python:
+	$(PYTHON_UV_RUN) ruff format $(PYTHON_PROJECT_DIR)
+
+## check formatting of python files
+format-python-check:
+	$(PYTHON_UV_RUN) ruff format --check $(PYTHON_PROJECT_DIR)
+
+## lint python files
+lint-python:
+	$(PYTHON_UV_RUN) ruff check --no-cache $(PYTHON_PROJECT_DIR)
+	$(PYTHON_UV_RUN) mypy --cache-dir="$(PYTHON_UV_ENV)/mypy_cache" --config-file $(PYTHON_PROJECT_DIR)/pyproject.toml $(PYTHON_PROJECT_DIR)

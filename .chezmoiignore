@@ -1,5 +1,14 @@
 .git/
+.antigravitycli/
+.DS_Store
+**/.DS_Store
 .ruff_cache/
+**/.ruff_cache/
+**/__pycache__/
+**/.mypy_cache/
+**/.pytest_cache/
+**/.venv/
+**/.coverage
 Makefile
 README.md
 .chezmoiignore
@@ -9,5 +18,7 @@ package.json
 pnpm-lock.yaml
 tombi.toml
 chezmoi/
+docs/
 node_modules/
+**/node_modules/
 tests/

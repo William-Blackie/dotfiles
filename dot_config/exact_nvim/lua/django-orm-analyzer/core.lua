@@ -278,11 +278,12 @@ function M.analyze_query()
     return
   end
 
+  local bufnr = vim.api.nvim_get_current_buf()
   local project_root = find_project_root()
 
   -- Clear previous virtual text & diagnostics for this namespace
-  vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
-  vim.diagnostic.reset(ns_id, 0)
+  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
+  vim.diagnostic.reset(ns_id, bufnr)
 
   local cmd, cmd_err = build_command(plugin_dir, project_root, query_str)
   if not cmd then
@@ -366,50 +367,58 @@ function M.analyze_query()
       -- Style virtual text based on complexity warning levels
       local analyzer = require("django-orm-analyzer") --[[@as DjangoORMAnalyzer]]
       local config = analyzer.config
-      if config.virtual_text.enabled then
-        local vt_text = config.virtual_text.prefix .. "Complexity: " .. result.complexity
-        local hl_group = "DjangoORMVirtualTextOpt"
+      if vim.api.nvim_buf_is_valid(bufnr) then
+        local max_line = math.max(1, vim.api.nvim_buf_line_count(bufnr))
+        local target_lnum = math.min(math.max(1, line_num), max_line) - 1
 
-        if
-          string.find(result.complexity, "O(N)", 1, true)
-          or string.find(result.complexity, "O(N * M)", 1, true)
-          or string.find(result.complexity, "O(N log N)", 1, true)
-        then
-          hl_group = "DjangoORMVirtualTextCrit"
-        elseif #result.warnings > 0 then
-          hl_group = "DjangoORMVirtualTextWarn"
-        end
+        if config.virtual_text.enabled then
+          local vt_text = config.virtual_text.prefix
+            .. "Complexity: "
+            .. result.complexity
+          local hl_group = "DjangoORMVirtualTextOpt"
 
-        vim.api.nvim_buf_set_extmark(0, ns_id, line_num - 1, 0, {
-          virt_text = { { vt_text, hl_group } },
-          virt_text_pos = "eol",
-        })
-      end
-
-      -- Build editor diagnostics
-      if config.diagnostics.enabled and #result.warnings > 0 then
-        local diag_message = "Database warnings:\n"
-        for _, w in ipairs(result.warnings) do
-          diag_message = diag_message .. "• " .. w .. "\n"
-        end
-        if #result.suggestions > 0 then
-          diag_message = diag_message .. "\nSuggestions:\n"
-          for _, s in ipairs(result.suggestions) do
-            diag_message = diag_message .. "💡 " .. s .. "\n"
+          if
+            string.find(result.complexity, "O(N)", 1, true)
+            or string.find(result.complexity, "O(N * M)", 1, true)
+            or string.find(result.complexity, "O(K)", 1, true)
+            or string.find(result.complexity, "O(N log N)", 1, true)
+          then
+            hl_group = "DjangoORMVirtualTextCrit"
+          elseif #result.warnings > 0 then
+            hl_group = "DjangoORMVirtualTextWarn"
           end
+
+          vim.api.nvim_buf_set_extmark(bufnr, ns_id, target_lnum, 0, {
+            virt_text = { { vt_text, hl_group } },
+            virt_text_pos = "eol",
+          })
         end
 
-        local diag = {
-          bufnr = 0,
-          lnum = line_num - 1,
-          col = 0,
-          end_lnum = line_num - 1,
-          end_col = -1,
-          severity = vim.diagnostic.severity.WARN,
-          source = "Django ORM",
-          message = diag_message,
-        }
-        vim.diagnostic.set(ns_id, 0, { diag })
+        -- Build editor diagnostics
+        if config.diagnostics.enabled and #result.warnings > 0 then
+          local diag_message = "Database warnings:\n"
+          for _, w in ipairs(result.warnings) do
+            diag_message = diag_message .. "• " .. w .. "\n"
+          end
+          if #result.suggestions > 0 then
+            diag_message = diag_message .. "\nSuggestions:\n"
+            for _, s in ipairs(result.suggestions) do
+              diag_message = diag_message .. "💡 " .. s .. "\n"
+            end
+          end
+
+          local diag = {
+            bufnr = bufnr,
+            lnum = target_lnum,
+            col = 0,
+            end_lnum = target_lnum,
+            end_col = -1,
+            severity = vim.diagnostic.severity.WARN,
+            source = "Django ORM",
+            message = diag_message,
+          }
+          vim.diagnostic.set(ns_id, bufnr, { diag })
+        end
       end
 
       -- Display floating analysis window

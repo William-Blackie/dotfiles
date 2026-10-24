@@ -1,6 +1,6 @@
 ---Django language support
 ---@type LazySpec
-local django_root_markers = { "manage.py", "pyproject.toml", ".git" }
+local utils = require("lib.utils")
 
 ---@param dir string|nil
 ---@return boolean
@@ -18,7 +18,7 @@ vim.filetype.add({
   extension = {
     html = function(path, _)
       local dir = vim.fs.dirname(path)
-      if is_templates_dir(dir) and vim.fs.root(path, django_root_markers) then
+      if is_templates_dir(dir) and vim.fs.root(path, utils.django_root_markers) then
         return "htmldjango"
       end
       return "html"
@@ -47,16 +47,6 @@ return {
         "djlint",
         "django-template-lsp",
         "ty",
-      },
-    },
-  },
-  {
-    "jeangiraldoo/codedocs.nvim",
-    opts = {
-      languages = {
-        python = {
-          default_style = "Google",
-        },
       },
     },
   },

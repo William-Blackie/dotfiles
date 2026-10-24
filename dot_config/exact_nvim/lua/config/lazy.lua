@@ -31,6 +31,7 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.lang.python" },
     { import = "lazyvim.plugins.extras.lang.yaml" },
     { import = "plugins" },
+    { import = "plugins.lang.chezmoi" },
     { import = "plugins.lang.django" },
     { import = "plugins.lang.python" },
     { import = "plugins.lang.html-css-js" },

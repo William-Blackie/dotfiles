@@ -134,6 +134,7 @@ Each action automatically returns AeroSpace to its main mode.
 | `1`-`0`             | Switch to workspace 1-10               |
 | `Shift-1`-`Shift-0` | Move window to workspace 1-10          |
 | `p/n`               | Switch to previous/next workspace      |
+| `Shift-p`/`Shift-n` | Move window to previous/next workspace |
 | `m`                 | Focus the next monitor                 |
 | `Shift-m`           | Move the window to the next monitor    |
 | `f`                 | Toggle fullscreen                      |

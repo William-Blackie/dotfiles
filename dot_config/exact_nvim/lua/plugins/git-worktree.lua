@@ -96,7 +96,7 @@ return {
             io.popen("git branch -r --format='%(refname:short)' | grep -v HEAD")
           if handle then
             for line in handle:lines() do
-              local branch = line:gsub("origin/", "")
+              local branch = line:gsub("^origin/", "")
               if branch ~= "origin" and branch ~= "" then
                 table.insert(branches, {
                   text = branch,

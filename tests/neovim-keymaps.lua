@@ -66,7 +66,7 @@ local ok, err = xpcall(function()
   assert(vim.fn.maparg(" gd", "n"):find("DiffviewOpen", 1, true))
   assert(vim.fn.maparg(" gf", "n"):find("DiffviewFileHistory", 1, true))
   assert(vim.fn.maparg(" gH", "v"):find("DiffviewFileHistory", 1, true))
-  print("PASS Diffview Git mappings win over picker and LazyVim mappings")
+  io.stdout:write("PASS Diffview Git mappings win over picker and LazyVim mappings\n")
 end, debug.traceback)
 if not ok then
   io.stderr:write(err .. "\n")

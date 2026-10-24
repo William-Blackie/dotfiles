@@ -69,7 +69,7 @@ make INSTALL_TOP="${BUILD_DEST_DIR}" install
 ln -sf "${BUILD_DEST_DIR}/bin/lua" "${BIN_DIR}/lua5.1"
 
 # cleanup source files
-rm -f "${SRC_DIR}/${LUA_ARCHIVE}"
+rm -rf "${SRC_DIR:?}/${LUA_ARCHIVE:?}" "${LUA_SRC_DIR:?}"
 
 if ! "${BIN_DIR}/lua5.1" -v >/dev/null 2>&1; then
     echo "Lua install not found."

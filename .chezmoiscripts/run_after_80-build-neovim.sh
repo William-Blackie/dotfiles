@@ -52,7 +52,7 @@ fi
 git_neovim merge --ff-only "origin/${BRANCH_NAME}"
 
 HEAD="$(git_neovim rev-parse HEAD)"
-STAMP_CONTENT=$'repo='"$REPO_DIR"$'\nhead='"$HEAD"$'\nprefix='"$INSTALL_PREFIX"$'\nbuild_type='"$BUILD_TYPE"
+STAMP_CONTENT=$'repo='"$REPO_DIR"$'\nbranch='"$BRANCH_NAME"$'\nhead='"$HEAD"$'\nprefix='"$INSTALL_PREFIX"$'\nbuild_type='"$BUILD_TYPE"
 
 if [[ -x "$INSTALL_PREFIX/bin/nvim" && -f "$STAMP_FILE" ]] && [[ "$(cat "$STAMP_FILE")" == "$STAMP_CONTENT" ]]; then
     exit 0
@@ -61,5 +61,6 @@ fi
 echo "Building Neovim from $REPO_DIR at $HEAD..."
 make -C "$REPO_DIR" distclean
 make -C "$REPO_DIR" CMAKE_BUILD_TYPE="$BUILD_TYPE" CMAKE_INSTALL_PREFIX="$INSTALL_PREFIX"
+rm -rf "$INSTALL_PREFIX/share/nvim/runtime"
 make -C "$REPO_DIR" CMAKE_BUILD_TYPE="$BUILD_TYPE" CMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" install
 printf '%s\n' "$STAMP_CONTENT" >"$STAMP_FILE"
