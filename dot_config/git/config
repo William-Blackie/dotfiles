@@ -81,6 +81,7 @@
 	undo = reset --soft HEAD^
 	wt = !wt
 	tags-reset = "!f(){ remote=\"${1:-origin}\"; tags=\"$(git tag -l)\"; if [ -n \"$tags\" ]; then printf \"%s\\n\" \"$tags\" | xargs -n 1 git tag -d >/dev/null 2>&1; fi; git fetch \"$remote\" --tags --prune --prune-tags; }; f"
+	tagpush = "!f(){ if [ -z \"$1\" ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then echo \"Usage: git tagpush <tag> [remote]\" >&2; return 1; fi; git tag -f \"$1\" && git push \"${2:-origin}\" \"$1\" --force; }; f"
 
 [color]
 	ui = auto

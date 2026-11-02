@@ -3,7 +3,7 @@ local M = {}
 local groups = {
   {
     scope = "aerospace",
-    title = "AeroSpace · after Option + ;",
+    title = "AeroSpace · after Option + Space",
     mappings = {
       { "h / j / k / l", "Focus left / down / up / right" },
       { "y / u / i / o", "Move window left / down / up / right" },

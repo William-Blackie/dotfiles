@@ -42,9 +42,9 @@ gaps.outer.right      = 0
 9 = "sidecar"
 
 [mode.main.binding]
-# Reserve bare Alt bindings for Neovim. Option + ; enters a one-shot AeroSpace
-# prefix mode on both a US Mac keyboard and the Voyager.
-alt-semicolon = "mode wm"
+# Option + Space enters a one-shot AeroSpace prefix mode, mirroring tmux's
+# Control + Space. Leave other bare Alt bindings available for Neovim.
+alt-space = "mode wm"
 
 [mode.wm.binding]
 esc = "mode main"

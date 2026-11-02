@@ -83,8 +83,10 @@ The ZSA Voyager layout is managed in Keymapp/Oryx, not in these dotfiles. Keep
 the keyboard firmware aligned with this modifier contract:
 
 - `Ctrl + h/j/k/l` navigates Neovim splits and tmux panes.
-- Bare `Alt` bindings belong to Neovim and its plugins.
-- `Option + ;` enters a one-shot AeroSpace prefix mode on either keyboard.
+- Bare `Alt` bindings, except `Option + Space`, belong to Neovim and its
+  plugins.
+- `Option + Space` enters a one-shot AeroSpace prefix mode on either keyboard,
+  mirroring tmux's `Control + Space`.
 - After the prefix, `h/j/k/l` focuses windows and `y/u/i/o` moves them.
 - After the prefix, `p/n` cycles workspaces and `m` focuses the next monitor.
 - After the prefix, `g` opens the searchable system-wide key guide.

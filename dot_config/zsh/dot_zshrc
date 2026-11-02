@@ -44,7 +44,31 @@ command -v kubectl >/dev/null 2>&1 && alias kcp="kubectl cp"
 command -v kubectl >/dev/null 2>&1 && alias ktop="kubectl top pods"
 
 ## Git
-command -v git >/dev/null 2>&1 && alias tagpush='git tag -f "$TAG" && git push origin "$TAG" --force'
+# Creates or updates a tag at HEAD and force-pushes it to the remote.
+#
+# Arguments:
+#   1: Tag name to create or update.
+#   2: Remote name (optional, defaults to origin).
+# Outputs:
+#   Usage message to stderr if tag is not provided.
+# Returns:
+#   0 on success; non-zero on failure or missing arguments.
+tagpush() {
+  command -v git >/dev/null 2>&1 || {
+    print -u2 "tagpush: git not found"
+    return 1
+  }
+
+  if [[ -z "${1:-}" || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    print -u2 "Usage: tagpush <tag> [remote]"
+    return 1
+  fi
+
+  local tag="$1"
+  local remote="${2:-origin}"
+
+  git tag -f "$tag" && git push "$remote" "$tag" --force
+}
 
 typeset -U fpath FPATH
 [[ -d "${DOCKER_CONFIG}/completions" ]] && fpath=("${DOCKER_CONFIG}/completions" $fpath)
