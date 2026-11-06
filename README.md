@@ -145,6 +145,10 @@ nvim
 # :Lazy sync
 ```
 
+Press `<leader>gd` to open working changes in Diffview, or close the current
+Diffview. Press `q` in a diff or history pane, or `<leader>gq`, to close it.
+Unsaved edits stay in memory; closing Diffview does not save or discard them.
+
 Project environments come from direnv's approved `.envrc` files. Neovim imports
 `direnv export json` before plugin setup and when entering files or changing
 directories; direnv restores the previous environment when leaving a project.
