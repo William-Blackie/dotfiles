@@ -83,6 +83,10 @@ The ZSA Voyager layout is managed in Keymapp/Oryx, not in these dotfiles. Keep
 the keyboard firmware aligned with this modifier contract:
 
 - `Ctrl + h/j/k/l` navigates Neovim splits and tmux panes.
+- `Command + Space` opens Vorssaint's Command Bar. Chezmoi enables this shortcut
+  and disables Spotlight's competing binding. Vorssaint's launch-at-login
+  preference is included; macOS may require enabling it in Login Items on a new
+  machine.
 - Bare `Alt` bindings, except `Option + Space`, belong to Neovim and its
   plugins.
 - `Option + Space` enters a one-shot AeroSpace prefix mode on either keyboard,
@@ -97,6 +101,8 @@ the keyboard firmware aligned with this modifier contract:
 The proposed Oryx layout is documented in
 [`docs/zsa-voyager-oryx-layout.md`](docs/zsa-voyager-oryx-layout.md).
 
+The shortcut guide is managed in `dot_hammerspoon/keyguide.lua`.
+
 Useful reload commands:
 
 ```sh
@@ -104,6 +110,41 @@ chezmoi apply
 aerospace reload-config
 tmux source-file ~/.config/tmux/tmux.conf
 ```
+
+- [ ] Check whether changes for
+      [Vorssaint #497: Store settings in a folder](https://github.com/vorssaint/vorssaint-utils/issues/497)
+      have been merged and released. If supported, use automatic settings-file
+      loading in place of the backup import script.
+
+## Vorssaint Across Macs
+
+`dot_config/vorssaint/private_settings.plist` is a complete portable settings
+backup exported by Vorssaint 3.4.3. It includes feature choices, shortcuts,
+appearance, and the launch-at-login preference. The native exporter includes
+default values too, so another Mac receives the same setup.
+
+Chezmoi installs it at `~/.config/vorssaint/settings.plist`. When the backup
+changes,
+`.chezmoiscripts/run_onchange_after_20-import-vorssaint-settings.sh.tmpl` uses
+Vorssaint's native `--import-settings` command. It saves the previous settings
+at `~/.local/state/vorssaint/previous-settings.plist`, closes a running
+Vorssaint, imports, and starts it. Unchanged backups are not reimported on every
+apply. Each Mac needs a version of Vorssaint supporting these backup commands;
+macOS permissions and Login Items approval are configured on each device.
+
+To carry later changes from the app back into the repo:
+
+```sh
+/Applications/Vorssaint.app/Contents/MacOS/Vorssaint --export-settings \
+  ~/dotfiles/dot_config/vorssaint/private_settings.plist
+git -C ~/dotfiles diff -- dot_config/vorssaint/private_settings.plist
+chezmoi apply
+```
+
+Review exports before committing: settings backups can include text snippets and
+custom launcher entries. Vorssaint excludes clipboard history, shelf contents,
+usage history, and machine state from its portable backup. On another Mac, pull
+the repo and run `chezmoi apply` to restore this setup.
 
 ## 1Password And SSH
 

@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Settings hash: {{ include "dot_config/vorssaint/private_settings.plist" | sha256sum }}
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+    exit 0
+fi
+
+app_bundle="/Applications/Vorssaint.app"
+if [[ ! -d "$app_bundle" ]]; then
+    app_bundle="$HOME/Applications/Vorssaint.app"
+fi
+app_binary="$app_bundle/Contents/MacOS/Vorssaint"
+if [[ ! -x "$app_binary" ]]; then
+    echo "Install Vorssaint before applying its settings." >&2
+    exit 1
+fi
+if ! /usr/bin/strings "$app_binary" | /usr/bin/grep -Fx -- '--import-settings' >/dev/null; then
+    echo "Update Vorssaint to a version with --import-settings support, then rerun chezmoi apply." >&2
+    exit 1
+fi
+
+settings_file="$HOME/.config/vorssaint/settings.plist"
+/usr/bin/plutil -lint "$settings_file" >/dev/null
+
+# Keep a local recovery copy before replacing portable preferences.
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/vorssaint"
+mkdir -p "$state_dir"
+chmod 700 "$state_dir"
+"$app_binary" --export-settings "$state_dir/previous-settings.plist"
+chmod 600 "$state_dir/previous-settings.plist"
+
+# The native importer requires Vorssaint to be closed. Reopen an existing
+# session even if the import fails; start a fresh setup after a successful import.
+start_app=false
+restart_if_needed() {
+    if [[ "$start_app" == "true" ]]; then
+        /usr/bin/open -g "$app_bundle"
+    fi
+}
+trap restart_if_needed EXIT
+
+if pgrep -x Vorssaint >/dev/null; then
+    start_app=true
+    pkill -TERM -x Vorssaint
+    for ((attempt = 0; attempt < 50; attempt++)); do
+        if ! pgrep -x Vorssaint >/dev/null; then
+            break
+        fi
+        sleep 0.1
+    done
+    if pgrep -x Vorssaint >/dev/null; then
+        echo "Vorssaint did not exit. Quit it and rerun chezmoi apply." >&2
+        exit 1
+    fi
+fi
+
+"$app_binary" --import-settings "$settings_file"
+# The first normal launch also registers the saved launch-at-login preference.
+start_app=true

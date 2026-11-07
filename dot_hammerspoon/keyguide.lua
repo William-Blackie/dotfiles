@@ -2,6 +2,13 @@ local M = {}
 
 local groups = {
   {
+    scope = "vorssaint",
+    title = "Vorssaint",
+    mappings = {
+      { "Command + Space", "Open searchable Command Bar" },
+    },
+  },
+  {
     scope = "aerospace",
     title = "AeroSpace · after Option + Space",
     mappings = {
