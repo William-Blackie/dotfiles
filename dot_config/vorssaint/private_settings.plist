@@ -40,6 +40,13 @@
 		<array>
 			<string>com.apple.finder</string>
 			<string>com.apple.mobilephone</string>
+			<string>net.kovidgoyal.kitty</string>
+			<string>com.apple.Terminal</string>
+			<string>com.microsoft.VSCode</string>
+			<string>com.openai.codex</string>
+			<string>com.google.Chrome</string>
+			<string>org.mozilla.firefox</string>
+			<string>com.1password.1password</string>
 		</array>
 		<key>batteryLimitPercent</key>
 		<integer>10</integer>
@@ -48,19 +55,19 @@
 		<key>bluetoothSleepRestoreOnWake</key>
 		<true/>
 		<key>brightnessControlEnabled</key>
-		<false/>
+		<true/>
 		<key>brightnessKeyStep</key>
 		<string>standard</string>
 		<key>brightnessKeysEnabled</key>
 		<false/>
 		<key>brightnessOSDEnabled</key>
-		<false/>
+		<true/>
 		<key>brightnessUpdatePromptState</key>
 		<string>handled</string>
 		<key>cameraPreviewShortcut</key>
 		<string>control+option+command:13</string>
 		<key>cameraPreviewShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>clamshellPreferred</key>
 		<true/>
 		<key>cleanerScheduleFrequency</key>
@@ -88,17 +95,21 @@
 		<key>clipboardAutoClearOnSleep</key>
 		<false/>
 		<key>clipboardHistoryEnabled</key>
-		<false/>
+		<true/>
 		<key>clipboardHistoryFilterSensitiveText</key>
-		<false/>
+		<true/>
 		<key>clipboardHistoryIgnoredApps</key>
-		<array/>
+		<array>
+			<string>com.1password.1password</string>
+			<string>com.bitwarden.desktop</string>
+			<string>com.apple.keychainaccess</string>
+		</array>
 		<key>clipboardHistoryIncludeImagesFiles</key>
 		<true/>
 		<key>clipboardHistoryLayout</key>
 		<string>list</string>
 		<key>clipboardHistoryLimit</key>
-		<integer>50</integer>
+		<integer>100</integer>
 		<key>clipboardHistoryMenuBarPreview</key>
 		<false/>
 		<key>clipboardHistoryMenuBarPreviewLength</key>
@@ -106,13 +117,13 @@
 		<key>clipboardHistoryQuickPreview</key>
 		<false/>
 		<key>clipboardHistoryRetentionDays</key>
-		<integer>0</integer>
+		<integer>7</integer>
 		<key>clipboardHistoryShortcut</key>
 		<string>control+option+command:9</string>
 		<key>clipboardHistoryShortcutEnabled</key>
 		<true/>
 		<key>clipboardHistoryShowSourceAppIcons</key>
-		<false/>
+		<true/>
 		<key>colorPickerBareHex</key>
 		<false/>
 		<key>colorPickerFormat</key>
@@ -120,7 +131,7 @@
 		<key>colorPickerShortcut</key>
 		<string>control+option+command:8</string>
 		<key>colorPickerShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>colorPickerShowCaptureMenuOnShortcut</key>
 		<true/>
 		<key>commandBarASCIILayoutEnabled</key>
@@ -158,11 +169,11 @@
 		<key>diskImageInstallerUseUserApplications</key>
 		<false/>
 		<key>displayBrightnessDecreaseShortcut</key>
-		<string>shift+command:27</string>
+		<string>control+option+command:27</string>
 		<key>displayBrightnessIncreaseShortcut</key>
-		<string>shift+command:24</string>
+		<string>control+option+command:24</string>
 		<key>displayBrightnessShortcutsEnabled</key>
-		<false/>
+		<true/>
 		<key>dockClickCycleWindows</key>
 		<false/>
 		<key>dockClickHide</key>
@@ -170,7 +181,7 @@
 		<key>dockClickMinimize</key>
 		<false/>
 		<key>dockPreviewBackgroundOpacity</key>
-		<real>1</real>
+		<real>1.0</real>
 		<key>dockPreviewCurrentSpaceOnly</key>
 		<false/>
 		<key>dockPreviewEnabled</key>
@@ -198,7 +209,7 @@
 		<key>featureAvailable.appUpdates</key>
 		<true/>
 		<key>featureAvailable.audioPriority</key>
-		<false/>
+		<true/>
 		<key>featureAvailable.autoQuit</key>
 		<true/>
 		<key>featureAvailable.bluetoothSleep</key>
@@ -304,13 +315,13 @@
 		<key>featureAvailable.pastePlain</key>
 		<true/>
 		<key>featureAvailable.portManager</key>
-		<false/>
+		<true/>
 		<key>featureAvailable.quickLauncher</key>
 		<true/>
 		<key>featureAvailable.quickToggles</key>
 		<true/>
 		<key>featureAvailable.quitApps</key>
-		<false/>
+		<true/>
 		<key>featureAvailable.quitWindowProtection</key>
 		<false/>
 		<key>featureAvailable.radialMenu</key>
@@ -352,7 +363,7 @@
 		<key>featureAvailable.windowLayout</key>
 		<false/>
 		<key>featureAvailable.windowMaximizer</key>
-		<true/>
+		<false/>
 		<key>featuresOnboardingVersion</key>
 		<integer>4</integer>
 		<key>finderCutPasteEnabled</key>
@@ -360,7 +371,7 @@
 		<key>finderCutPasteShowHUD</key>
 		<true/>
 		<key>finderPasteImageAsFile</key>
-		<false/>
+		<true/>
 		<key>finderRenameEnabled</key>
 		<false/>
 		<key>finderRenameShortcut</key>
@@ -416,11 +427,11 @@
 		<key>keepAwakeUntilTime</key>
 		<real>0.0</real>
 		<key>keyboardBrightnessDecreaseShortcut</key>
-		<string>option+command:27</string>
+		<string>control+option+shift+command:27</string>
 		<key>keyboardBrightnessIncreaseShortcut</key>
-		<string>option+command:24</string>
+		<string>control+option+shift+command:24</string>
 		<key>keyboardBrightnessShortcutsEnabled</key>
-		<false/>
+		<true/>
 		<key>keyboardDebounceEnabled</key>
 		<false/>
 		<key>keyboardDebounceKeyWindows</key>
@@ -450,11 +461,11 @@
 		<key>mediaGIFEnd</key>
 		<real>0.0</real>
 		<key>mediaGIFFPS</key>
-		<real>12</real>
+		<real>12.0</real>
 		<key>mediaGIFLoops</key>
 		<true/>
 		<key>mediaGIFQuality</key>
-		<real>0.73999999999999999</real>
+		<real>0.74</real>
 		<key>mediaGIFSizing</key>
 		<string>resolution</string>
 		<key>mediaGIFStart</key>
@@ -476,7 +487,7 @@
 		<key>mediaImageProfiles</key>
 		<string>[]</string>
 		<key>mediaImageQuality</key>
-		<real>0.71999999999999997</real>
+		<real>0.72</real>
 		<key>mediaImageRenamePattern</key>
 		<string></string>
 		<key>mediaImageResizeHeight</key>
@@ -496,11 +507,11 @@
 		<key>mediaImageWatermarkMargin</key>
 		<integer>32</integer>
 		<key>mediaImageWatermarkOpacity</key>
-		<real>0.45000000000000001</real>
+		<real>0.45</real>
 		<key>mediaImageWatermarkPosition</key>
 		<string>bottomRight</string>
 		<key>mediaImageWatermarkScale</key>
-		<real>0.17999999999999999</real>
+		<real>0.18</real>
 		<key>mediaImageWatermarkText</key>
 		<string></string>
 		<key>mediaLastTool</key>
@@ -514,13 +525,13 @@
 		<key>mediaVideoEnd</key>
 		<real>0.0</real>
 		<key>mediaVideoFPS</key>
-		<real>30</real>
+		<real>30.0</real>
 		<key>mediaVideoKeepAudio</key>
 		<true/>
 		<key>mediaVideoMaxDimension</key>
 		<integer>1280</integer>
 		<key>mediaVideoQuality</key>
-		<real>0.68000000000000005</real>
+		<real>0.68</real>
 		<key>mediaVideoSizing</key>
 		<string>resolution</string>
 		<key>mediaVideoStart</key>
@@ -584,7 +595,7 @@
 		<key>micMuteShortcut</key>
 		<string>control+option+command:46</string>
 		<key>micMuteShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>middleClickEnabled</key>
 		<true/>
 		<key>middleClickExceptions</key>
@@ -756,7 +767,7 @@
 		<key>notchAgentsFinishAlert</key>
 		<true/>
 		<key>notchAgentsFinishMinimum</key>
-		<real>60</real>
+		<real>60.0</real>
 		<key>notchAgentsHiddenCards</key>
 		<string></string>
 		<key>notchAgentsLimitAlert</key>
@@ -766,7 +777,7 @@
 		<key>notchAgentsLimitFocus</key>
 		<string>mostUsed</string>
 		<key>notchAgentsLimitThreshold</key>
-		<real>80</real>
+		<real>80.0</real>
 		<key>notchAgentsLiveActivity</key>
 		<true/>
 		<key>notchAgentsOpenCode</key>
@@ -816,7 +827,7 @@
 		<key>notchClipboardWindow</key>
 		<true/>
 		<key>notchCloseDelay</key>
-		<real>0.17999999999999999</real>
+		<real>0.18</real>
 		<key>notchCommandBar</key>
 		<true/>
 		<key>notchCommandBarStyle</key>
@@ -826,9 +837,9 @@
 		<key>notchCoversMenus</key>
 		<true/>
 		<key>notchCustomHeight</key>
-		<real>480</real>
+		<real>480.0</real>
 		<key>notchCustomWidth</key>
-		<real>440</real>
+		<real>440.0</real>
 		<key>notchDismissNativeNotifications</key>
 		<false/>
 		<key>notchDisplay</key>
@@ -967,7 +978,7 @@
 		<key>notchShortcut</key>
 		<string>control+option+command:34</string>
 		<key>notchShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>notchShowInCaptures</key>
 		<true/>
 		<key>notchShowPlayingMusic</key>
@@ -1127,9 +1138,9 @@
 		<key>panelUtilityWindowLayout</key>
 		<true/>
 		<key>pastePlainEnabled</key>
-		<false/>
+		<true/>
 		<key>pastePlainShortcut</key>
-		<string>option+shift+command:9</string>
+		<string>control+option+shift+command:9</string>
 		<key>pinchZoomEnabled</key>
 		<false/>
 		<key>pinchZoomModifier</key>
@@ -1145,7 +1156,7 @@
 		<key>quickLauncherHiddenItems</key>
 		<string></string>
 		<key>quickLauncherShortcut</key>
-		<string>control+command:9</string>
+		<string>control+option+command:12</string>
 		<key>quickLauncherShortcutEnabled</key>
 		<true/>
 		<key>quitAppsExceptFrontShortcut</key>
@@ -1162,7 +1173,7 @@
 		<key>quitAppsShortcutEnabled</key>
 		<false/>
 		<key>quitProtectionCloseDoubleIntervalMs</key>
-		<real>600</real>
+		<real>600.0</real>
 		<key>quitProtectionCloseEnabled</key>
 		<false/>
 		<key>quitProtectionCloseExceptions</key>
@@ -1170,7 +1181,7 @@
 		<key>quitProtectionCloseExtraModifier</key>
 		<string>shift</string>
 		<key>quitProtectionCloseHoldDurationMs</key>
-		<real>800</real>
+		<real>800.0</real>
 		<key>quitProtectionCloseMode</key>
 		<string>hold</string>
 		<key>quitProtectionCloseScope</key>
@@ -1178,7 +1189,7 @@
 		<key>quitProtectionCloseShowFeedback</key>
 		<true/>
 		<key>quitProtectionQuitDoubleIntervalMs</key>
-		<real>600</real>
+		<real>600.0</real>
 		<key>quitProtectionQuitEnabled</key>
 		<false/>
 		<key>quitProtectionQuitExceptions</key>
@@ -1186,7 +1197,7 @@
 		<key>quitProtectionQuitExtraModifier</key>
 		<string>shift</string>
 		<key>quitProtectionQuitHoldDurationMs</key>
-		<real>800</real>
+		<real>800.0</real>
 		<key>quitProtectionQuitMode</key>
 		<string>hold</string>
 		<key>quitProtectionQuitScope</key>
@@ -1206,7 +1217,7 @@
 		<key>recentCapturesShortcut</key>
 		<string>control+option+command:4</string>
 		<key>recentCapturesShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>recorderAutomaticZoom</key>
 		<true/>
 		<key>recorderCountdown</key>
@@ -1231,7 +1242,7 @@
 		<key>recorderShortcut</key>
 		<string>control+option+command:23</string>
 		<key>recorderShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>recorderShowCaptureMenuOnShortcut</key>
 		<true/>
 		<key>recorderSystemAudio</key>
@@ -1247,9 +1258,9 @@
 		<key>scratchpadShortcut</key>
 		<string>control+option+command:45</string>
 		<key>scratchpadShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>scratchpadTextSize</key>
-		<real>13</real>
+		<real>13.0</real>
 		<key>screenOCRDetectQRCodes</key>
 		<true/>
 		<key>screenOCRRemoveLineBreaks</key>
@@ -1257,7 +1268,7 @@
 		<key>screenOCRShortcut</key>
 		<string>control+option+command:17</string>
 		<key>screenOCRShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>screenOCRShowCaptureMenuOnShortcut</key>
 		<true/>
 		<key>screenshotAddToShelf</key>
@@ -1271,7 +1282,7 @@
 		<key>screenshotClipboardShortcut</key>
 		<string>control+option+command:35</string>
 		<key>screenshotClipboardShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>screenshotCopyImageOnly</key>
 		<false/>
 		<key>screenshotCopyToClipboard</key>
@@ -1293,7 +1304,7 @@
 		<key>screenshotFullScreenShortcut</key>
 		<string>control+option+command:20</string>
 		<key>screenshotFullScreenShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>screenshotHideVorssaintWindows</key>
 		<true/>
 		<key>screenshotHighlightWindows</key>
@@ -1311,7 +1322,7 @@
 		<key>screenshotLastCaptureShortcut</key>
 		<string>control+option+command:14</string>
 		<key>screenshotLastCaptureShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>screenshotLastColor</key>
 		<string>red</string>
 		<key>screenshotLastSticker</key>
@@ -1323,7 +1334,7 @@
 		<key>screenshotLastTool</key>
 		<string>arrow</string>
 		<key>screenshotLoupeDefaultZoom</key>
-		<real>1</real>
+		<real>1.0</real>
 		<key>screenshotLoupeRememberZoom</key>
 		<false/>
 		<key>screenshotLoupeStartsOn</key>
@@ -1347,7 +1358,7 @@
 		<key>screenshotShortcut</key>
 		<string>control+option+command:21</string>
 		<key>screenshotShortcutEnabled</key>
-		<false/>
+		<true/>
 		<key>screenshotShowCaptureMenuOnShortcut</key>
 		<true/>
 		<key>screenshotShowLastRegion</key>
@@ -1419,7 +1430,7 @@
 		<key>smoothScrollStep</key>
 		<integer>40</integer>
 		<key>snippetLibraryEnabled</key>
-		<false/>
+		<true/>
 		<key>snippetLibraryShortcut</key>
 		<string>control+option+command:37</string>
 		<key>snippetSoundEnabled</key>
@@ -1427,7 +1438,7 @@
 		<key>snippetSoundName</key>
 		<string>Tink</string>
 		<key>soundOutputSwitcherEnabled</key>
-		<false/>
+		<true/>
 		<key>soundOutputSwitcherShortcut</key>
 		<string>control+option+command:1</string>
 		<key>spacesOrderEnabled</key>
@@ -1457,7 +1468,7 @@
 		<key>switcherCurrentSpaceOnly</key>
 		<false/>
 		<key>switcherEnabled</key>
-		<true/>
+		<false/>
 		<key>switcherIconRowMode</key>
 		<false/>
 		<key>switcherInstantSelection</key>
@@ -1509,7 +1520,7 @@
 		<key>urlCleanerDisabledParameters</key>
 		<string></string>
 		<key>urlCleanerEnabled</key>
-		<false/>
+		<true/>
 		<key>urlCleanerSiteParameters</key>
 		<string></string>
 		<key>wallpaperApplyAllDisplays</key>
@@ -1559,7 +1570,7 @@
 		<key>windowLayoutIgnoredApps</key>
 		<array/>
 		<key>windowLayoutMarginPercent</key>
-		<real>5</real>
+		<real>5.0</real>
 		<key>windowLayoutScreenGap</key>
 		<integer>0</integer>
 		<key>windowLayoutShortcutBottom</key>
@@ -1651,7 +1662,7 @@
 		<key>windowLayoutWindowGap</key>
 		<integer>0</integer>
 		<key>windowMaximizeEnabled</key>
-		<true/>
+		<false/>
 		<key>windowMaximizeExcludedApps</key>
 		<array/>
 		<key>windowPreviewExcludedApps</key>

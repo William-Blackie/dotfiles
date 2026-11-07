@@ -21,6 +21,7 @@ PYTHON_UV_RUN := UV_PROJECT_ENVIRONMENT="$(PYTHON_UV_ENV)" PYTHONDONTWRITEBYTECO
 	apply \
 	check \
 	test-neovim \
+	test-vorssaint \
 	test-python \
 	lint \
 	format \
@@ -74,12 +75,16 @@ apply:
 
 ### Utils
 ## format, lint, and test all files
-check: format-check lint test-neovim test-python
+check: format-check lint test-neovim test-python test-vorssaint
 
 ## test neovim configuration
 test-neovim:
 	nvim --headless -u NONE -i NONE -l tests/neovim.lua
 	nvim --headless -u NONE -i NONE -l tests/neovim-keymaps.lua
+
+## check Vorssaint shortcut ownership and automation settings
+test-vorssaint:
+	python3 tests/vorssaint.py
 
 ## test python plugins
 test-python:

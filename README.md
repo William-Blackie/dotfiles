@@ -103,6 +103,20 @@ The proposed Oryx layout is documented in
 
 The shortcut guide is managed in `dot_hammerspoon/keyguide.lua`.
 
+Vorssaint utilities use `Control + Option + Command` plus a key. Common keys are
+`V` for clipboard history, `D` for shelf, `S` for sound output, `M` for mic
+mute, `K` for keep awake, `N` for notes, `L` for snippets, `T` for OCR, `C` for
+color picker, `W` for camera preview, and `Q` for the quick panel. Add `Shift`
+to `V` to paste plain text. `3/4/5` open full-screen capture, region capture,
+and recording; `H/E/P` open recent captures, the last capture, and a clipboard
+image in the editor. The complete guide lists brightness and other controls.
+
+AeroSpace owns window layouts, floating, fullscreen, and monitor focus. macOS
+owns app switching and standard screenshot keys. Vorssaint's window layout,
+maximizer, app switcher, focus-following, and modifier remapping are disabled.
+The keyboard setup script reserves macOS's `Control + Space` for tmux and
+`Command + Space` for Vorssaint without changing other system shortcuts.
+
 Useful reload commands:
 
 ```sh
@@ -145,6 +159,19 @@ Review exports before committing: settings backups can include text snippets and
 custom launcher entries. Vorssaint excludes clipboard history, shelf contents,
 usage history, and machine state from its portable backup. On another Mac, pull
 the repo and run `chezmoi apply` to restore this setup.
+
+Clipboard history keeps up to 100 items for seven days, filters sensitive text,
+and excludes password managers. Clipboard contents stay on each Mac. Auto-quit
+is enabled with exceptions for terminals, VS Code, Codex, browsers, and
+1Password. Weekly cleanup runs Monday at 09:00 local time with a completion
+notification; Vorssaint's scheduled cleaner moves its safe selection to Trash.
+Display brightness uses the utility modifier layer; add Shift for keyboard
+brightness. Native brightness keys keep their usual behavior. Audio device
+priority discovers the devices attached to each Mac; device IDs and their order
+can differ across machines.
+
+Run `make test-vorssaint` to check active shortcut collisions, modifier
+ownership, clipboard exclusions, and app-quitting exceptions before applying.
 
 ## 1Password And SSH
 
