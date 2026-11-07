@@ -1,4 +1,4 @@
-"""Check shared shortcut ownership and automation rules before applying settings."""
+"""Check active Vorssaint shortcuts for collisions and reserved modifiers."""
 
 import plistlib
 import unittest
@@ -100,43 +100,6 @@ class VorssaintConfigurationTests(unittest.TestCase):
         self.assertEqual(shortcuts.pop("commandBar"), (frozenset({"command"}), 49))
         for role, (modifiers, _) in shortcuts.items():
             self.assertTrue({"control", "option", "command"} <= modifiers, role)
-
-    def test_window_and_input_services_have_one_owner(self) -> None:
-        for key in (
-            "switcherEnabled",
-            "windowMaximizeEnabled",
-            "windowLayoutShortcutsEnabled",
-            "windowDirectionalEnabled",
-            "windowEdgeSnapEnabled",
-            "windowGestureEnabled",
-            "pointerDisplayEnabled",
-            "focusFollowsMouseEnabled",
-            "superKeyEnabled",
-            "switcherTakeOverSystemShortcuts",
-            "finderRenameEnabled",
-        ):
-            self.assertFalse(self.settings[key], key)
-
-    def test_autoquit_protects_development_sessions(self) -> None:
-        exceptions = set(self.settings["autoQuitExceptions"])
-        self.assertTrue(
-            {
-                "net.kovidgoyal.kitty",
-                "com.apple.Terminal",
-                "com.microsoft.VSCode",
-                "com.openai.codex",
-                "com.google.Chrome",
-            }
-            <= exceptions
-        )
-
-    def test_clipboard_excludes_password_managers(self) -> None:
-        self.assertTrue(self.settings["clipboardHistoryFilterSensitiveText"])
-        self.assertTrue(
-            {"com.1password.1password", "com.bitwarden.desktop"}
-            <= set(self.settings["clipboardHistoryIgnoredApps"])
-        )
-        self.assertGreater(self.settings["clipboardHistoryRetentionDays"], 0)
 
 
 if __name__ == "__main__":

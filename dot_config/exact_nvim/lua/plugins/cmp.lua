@@ -2,10 +2,7 @@
 ---@type LazyPluginSpec
 return {
   "saghen/blink.cmp",
-  -- Pin to a tagged release so lazy.nvim always lands on a git tag: the fuzzy
-  -- matcher then downloads a prebuilt binary from GitHub releases instead of
-  -- falling back to `cargo build --release` (which fails here - ~/.cargo is
-  -- owned by root, see the cargo permission note).
+  -- Tagged releases provide prebuilt fuzzy-matcher binaries.
   version = "v1.*",
   dependencies = {
     "saghen/blink.compat",
@@ -54,8 +51,6 @@ return {
       },
     },
 
-    -- (Default) list of enabled providers defined so that you can extend it
-    -- elsewhere in your config, without redefining it, due to `opts_extend`
     sources = {
       default = { "lsp", "path", "snippets", "buffer", "ecolog" },
       per_filetype = {
@@ -88,11 +83,7 @@ return {
         },
         css_vars = {
           name = "css-vars",
-          -- css-vars.nvim's own blink integration (css-vars.blink) requires
-          -- "blink.lib.task", which doesn't exist in current blink.cmp
-          -- (moved under "blink.cmp.lib.*") - it's broken upstream as of
-          -- their HEAD too, not just our pinned version. Use our own
-          -- self-contained source module instead.
+          -- The upstream source expects blink.lib.task; use the local adapter.
           module = "config.sources.css_vars",
 
           opts = {
@@ -105,9 +96,7 @@ return {
           name = "npm",
           module = "blink-cmp-npm",
           async = true,
-          -- optional - make blink-cmp-npm completions top priority (see `:h blink.cmp`)
           score_offset = 100,
-          -- optional - blink-cmp-npm config
           opts = {
             ignore = {},
             only_semantic_versions = true,
@@ -117,9 +106,7 @@ return {
         git = {
           module = "blink-cmp-git",
           name = "Git",
-          opts = {
-            -- options for the blink-cmp-git
-          },
+          opts = {},
         },
         -- https://github.com/disrupted/blink-cmp-conventional-commits
         conventional_commits = {
@@ -128,9 +115,7 @@ return {
           enabled = function()
             return vim.bo.filetype == "gitcommit"
           end,
-          opts = {
-            -- See Configuration section below for available options
-          },
+          opts = {},
         },
       },
     },

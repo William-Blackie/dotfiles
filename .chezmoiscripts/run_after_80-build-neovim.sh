@@ -23,15 +23,6 @@ done
 mkdir -p "$INSTALL_PREFIX/bin" "$STATE_DIR"
 
 # Runs git in the Neovim checkout without reading global git config.
-#
-# Globals:
-#   REPO_DIR
-# Arguments:
-#   Git subcommand and arguments.
-# Outputs:
-#   Writes git output to stdout/stderr.
-# Returns:
-#   The wrapped git command's exit status.
 git_neovim() {
     GIT_CONFIG_GLOBAL=/dev/null git -C "$REPO_DIR" "$@"
 }

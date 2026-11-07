@@ -134,12 +134,6 @@ if [[ -r "$XDG_CONFIG_HOME/fzf/fzf.zsh" ]] || command -v fzf >/dev/null 2>&1; th
   fi
 fi
 
-# Sources the first readable file from a list.
-#
-# Arguments:
-#   Candidate file paths.
-# Returns:
-#   0 after sourcing a file; non-zero if no candidate is readable.
 _source_first() {
   local file
   for file in "$@"; do
@@ -149,13 +143,6 @@ _source_first() {
 }
 
 # Prints the first readable nvm loader script.
-#
-# Globals:
-#   NVM_DIR
-# Outputs:
-#   Writes the loader path to stdout.
-# Returns:
-#   0 if a loader is found; non-zero otherwise.
 _nvm_script() {
   local file
   for file in "$NVM_DIR/nvm.sh" /opt/homebrew/opt/nvm/nvm.sh /usr/local/opt/nvm/nvm.sh; do
@@ -165,15 +152,6 @@ _nvm_script() {
 }
 
 # Lazy-loads nvm and forwards the original command.
-#
-# Globals:
-#   NVM_DIR
-# Arguments:
-#   Arguments passed to nvm.
-# Outputs:
-#   Writes nvm output to stdout/stderr.
-# Returns:
-#   The loaded nvm command's exit status, or non-zero if nvm.sh is missing.
 nvm() {
   local script
   script="$(_nvm_script)" || {
@@ -198,13 +176,6 @@ if command -v direnv >/dev/null 2>&1; then
 fi
 
 # Attaches to or creates a tmux session, letting continuum handle restore.
-#
-# Arguments:
-#   session_name - Optional session name to attach or create (defaults to main).
-# Outputs:
-#   Interactive fzf selection interface when multiple sessions exist.
-# Returns:
-#   0 on success; non-zero if tmux or fzf fails.
 t() {
   local session="${1:-}"
 
@@ -243,13 +214,6 @@ t() {
 }
 
 # Selects and exports the active 1Password account for this shell.
-#
-# Globals:
-#   OP_ACCOUNT
-# Outputs:
-#   Writes the selected account URL to stdout, or dependency errors to stderr.
-# Returns:
-#   0 after selecting an account; non-zero if dependencies are missing or canceled.
 opswitch() {
   local cmd
   for cmd in op jq fzf; do
@@ -268,11 +232,6 @@ opswitch() {
 }
 
 # Signs in to 1Password if needed.
-#
-# Outputs:
-#   Writes the sign-in status to stdout.
-# Returns:
-#   0 if already signed in or sign-in succeeds; non-zero if op fails.
 opsignin() {
   command -v op >/dev/null 2>&1 || return 1
 
@@ -290,16 +249,6 @@ opsignin() {
 }
 
 # Runs chezmoi with the configured 1Password account, when set.
-#
-# Globals:
-#   CHEZMOI_1PASSWORD_ACCOUNT
-#   OP_ACCOUNT
-# Arguments:
-#   Arguments passed to chezmoi.
-# Outputs:
-#   Writes chezmoi output to stdout/stderr.
-# Returns:
-#   The wrapped chezmoi command's exit status.
 chezmoi() {
   local op_chezmoi_account="${CHEZMOI_1PASSWORD_ACCOUNT:-}"
   [[ -n "$op_chezmoi_account" ]] && export OP_ACCOUNT="$op_chezmoi_account"

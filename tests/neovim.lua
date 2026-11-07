@@ -250,9 +250,6 @@ local ok, err = xpcall(function()
     end
   )
   check("plugin specs and Hammerspoon keyguide load cleanly", function()
-    local coderabbit = dofile(root .. "/dot_config/exact_nvim/lua/plugins/coderabbit.lua")
-    assert(type(coderabbit.opts) == "table" and coderabbit.opts.cli.binary == "cr")
-    assert(coderabbit.setup == nil)
     local django_spec =
       dofile(root .. "/dot_config/exact_nvim/lua/plugins/lang/django.lua")
     assert(#django_spec == 2)

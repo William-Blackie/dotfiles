@@ -1,0 +1,5 @@
+.config/nvim/lua/plugins/coderabbit.lua
+.config/nvim/lua/plugins/opencode.lua
+.config/nvim/lua/plugins/obsidian.lua
+.config/opencode/config.json
+.config/opencode/opencode.json

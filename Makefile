@@ -82,7 +82,7 @@ test-neovim:
 	nvim --headless -u NONE -i NONE -l tests/neovim.lua
 	nvim --headless -u NONE -i NONE -l tests/neovim-keymaps.lua
 
-## check Vorssaint shortcut ownership and automation settings
+## check Vorssaint shortcut collisions and modifier usage
 test-vorssaint:
 	python3 tests/vorssaint.py
 

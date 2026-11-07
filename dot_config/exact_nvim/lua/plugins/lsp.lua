@@ -88,15 +88,8 @@ return {
       require("html-css").setup(opts)
       require("lib.project_styles").setup(opts)
 
-      -- html-css's own hover keymap (hover.lua) is a plain global
-      -- `vim.keymap.set`, but LazyVim registers its "K" through
-      -- `Snacks.keymap.set()` with an `lsp` filter: Snacks re-applies
-      -- whichever `n:K` registration has the highest id (i.e. was
-      -- registered most recently) as a *buffer-local* mapping every time an
-      -- LSP client (re)attaches - debounced by 100ms, so it always fires
-      -- after (and clobbers) a plain keymap set from an LspAttach handler.
-      -- Registering ours the same way, deferred past startup so it's
-      -- guaranteed to register after LazyVim's, is what actually wins.
+      -- Register after LazyVim through Snacks so LSP attachment preserves
+      -- the html-css hover mapping instead of replacing it with the default.
       local bind = opts.handlers.hover.bind
       local html_css_hover = vim.fn.maparg(bind, "n", false, true).callback
       if not html_css_hover then

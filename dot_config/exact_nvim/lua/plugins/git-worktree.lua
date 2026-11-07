@@ -8,12 +8,6 @@ local function normalize_branch_name(branch)
   return normalized
 end
 
----@return table
-local function snacks_module()
-  local snacks = require("snacks")
-  return snacks
-end
-
 return {
   "polarmutex/git-worktree.nvim",
   dependencies = {
@@ -115,7 +109,7 @@ return {
           return branches
         end
 
-        local snacks = snacks_module()
+        local snacks = require("snacks")
         local branches = get_branches()
         local items = {}
         for _, branch in ipairs(branches) do
@@ -203,7 +197,7 @@ return {
           return worktrees
         end
 
-        local snacks = snacks_module()
+        local snacks = require("snacks")
         local worktrees = get_worktrees()
         local items = {}
         for _, wt in ipairs(worktrees) do
@@ -259,7 +253,7 @@ return {
           return
         end
 
-        local snacks = snacks_module()
+        local snacks = require("snacks")
         local items = {}
         for _, wt in ipairs(worktrees) do
           table.insert(items, wt.text)
@@ -287,7 +281,7 @@ return {
     {
       "<leader>gwi",
       function()
-        local snacks = snacks_module()
+        local snacks = require("snacks")
 
         -- Check if we're in an empty directory or a git repo
         local is_git_repo = vim.fn.isdirectory(".git") == 1

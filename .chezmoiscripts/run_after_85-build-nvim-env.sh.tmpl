@@ -26,24 +26,10 @@ RUBY_BIN_DIR="${RUBY_ENV_DIR}/bin"
 RUBY_GEM_BIN_DIR="${RUBY_ENV_DIR}/gems/bin"
 PERL_BIN_DIR="${PERL_ENV_DIR}/bin"
 
-# Returns whether a command is available on PATH.
-#
-# Arguments:
-#   $1: Command name to check.
-# Returns:
-#   0 if the command exists; non-zero otherwise.
 has_cmd() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Prints the Homebrew prefix for a formula.
-#
-# Arguments:
-#   $1: Homebrew formula name.
-# Outputs:
-#   Writes the formula prefix to stdout.
-# Returns:
-#   0 if brew and the formula prefix are available; non-zero otherwise.
 brew_prefix() {
     local formula="$1"
 
@@ -52,13 +38,6 @@ brew_prefix() {
 }
 
 # Computes a stable hash marker for a manifest file.
-#
-# Arguments:
-#   $1: File to hash.
-# Outputs:
-#   Writes the sha256 hash, "missing", or "error" to stdout.
-# Returns:
-#   Always returns 0 so optional manifest files can participate in stamps.
 file_hash() {
     local file="$1"
 
@@ -77,13 +56,6 @@ file_hash() {
 }
 
 # Builds stamp content from one or more manifest files.
-#
-# Arguments:
-#   Manifest file paths.
-# Outputs:
-#   Writes path=hash lines to stdout.
-# Returns:
-#   0 after writing all requested file markers.
 file_stamp_content() {
     local file
 
@@ -92,26 +64,10 @@ file_stamp_content() {
     done
 }
 
-# Prints the stamp file path for an environment name.
-#
-# Globals:
-#   STATE_DIR
-# Arguments:
-#   $1: Stamp name.
-# Outputs:
-#   Writes an absolute stamp path to stdout.
 stamp_file() {
     printf '%s/%s.txt\n' "$STATE_DIR" "$1"
 }
 
-# Returns whether an environment marker and stamp both match expected content.
-#
-# Arguments:
-#   $1: Stamp name.
-#   $2: Marker file or directory proving the environment exists.
-#   $3: Expected stamp content.
-# Returns:
-#   0 if the marker exists and the stamp matches; non-zero otherwise.
 cache_hit() {
     local name="$1"
     local marker="$2"
@@ -123,12 +79,6 @@ cache_hit() {
 }
 
 # Writes cache stamp content for an environment.
-#
-# Globals:
-#   STATE_DIR
-# Arguments:
-#   $1: Stamp name.
-#   $2: Stamp content.
 write_stamp() {
     local name="$1"
     local content="$2"
@@ -137,13 +87,6 @@ write_stamp() {
     printf '%s\n' "$content" >"$(stamp_file "$name")"
 }
 
-# Mirrors a manifest file into an environment directory.
-#
-# Arguments:
-#   $1: Source path.
-#   $2: Destination path.
-# Returns:
-#   0 if the file was copied or the destination was removed.
 sync_file() {
     local src="$1"
     local dest="$2"
@@ -156,15 +99,6 @@ sync_file() {
 }
 
 # Writes the executable wrapper used by Neovim's Ruby provider.
-#
-# Globals:
-#   RUBY_ENV_DIR
-#   RUBY_GEM_BIN_DIR
-# Arguments:
-#   $1: Ruby executable path.
-#   $2: Wrapper path to write.
-# Outputs:
-#   Writes the wrapper file.
 write_ruby_host_wrapper() {
     local ruby_bin="$1"
     local wrapper="$2"
@@ -181,14 +115,6 @@ EOF
 }
 
 # Writes the executable wrapper used by Neovim's Perl provider.
-#
-# Globals:
-#   PERL_ENV_DIR
-# Arguments:
-#   $1: Perl executable path.
-#   $2: Wrapper path to write.
-# Outputs:
-#   Writes the wrapper file.
 write_perl_wrapper() {
     local perl_bin="$1"
     local wrapper="$2"
@@ -204,15 +130,6 @@ EOF
 }
 
 # Synchronizes Neovim's Python provider environment from its manifest.
-#
-# Globals:
-#   PYTHON_ENV_DIR
-#   PYTHON_MANIFEST_DIR
-#   PYTHON_VERSION
-# Outputs:
-#   Writes status messages to stdout.
-# Returns:
-#   0 even when optional tooling is missing or uv sync fails.
 sync_python_env() {
     [[ -f "${PYTHON_MANIFEST_DIR}/pyproject.toml" ]] || return 0
 
@@ -253,18 +170,6 @@ sync_python_env() {
 }
 
 # Synchronizes Neovim's Node provider environment from its manifest.
-#
-# Globals:
-#   NODE_BIN_DIR
-#   NODE_ENV_DIR
-#   NODE_MAJOR
-#   NODE_MANIFEST_DIR
-#   PNPM_VERSION
-#   XDG_DATA_HOME
-# Outputs:
-#   Writes status messages to stdout.
-# Returns:
-#   0 even when optional tooling is missing or pnpm install fails.
 sync_node_env() {
     [[ -f "${NODE_MANIFEST_DIR}/package.json" && -f "${NODE_MANIFEST_DIR}/pnpm-lock.yaml" ]] || return 0
 
@@ -362,16 +267,6 @@ sync_node_env() {
 }
 
 # Synchronizes Neovim's Ruby provider environment.
-#
-# Globals:
-#   RUBY_BIN_DIR
-#   RUBY_ENV_DIR
-#   RUBY_GEM_BIN_DIR
-#   RUBY_GEM_VERSION
-# Outputs:
-#   Writes status messages to stdout.
-# Returns:
-#   0 even when Homebrew Ruby or gem installation is unavailable.
 sync_ruby_env() {
     local ruby_prefix ruby_bin gem_bin ruby_version
     local stamp_content
@@ -422,15 +317,6 @@ sync_ruby_env() {
 }
 
 # Synchronizes Neovim's Perl provider environment.
-#
-# Globals:
-#   PERL_BIN_DIR
-#   PERL_ENV_DIR
-#   PERL_MODULE
-# Outputs:
-#   Writes status messages to stdout.
-# Returns:
-#   0 even when Homebrew Perl, cpanm, or module installation is unavailable.
 sync_perl_env() {
     local perl_prefix perl_bin cpanm_prefix cpanm_bin perl_version
     local stamp_content

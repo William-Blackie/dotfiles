@@ -43,12 +43,9 @@ require("lazy").setup({
   },
   install = { colorscheme = { "catppuccin" } },
   dev = {
-    -- Directory where you store your local plugin projects. If a function is used,
-    -- the plugin directory (e.g. `~/projects/plugin-name`) must be returned.
     ---@type string | fun(plugin: LazyPlugin): string
     path = "~/Projects/nvim/",
-    ---@type string[] plugins that match these patterns will use your local versions instead of being fetched from GitHub
-    patterns = {}, -- For example {"folke"}
+    patterns = {},
     fallback = false, -- Fallback to git when local plugin doesn't exist
   },
   checker = { enabled = true, notify = false },

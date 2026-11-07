@@ -12,7 +12,6 @@ from django.template.loader import render_to_string
 
 from django_orm_analyzer.analyzer import QueryAnalyzer
 
-# ANSI color codes for premium terminal styling
 CLR_BLUE = "\033[94m"
 CLR_GREEN = "\033[92m"
 CLR_WARNING = "\033[93m"

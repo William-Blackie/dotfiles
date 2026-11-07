@@ -95,7 +95,6 @@ vim.opt.spellfile = vim.fn.stdpath("config") .. "/spell/en.utf-8.add"
 vim.g.lazyvim_eslint_auto_format = true
 
 -- Blink.cmp
--- Build from main
 vim.g.lazyvim_blink_main = false
 -- Turn off the AI.
 vim.g.ai_cmp = false

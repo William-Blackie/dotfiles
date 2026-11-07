@@ -23,17 +23,6 @@ lib.django_root_markers = {
   ".git",
 }
 
--- Get environment variable with default fallback. Treats both nil and empty
--- string as unset (`:h vim.env` only sets vim.env for non-empty values, but
--- `:let $FOO = ''` can still produce an empty entry).
-function lib.env_or_default(name, default)
-  local value = vim.env[name]
-  if value == nil or value == "" then
-    return default
-  end
-  return value
-end
-
 -- Top-level directory of the current git repository, or nil if not in one.
 function lib.git_root()
   local result = vim

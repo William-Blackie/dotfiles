@@ -7,11 +7,6 @@ PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$HOME/bin:$PATH"
 export PATH
 
 # Finds a usable Homebrew executable.
-#
-# Outputs:
-#   Writes the brew path to stdout.
-# Returns:
-#   0 if Homebrew is installed and functional; non-zero otherwise.
 brew_cmd() {
   if command -v brew >/dev/null 2>&1; then
     if brew --prefix >/dev/null 2>&1; then

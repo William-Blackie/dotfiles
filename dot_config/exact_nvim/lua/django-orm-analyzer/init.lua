@@ -60,7 +60,6 @@ M.config = {
   },
 }
 
--- Initialize default highlight groups for a premium developer experience
 local function setup_highlights()
   local colors = {
     primary = "#6366f1", -- Indigo

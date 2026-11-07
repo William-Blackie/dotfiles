@@ -26,11 +26,6 @@ else
 fi
 
 # Fetches the latest release tag for Recordly from GitHub.
-#
-# Outputs:
-#   Writes the tag string (e.g. 1.4.0) to stdout.
-# Returns:
-#   0 if the tag was resolved; non-zero otherwise.
 resolve_latest_tag() {
     local location_header
     location_header="$(curl -fsSIL --connect-timeout 5 --max-time 10 "https://github.com/webadderallorg/Recordly/releases/latest" 2>/dev/null | grep -i "^location:" || true)"
@@ -71,10 +66,6 @@ TEMP_DIR="$(mktemp -d)"
 MOUNT_POINT=""
 
 # Cleans up temporary files and unmounts the DMG if attached.
-#
-# Globals:
-#   MOUNT_POINT
-#   TEMP_DIR
 cleanup() {
     if [[ -n "$MOUNT_POINT" && -d "$MOUNT_POINT" ]]; then
         hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
