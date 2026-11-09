@@ -5,6 +5,14 @@ source_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 test_dir="$(mktemp -d)"
 trap 'rm -rf "$test_dir"' EXIT
 
+# A saved script PATH may omit Nix despite inheriting its shell-init flag.
+mkdir -p "$test_dir/home/.nix-profile/bin"
+printf '#!/bin/sh\nexit 0\n' >"$test_dir/home/.nix-profile/bin/nix"
+chmod +x "$test_dir/home/.nix-profile/bin/nix"
+# shellcheck disable=SC2016
+env HOME="$test_dir/home" XDG_STATE_HOME="$test_dir/home/.local/state" PATH=/usr/bin:/bin __ETC_PROFILE_NIX_SOURCED=1 \
+    /bin/sh -eu -c '. "$1"; command -v nix >/dev/null; nix --version' sh "$source_dir/dot_config/shell/nix.sh"
+
 # Use functions so a system Nix profile cannot override these test doubles.
 nix() {
     printf '%s\n' "$*" >>"$TEST_NIX_LOG"
