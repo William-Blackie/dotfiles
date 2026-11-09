@@ -22,6 +22,9 @@ PYTHON_UV_RUN := UV_PROJECT_ENVIRONMENT="$(PYTHON_UV_ENV)" PYTHONDONTWRITEBYTECO
 	check \
 	test-neovim \
 	test-vorssaint \
+	test-nix \
+	test-onepassword \
+	test-secrets \
 	test-python \
 	lint \
 	format \
@@ -75,7 +78,19 @@ apply:
 
 ### Utils
 ## format, lint, and test all files
-check: format-check lint test-neovim test-python test-vorssaint
+check: format-check lint test-neovim test-python test-nix test-onepassword test-secrets test-vorssaint
+
+## test live secret rendering with a fake 1Password CLI
+test-secrets:
+	python3 tests/chezmoi-secrets.py
+
+## test account selection without accessing 1Password
+test-onepassword:
+	zsh -f tests/onepassword.zsh
+
+## test Nix bootstrap and profile switching without installing packages
+test-nix:
+	bash tests/nix-bootstrap.sh
 
 ## test neovim configuration
 test-neovim:
@@ -161,13 +176,13 @@ format-lua-check:
 
 ## format python files
 format-python:
-	$(PYTHON_UV_RUN) ruff format $(PYTHON_PROJECT_DIR)
+	$(PYTHON_UV_RUN) ruff format $(PYTHON_PROJECT_DIR) tests/chezmoi-secrets.py
 
 ## check formatting of python files
 format-python-check:
-	$(PYTHON_UV_RUN) ruff format --check $(PYTHON_PROJECT_DIR)
+	$(PYTHON_UV_RUN) ruff format --check $(PYTHON_PROJECT_DIR) tests/chezmoi-secrets.py
 
 ## lint python files
 lint-python:
-	$(PYTHON_UV_RUN) ruff check --no-cache $(PYTHON_PROJECT_DIR)
-	$(PYTHON_UV_RUN) mypy --cache-dir="$(PYTHON_UV_ENV)/mypy_cache" --config-file $(PYTHON_PROJECT_DIR)/pyproject.toml $(PYTHON_PROJECT_DIR)
+	$(PYTHON_UV_RUN) ruff check --no-cache $(PYTHON_PROJECT_DIR) tests/chezmoi-secrets.py
+	$(PYTHON_UV_RUN) mypy --cache-dir="$(PYTHON_UV_ENV)/mypy_cache" --config-file $(PYTHON_PROJECT_DIR)/pyproject.toml $(PYTHON_PROJECT_DIR) tests/chezmoi-secrets.py

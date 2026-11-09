@@ -22,3 +22,15 @@ docs/
 node_modules/
 **/node_modules/
 tests/
+
+{{ $workSecrets := get . "workSecrets" | default dict -}}
+{{ $kubernetes := get . "kubernetes" | default dict -}}
+{{ if not (get $kubernetes "sources") -}}
+.kube/config
+{{ end -}}
+{{ if not (and (get $workSecrets "account") (get $workSecrets "awsCredentials")) -}}
+.config/aws/credentials
+{{ end -}}
+{{ if not (and (get $workSecrets "account") (get $workSecrets "awsConfig")) -}}
+.config/aws/config
+{{ end -}}

@@ -5,7 +5,6 @@ PYTHON_VERSION="3.12"
 NODE_MAJOR="24"
 PNPM_VERSION="11.13.1"
 RUBY_GEM_VERSION="0.10.0"
-PERL_MODULE="Neovim::Ext"
 
 SOURCE_DIR="{{ .chezmoi.sourceDir }}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}"
@@ -20,21 +19,12 @@ NODE_MANIFEST_DIR="${MANIFEST_ROOT}/node"
 PYTHON_ENV_DIR="${ENV_ROOT}/python"
 NODE_ENV_DIR="${ENV_ROOT}/node"
 RUBY_ENV_DIR="${ENV_ROOT}/ruby"
-PERL_ENV_DIR="${ENV_ROOT}/perl"
 NODE_BIN_DIR="${NODE_ENV_DIR}/bin"
 RUBY_BIN_DIR="${RUBY_ENV_DIR}/bin"
 RUBY_GEM_BIN_DIR="${RUBY_ENV_DIR}/gems/bin"
-PERL_BIN_DIR="${PERL_ENV_DIR}/bin"
 
 has_cmd() {
     command -v "$1" >/dev/null 2>&1
-}
-
-brew_prefix() {
-    local formula="$1"
-
-    has_cmd brew || return 1
-    brew --prefix "$formula" 2>/dev/null
 }
 
 # Computes a stable hash marker for a manifest file.
@@ -114,21 +104,6 @@ EOF
     chmod 0755 "$wrapper"
 }
 
-# Writes the executable wrapper used by Neovim's Perl provider.
-write_perl_wrapper() {
-    local perl_bin="$1"
-    local wrapper="$2"
-    local perl_lib="${PERL_ENV_DIR}/lib/perl5"
-
-    cat >"$wrapper" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-export PERL5LIB="${perl_lib}:\${PERL5LIB:-}"
-exec "${perl_bin}" "\$@"
-EOF
-    chmod 0755 "$wrapper"
-}
-
 # Synchronizes Neovim's Python provider environment from its manifest.
 sync_python_env() {
     [[ -f "${PYTHON_MANIFEST_DIR}/pyproject.toml" ]] || return 0
@@ -161,7 +136,7 @@ sync_python_env() {
         exit_code=$?
         if [[ $exit_code -ne 0 ]]; then
             echo "uv sync failed with exit code $exit_code. Skipping Python env build."
-            exit 0
+            exit 1
         fi
     ) || return 0
 
@@ -176,6 +151,8 @@ sync_node_env() {
     local node_major pnpm_version stamp_content
     stamp_content=$(
         printf 'node_major=%s\n' "$NODE_MAJOR"
+        printf 'node_bin=%s\n' "$(command -v node || true)"
+        printf 'node_version=%s\n' "$(node --version 2>/dev/null || true)"
         printf 'pnpm_version=%s\n' "$PNPM_VERSION"
         file_stamp_content \
             "${NODE_MANIFEST_DIR}/.nvmrc" \
@@ -191,27 +168,9 @@ sync_node_env() {
 
     (
         set +e
-        NVM_DIR="${NVM_DIR:-${XDG_DATA_HOME}/nvm}"
-        if [[ -s "${NVM_DIR}/nvm.sh" ]]; then
-            # shellcheck disable=SC1091
-            . "${NVM_DIR}/nvm.sh" >/dev/null 2>&1
-        elif [[ -s "/opt/homebrew/opt/nvm/nvm.sh" ]]; then
-            # shellcheck disable=SC1091
-            . "/opt/homebrew/opt/nvm/nvm.sh" >/dev/null 2>&1
-        elif nvm_prefix="$(brew_prefix nvm)" && [[ -s "${nvm_prefix}/nvm.sh" ]]; then
-            # shellcheck disable=SC1090,SC1091
-            . "${nvm_prefix}/nvm.sh" >/dev/null 2>&1
-        fi
-
-        if ! has_cmd nvm; then
-            echo "Skipping Neovim Node env build: missing required command: nvm"
+        if ! has_cmd node; then
+            echo "Skipping Neovim Node env build: missing Node from the Nix profile"
             exit 0
-        fi
-
-        if ! nvm use "$NODE_MAJOR" >/dev/null 2>&1; then
-            echo "Node ${NODE_MAJOR} not found, trying to install..."
-            nvm install "$NODE_MAJOR" >/dev/null 2>&1
-            nvm use "$NODE_MAJOR" >/dev/null 2>&1
         fi
 
         node_major="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 'unknown')"
@@ -268,24 +227,25 @@ sync_node_env() {
 
 # Synchronizes Neovim's Ruby provider environment.
 sync_ruby_env() {
-    local ruby_prefix ruby_bin gem_bin ruby_version
+    local ruby_bin gem_bin ruby_version
     local stamp_content
 
-    if ! ruby_prefix="$(brew_prefix ruby)" || [[ ! -x "${ruby_prefix}/bin/ruby" || ! -x "${ruby_prefix}/bin/gem" ]]; then
-        echo "Skipping Neovim Ruby env build: missing Homebrew ruby"
+    if ! ruby_bin="$(command -v ruby)" || ! gem_bin="$(command -v gem)"; then
+        echo "Skipping Neovim Ruby env build: missing ruby or gem"
         return 0
     fi
 
-    ruby_bin="${ruby_prefix}/bin/ruby"
-    gem_bin="${ruby_prefix}/bin/gem"
     ruby_version="$("$ruby_bin" -e 'print RUBY_VERSION' 2>/dev/null || echo 'unknown')"
 
     stamp_content=$(
+        printf 'ruby_bin=%s\n' "$ruby_bin"
         printf 'ruby_version=%s\n' "$ruby_version"
         printf 'ruby_gem_version=%s\n' "$RUBY_GEM_VERSION"
     )
 
-    if cache_hit ruby "${RUBY_BIN_DIR}/neovim-ruby-host" "$stamp_content"; then
+    if cache_hit ruby "${RUBY_BIN_DIR}/neovim-ruby-host" "$stamp_content" &&
+        GEM_HOME="${RUBY_ENV_DIR}/gems" GEM_PATH="${RUBY_ENV_DIR}/gems" \
+            "$ruby_bin" -rneovim -e "" >/dev/null 2>&1; then
         return 0
     fi
 
@@ -306,7 +266,7 @@ sync_ruby_env() {
         exit_code=$?
         if [[ $exit_code -ne 0 ]]; then
             echo "Ruby gem installation failed with exit code $exit_code. Skipping Ruby env build."
-            exit 0
+            exit 1
         fi
     ) || return 0
 
@@ -316,59 +276,10 @@ sync_ruby_env() {
     return 0
 }
 
-# Synchronizes Neovim's Perl provider environment.
-sync_perl_env() {
-    local perl_prefix perl_bin cpanm_prefix cpanm_bin perl_version
-    local stamp_content
-
-    if ! perl_prefix="$(brew_prefix perl)" || [[ ! -x "${perl_prefix}/bin/perl" ]]; then
-        echo "Skipping Neovim Perl env build: missing Homebrew perl"
-        return 0
-    fi
-
-    if cpanm_prefix="$(brew_prefix cpanminus)" && [[ -x "${cpanm_prefix}/bin/cpanm" ]]; then
-        cpanm_bin="${cpanm_prefix}/bin/cpanm"
-    elif has_cmd cpanm; then
-        cpanm_bin="$(command -v cpanm)"
-    else
-        echo "Skipping Neovim Perl env build: missing cpanm"
-        return 0
-    fi
-
-    perl_bin="${perl_prefix}/bin/perl"
-    perl_version="$("$perl_bin" -e 'print $^V' 2>/dev/null || echo 'unknown')"
-
-    stamp_content=$(
-        printf 'perl_version=%s\n' "$perl_version"
-        printf 'perl_module=%s\n' "$PERL_MODULE"
-    )
-
-    if cache_hit perl "${PERL_BIN_DIR}/perl" "$stamp_content"; then
-        return 0
-    fi
-    echo "Syncing Neovim Perl env at ${PERL_ENV_DIR}..."
-    (
-        set +e
-        PERL_CPANM_HOME="${PERL_ENV_DIR}/cpanm" \
-            "$perl_bin" "$cpanm_bin" -L "$PERL_ENV_DIR" -n App::cpanminus "$PERL_MODULE"
-        exit_code=$?
-        if [[ $exit_code -ne 0 ]]; then
-            echo "Perl module installation failed with exit code $exit_code. Skipping Perl env build."
-            exit 0
-        fi
-    ) || return 0
-
-    mkdir -p "$PERL_BIN_DIR"
-    write_perl_wrapper "$perl_bin" "${PERL_BIN_DIR}/perl"
-    write_stamp perl "$stamp_content"
-    return 0
-}
-
-mkdir -p "$PYTHON_ENV_DIR" "$NODE_ENV_DIR" "$RUBY_ENV_DIR" "$PERL_ENV_DIR"
+mkdir -p "$PYTHON_ENV_DIR" "$NODE_ENV_DIR" "$RUBY_ENV_DIR"
 
 sync_python_env
 sync_node_env
 sync_ruby_env
-sync_perl_env
 
 echo "Neovim envs are ready under ${ENV_ROOT}."

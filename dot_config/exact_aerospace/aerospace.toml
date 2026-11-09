@@ -1,6 +1,6 @@
 config-version = 2
 
-after-startup-command = ["exec-and-forget borders"]
+after-startup-command = ["exec-and-forget /bin/zsh -lc 'exec borders'"]
 start-at-login        = true
 auto-reload-config    = true
 

@@ -1,0 +1,48 @@
+sourceDir = {{ .chezmoi.sourceDir | quote }}
+workingTree = {{ .chezmoi.sourceDir | quote }}
+
+[hooks.read-source-state.pre]
+command = "bash"
+args = [{{ joinPath .chezmoi.sourceDir ".install-password-manager.sh" | quote }}]
+
+# 1Password integration - uses first account if only one exists
+# Or set CHEZMOI_1PASSWORD_ACCOUNT env var to override
+[onepassword]
+# The managed Nix profile also works before the shell config is installed.
+{{ $nixBin := joinPath .chezmoi.homeDir ".local/state/nix/profiles/dotfiles/bin" -}}
+command = {{ joinPath $nixBin "op" | quote }}
+{{ if env "CHEZMOI_1PASSWORD_ACCOUNT" -}}
+account = {{ env "CHEZMOI_1PASSWORD_ACCOUNT" | quote }}
+{{- end }}
+
+[edit]
+command = "nvim"
+watch = true
+apply = true
+
+[merge]
+command = "nvim"
+watch = true
+apply = true
+
+[diff]
+exclude = ["scripts"]
+{{ if lookPath "delta" -}}
+pager = "delta"
+{{- end }}
+
+[status]
+exclude = ["scripts"]
+
+[scriptEnv]
+# Before-scripts install this profile; after-scripts can use it in the same apply.
+PATH = {{ printf "%s:%s" (joinPath .chezmoi.homeDir ".local/state/nix/profiles/dotfiles/bin") (env "PATH") | quote }}
+
+{{ $workSecrets := get . "workSecrets" | default dict -}}
+{{ range $key, $variable := dict "account" "OP_WORK_ACCOUNT" "awsCredentials" "OP_AWS_CREDENTIALS_REF" "awsConfig" "OP_AWS_CONFIG_REF" -}}
+{{ if env $variable -}}
+{{ $_ := set $workSecrets $key (env $variable) -}}
+{{ end -}}
+{{ end -}}
+# Preserve machine-local references when init regenerates the config.
+{{ dict "data" (dict "workSecrets" $workSecrets "kubernetes" (get . "kubernetes" | default dict)) | toToml }}

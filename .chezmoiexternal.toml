@@ -10,6 +10,20 @@ type      = "git-repo"
 url       = "https://github.com/tmux-plugins/tpm"
 pull.args = ["--ff-only"]
 
+# Manage NVM's code while preserving installed Node versions, aliases, and cache.
+[".local/share/nvm"]
+type            = "archive"
+url             = "https://github.com/nvm-sh/nvm/archive/refs/tags/v0.41.0.tar.gz"
+checksum.sha256 = "532560c9ecc6ef484279fcc1c600e9346537bc7913b891ffd0ec0caca5072694"
+stripComponents = 1
+exact           = false
+include         = [
+  "*/nvm.sh",
+  "*/nvm-exec",
+  "*/bash_completion",
+  "*/LICENSE.md"
+]
+
 [".local/src/neovim"]
 type      = "git-repo"
 url       = "https://github.com/neovim/neovim.git"

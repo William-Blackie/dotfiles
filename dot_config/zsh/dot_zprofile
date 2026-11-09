@@ -2,3 +2,6 @@
 
 # Login-only local environment.
 [[ -f "$ZDOTDIR/.zprofile.local" ]] && source "$ZDOTDIR/.zprofile.local"
+
+# macOS path_helper runs after .zshenv; restore the managed tools' precedence.
+[[ -r "$XDG_CONFIG_HOME/shell/nix.sh" ]] && source "$XDG_CONFIG_HOME/shell/nix.sh"

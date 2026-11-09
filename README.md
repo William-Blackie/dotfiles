@@ -6,19 +6,38 @@ directories marked `exact_*` when applying them.
 
 ## Setup
 
-Install Homebrew, then:
+Install [Nix](https://nixos.org/download/) first, then open a new terminal. The
+package set targets Apple Silicon macOS and Linux (x86_64/aarch64).
+
+Install chezmoi without Homebrew, then initialize over HTTPS (SSH keys may not
+be available yet):
 
 ```sh
-brew install chezmoi git
-chezmoi init git@github.com:William-Blackie/dotfiles.git \
+mkdir -p ~/.local/bin
+curl -fsLS https://get.chezmoi.io | sh -s -- -b ~/.local/bin
+export PATH="$HOME/.local/bin:$PATH"
+chezmoi init https://github.com/William-Blackie/dotfiles.git \
   --source ~/dotfiles \
   --config-path ~/.config/chezmoi/chezmoi.toml
 chezmoi apply
 ```
 
-On a configured Mac, pull `~/dotfiles` and run `chezmoi apply`. The apply
-scripts install packages, fetch dependencies, and build Neovim and its provider
-environments.
+For an existing checkout, install Nix and run:
+
+```sh
+chezmoi init --source ~/dotfiles \
+  --config-path ~/.config/chezmoi/chezmoi.toml
+chezmoi apply
+exec zsh -l
+```
+
+Before reading source state (including during `init --apply`), chezmoi installs
+1Password CLI through Nix if the managed `op` is missing. Apply installs the
+shared CLI tools before running build scripts. Homebrew remains responsible for
+macOS desktop apps and fonts. Blueutil, Borders, and SwitchAudioSource are Nix
+packages on macOS. Existing Homebrew tools are not uninstalled automatically;
+the Nix profile takes priority in new shells. The remaining desktop
+configuration is still macOS-first.
 
 ## Use
 
@@ -27,6 +46,10 @@ chezmoi diff
 chezmoi apply
 chezmoi status
 ```
+
+Scripts are hidden from `diff` and `status`; use `--exclude=none` to include
+them. The root `.chezmoi.toml.tmpl` generates machine-local configuration on
+`chezmoi init`; regular applies do not overwrite it.
 
 Edit files in this repo, then apply. Changes made by an app need to be copied
 back into the repo before they can be shared across Macs.
@@ -131,6 +154,10 @@ Enable the 1Password SSH agent on each Mac. Agent accounts, keys, and
 `~/.config/1Password/ssh/agent.toml` stay local. Optional SSH overrides go in
 `~/.ssh/config.local`.
 
+AWS and Kubernetes configuration are rendered from explicit 1Password accounts.
+See [tools and secrets](docs/tools-and-secrets.md) for account setup, vault
+references, Nix updates and rollback, and NVM management.
+
 ## Checks
 
 ```sh
@@ -138,6 +165,6 @@ pnpm install
 make check
 ```
 
-Focused checks: `make test-neovim`, `make test-python`, and
-`make test-vorssaint`. Neovim checks require the installed plugins and Python
-Tree-sitter parser.
+Focused checks: `make test-neovim`, `make test-python`, `make test-vorssaint`,
+`make test-nix`, `make test-onepassword`, and `make test-secrets`. Neovim checks
+require the installed plugins and Python Tree-sitter parser.

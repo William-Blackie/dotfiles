@@ -25,11 +25,10 @@ local python_bin = nvim_env .. "/python/.venv/bin"
 local node_bin = nvim_env .. "/node/bin:" .. nvim_env .. "/node/node_modules/.bin"
 local node_host = nvim_env .. "/node/node_modules/neovim/bin/cli.js"
 local ruby_host = nvim_env .. "/ruby/bin/neovim-ruby-host"
-local ruby_bin = "/opt/homebrew/opt/ruby/bin"
+local ruby_executable = vim.fn.exepath("ruby")
+local ruby_bin = vim.fn.fnamemodify(ruby_executable, ":h")
 local ruby_gems = nvim_env .. "/ruby/gems"
-local perl_host = nvim_env .. "/perl/bin/perl"
-local perl_bin = nvim_env .. "/perl/bin"
-local perl_lib = nvim_env .. "/perl/lib/perl5"
+local perl_host = vim.fn.exepath("perl")
 
 if vim.fn.executable(python_host) == 1 then
   vim.env.PATH = python_bin .. ":" .. vim.env.PATH
@@ -39,15 +38,10 @@ if vim.fn.executable(nvim_env .. "/node/bin/node") == 1 then
   vim.env.PATH = node_bin .. ":" .. vim.env.PATH
 end
 
-if vim.fn.executable(ruby_bin .. "/ruby") == 1 then
+if ruby_executable ~= "" then
   vim.env.GEM_HOME = ruby_gems
   vim.env.GEM_PATH = ruby_gems
   vim.env.PATH = ruby_bin .. ":" .. ruby_gems .. "/bin:" .. vim.env.PATH
-end
-
-if vim.fn.executable(perl_host) == 1 then
-  vim.env.PERL5LIB = perl_lib .. ":" .. (vim.env.PERL5LIB or "")
-  vim.env.PATH = perl_bin .. ":" .. vim.env.PATH
 end
 
 if vim.fn.executable(python_host) == 1 then

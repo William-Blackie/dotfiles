@@ -61,15 +61,13 @@ preferred_path=(
   "$XDG_DATA_HOME/nvim/mason/bin"
   "$HOME/bin"
   "$PNPM_HOME/bin"
+  "$XDG_DATA_HOME/npm/bin"
   "$CARGO_HOME/bin"
   "$GOPATH/bin"
 )
 
-if [[ -r "$NVM_DIR/alias/default" ]]; then
-  _node_version="$(<"$NVM_DIR/alias/default")"
-  [[ -d "$NVM_DIR/versions/node/$_node_version/bin" ]] && preferred_path=("$NVM_DIR/versions/node/$_node_version/bin" "${preferred_path[@]}")
-fi
-unset _node_version
-
 path=("${preferred_path[@]}" "${path[@]}")
 export PATH
+
+# Load Nix last so managed tools take precedence over old Homebrew/runtime installs.
+[[ -r "$XDG_CONFIG_HOME/shell/nix.sh" ]] && source "$XDG_CONFIG_HOME/shell/nix.sh"

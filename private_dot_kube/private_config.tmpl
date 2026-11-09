@@ -1,0 +1,49 @@
+{{- $clusters := list -}}
+{{- $users := list -}}
+{{- $contexts := list -}}
+{{- $names := dict -}}
+{{- range .kubernetes.sources -}}
+  {{- if or (not .name) (not .account) (hasKey $names .name) -}}
+    {{- fail "Kubernetes sources require unique names and explicit accounts" -}}
+  {{- end -}}
+  {{- if eq (not (get . "reference")) (not (get . "document")) -}}
+    {{- fail "Kubernetes sources require exactly one reference or document" -}}
+  {{- end -}}
+  {{- $_ := set $names .name true -}}
+  {{- $raw := "" -}}
+  {{- if get . "reference" -}}
+    {{- $raw = onepasswordRead .reference .account -}}
+  {{- else -}}
+    {{- $raw = onepasswordDocument .document (get . "vault") .account -}}
+  {{- end -}}
+  {{- if not (trim $raw) -}}{{- fail "1Password returned an empty kubeconfig" -}}{{- end -}}
+  {{- $config := fromYaml $raw -}}
+  {{- $context := dict -}}
+  {{- range $config.contexts -}}
+    {{- if eq .name (index $config "current-context") -}}
+      {{- $context = .context -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $cluster := dict -}}
+  {{- $user := dict -}}
+  {{- range $config.clusters -}}
+    {{- if eq .name (get $context "cluster") -}}{{- $cluster = .cluster -}}{{- end -}}
+  {{- end -}}
+  {{- range $config.users -}}
+    {{- if eq .name (get $context "user") -}}{{- $user = .user -}}{{- end -}}
+  {{- end -}}
+  {{- if or (not $context) (not $cluster) (not $user) -}}
+    {{- fail (printf "Kubernetes source %s has an incomplete current context" .name) -}}
+  {{- end -}}
+  {{/* Namespace each selected context, cluster and user to avoid name collisions. */}}
+  {{- $_ := set $context "cluster" .name -}}
+  {{- $_ := set $context "user" .name -}}
+  {{- $clusters = append $clusters (dict "name" .name "cluster" $cluster) -}}
+  {{- $users = append $users (dict "name" .name "user" $user) -}}
+  {{- $contexts = append $contexts (dict "name" .name "context" $context) -}}
+{{- end -}}
+{{- $current := .kubernetes.currentContext -}}
+{{- if not (hasKey $names $current) -}}
+  {{- fail "Kubernetes currentContext must name a configured source" -}}
+{{- end -}}
+{{- dict "apiVersion" "v1" "kind" "Config" "clusters" $clusters "users" $users "contexts" $contexts "current-context" $current | toYaml -}}

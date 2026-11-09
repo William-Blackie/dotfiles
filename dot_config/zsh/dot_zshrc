@@ -1,7 +1,5 @@
 #!/bin/zsh
 
-export PATH="/opt/homebrew/bin:$PATH"
-
 setopt extendedglob autocd interactivecomments
 setopt appendhistory sharehistory hist_ignore_space hist_ignore_all_dups \
   hist_save_no_dups hist_ignore_dups hist_find_no_dups
@@ -73,7 +71,7 @@ tagpush() {
 typeset -U fpath FPATH
 [[ -d "${DOCKER_CONFIG}/completions" ]] && fpath=("${DOCKER_CONFIG}/completions" $fpath)
 [[ -d "$ZDOTDIR/functions" ]] && fpath=("$ZDOTDIR/functions" $fpath)
-for _site_functions in /opt/homebrew/share/zsh/site-functions /usr/local/share/zsh/site-functions; do
+for _site_functions in /opt/homebrew/share/zsh/site-functions /usr/local/share/zsh/site-functions "$DOTFILES_NIX_PROFILE/share/zsh/site-functions"; do
   [[ -d "$_site_functions" ]] && fpath=("$_site_functions" $fpath)
 done
 unset _site_functions
@@ -142,24 +140,14 @@ _source_first() {
   return 1
 }
 
-# Prints the first readable nvm loader script.
-_nvm_script() {
-  local file
-  for file in "$NVM_DIR/nvm.sh" /opt/homebrew/opt/nvm/nvm.sh /usr/local/opt/nvm/nvm.sh; do
-    [[ -r "$file" ]] && print -r -- "$file" && return 0
-  done
-  return 1
-}
-
-# Lazy-loads nvm and forwards the original command.
+# Keep Nix's Node as the default; load NVM only when explicitly requested.
 nvm() {
-  local script
-  script="$(_nvm_script)" || {
-    print -u2 "nvm: nvm.sh not found"
+  if [[ ! -r "$NVM_DIR/nvm.sh" ]]; then
+    print -u2 "nvm: run chezmoi apply to install NVM into $NVM_DIR"
     return 1
-  }
+  fi
   unfunction nvm
-  source "$script"
+  source "$NVM_DIR/nvm.sh" --no-use || return
   nvm "$@"
 }
 
@@ -213,47 +201,8 @@ t() {
   fi
 }
 
-# Selects and exports the active 1Password account for this shell.
-opswitch() {
-  local cmd
-  for cmd in op jq fzf; do
-    command -v "$cmd" >/dev/null 2>&1 || {
-      print -u2 "opswitch: missing required command: $cmd"
-      return 1
-    }
-  done
-
-  local account
-  account=$(op account list --format json 2>/dev/null | jq -r '.[].url' | fzf --header "Select 1Password Account" --reverse)
-  [[ -n "$account" && "$account" != "null" ]] || return 1
-
-  export OP_ACCOUNT="$account"
-  print "Switched to: $account"
-}
-
-# Signs in to 1Password if needed.
-opsignin() {
-  command -v op >/dev/null 2>&1 || return 1
-
-  local account
-  if account=$(op account get --format json 2>/dev/null); then
-    if command -v jq >/dev/null 2>&1; then
-      print "Already signed in to $(jq -r '.url' <<<"$account")"
-    else
-      print "Already signed in"
-    fi
-    return 0
-  fi
-
-  eval "$(op signin)"
-}
-
-# Runs chezmoi with the configured 1Password account, when set.
-chezmoi() {
-  local op_chezmoi_account="${CHEZMOI_1PASSWORD_ACCOUNT:-}"
-  [[ -n "$op_chezmoi_account" ]] && export OP_ACCOUNT="$op_chezmoi_account"
-  command chezmoi "$@"
-}
+# Work/personal account helpers; account IDs stay in .zshenv.local.
+[[ -r "$ZDOTDIR/onepassword.zsh" ]] && source "$ZDOTDIR/onepassword.zsh"
 
 typeset -gA ZSH_HIGHLIGHT_STYLES
 ZSH_HIGHLIGHT_STYLES[command]="fg=#89b4fa,bold"
@@ -263,6 +212,7 @@ ZSH_HIGHLIGHT_STYLES[path]="fg=#94e2d5"
 ZSH_HIGHLIGHT_STYLES["unknown-token"]="fg=#f38ba8,bold"
 
 _source_first \
+  "$DOTFILES_NIX_PROFILE/share/zsh-autosuggestions/zsh-autosuggestions.zsh" \
   /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
   /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
   "$XDG_DATA_HOME/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" >/dev/null 2>&1 || true
@@ -274,6 +224,7 @@ done
 unset local_config
 
 _source_first \
+  "$DOTFILES_NIX_PROFILE/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" \
   /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
   /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
   "$XDG_DATA_HOME/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >/dev/null 2>&1 || true
