@@ -148,6 +148,8 @@ return {
         bashls = {
           filetypes = { "sh", "bash", "sh.chezmoitmpl", "bash.chezmoitmpl" },
         },
+        helm_ls = { mason = false },
+        terraformls = { mason = false },
         make_ls = {
           cmd = { "make-ls" },
           filetypes = { "make" },

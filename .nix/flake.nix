@@ -18,17 +18,21 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-            config.allowUnfreePredicate = pkg: nixpkgs.lib.getName pkg == "1password-cli";
+            config.allowUnfreePredicate =
+              pkg: builtins.elem (nixpkgs.lib.getName pkg) [ "1password-cli" "terraform" ];
           };
+          homelabTofu = import ./opentofu.nix { inherit pkgs; };
         in
         {
           onepassword = pkgs._1password-cli;
+          opentofu = homelabTofu;
           default = pkgs.buildEnv {
             name = "dotfiles-tools";
             paths =
               with pkgs;
               [
                 _1password-cli
+                actionlint
                 awscli2
                 bash-completion
                 bat
@@ -48,15 +52,19 @@
                 gettext
                 gh
                 git
+                gitleaks
                 gnumake
                 go
                 hadolint
+                helm-ls
+                homelabTofu
                 jq
                 k9s
                 kind
                 kube-linter
                 kubectl
                 kubectx
+                kubernetes-helm
                 lazygit
                 lua5_1
                 lua51Packages.luarocks
@@ -71,12 +79,15 @@
                 shfmt
                 starship
                 stdenv.cc
+                terraform
+                terraform-ls
                 tmux
                 tree-sitter
                 ueberzugpp
                 uv
                 wget
                 xdg-ninja
+                yq-go
                 zoxide
                 zsh-autosuggestions
                 zsh-syntax-highlighting
