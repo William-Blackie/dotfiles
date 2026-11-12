@@ -3,6 +3,7 @@ set -euo pipefail
 
 # flake: {{ include ".nix/flake.nix" | sha256sum }}
 # lock: {{ include ".nix/flake.lock" | sha256sum }}
+# uv: {{ include ".nix/uv.nix" | sha256sum }}
 # installer: {{ include ".install-nix-packages.sh" | sha256sum }}
 # environment: {{ include "dot_config/shell/nix.sh" | sha256sum }}
 exec bash {{ joinPath .chezmoi.sourceDir ".install-nix-packages.sh" | quote }}

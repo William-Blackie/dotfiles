@@ -22,10 +22,12 @@
               pkg: builtins.elem (nixpkgs.lib.getName pkg) [ "1password-cli" "terraform" ];
           };
           homelabTofu = import ./opentofu.nix { inherit pkgs; };
+          pinnedUv = import ./uv.nix { inherit pkgs; };
         in
         {
           onepassword = pkgs._1password-cli;
           opentofu = homelabTofu;
+          uv = pinnedUv;
           default = pkgs.buildEnv {
             name = "dotfiles-tools";
             paths =
@@ -84,7 +86,7 @@
                 tmux
                 tree-sitter
                 ueberzugpp
-                uv
+                pinnedUv
                 wget
                 xdg-ninja
                 yq-go

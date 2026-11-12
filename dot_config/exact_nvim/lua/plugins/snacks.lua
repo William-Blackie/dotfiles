@@ -2,20 +2,29 @@
 ---@type LazyPluginSpec[]
 local function resume_gh_review()
   local active = Snacks.picker.get({ source = "gh_diff" })
-  if active[#active] then
-    active[#active]:focus("list", { show = true })
-    return
-  end
-
+  local picker = active[#active]
   local resume = require("snacks.picker.resume")
-  if resume.state.gh_diff then
-    resume.resume({ source = "gh_diff" })
+  local state = resume.state.gh_diff
+  local opts = picker and picker.opts or state and state.opts
+  if not opts or not opts.pr then
+    Snacks.picker.gh_pr()
     return
   end
 
-  Snacks.notify.warn(
-    "No GitHub review to resume. Press Space, then g, then p to open one."
-  )
+  -- Resuming a picker alone reuses cached reviews, including pending comments.
+  require("snacks.gh.api").view(function(item)
+    if not item then
+      return
+    end
+    vim.schedule(function()
+      if picker and not picker.closed then
+        picker:refresh()
+        picker:focus("list", { show = true })
+      else
+        resume.resume({ source = "gh_diff" })
+      end
+    end)
+  end, { type = "pr", repo = opts.repo, number = opts.pr }, { force = true })
 end
 
 return {
@@ -34,7 +43,7 @@ return {
       {
         "<leader>gr",
         resume_gh_review,
-        desc = "Resume GitHub Review",
+        desc = "Refresh / Resume GitHub Review",
       },
       {
         "<leader>gn",
@@ -65,7 +74,7 @@ return {
             jump = { close = false },
             layout = {
               preset = "right",
-              hidden = { "preview" },
+              hidden = {},
             },
           },
         },

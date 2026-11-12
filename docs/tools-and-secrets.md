@@ -117,6 +117,11 @@ successful build, preserving the previous generation on failure:
 ~/.local/state/nix/profiles/dotfiles
 ```
 
+uv is pinned separately to 0.13.6 in `.nix/uv.nix` to match projects with an
+exact `required-version`. It uses checksum-verified upstream release binaries
+for each supported platform. Update the version and release hashes in that file,
+then apply; chezmoi tracks changes to the pin automatically.
+
 AWS CLI and the Kubernetes tools are included in the shared profile. Node 24 is
 the default. NVM remains available on demand for project-specific versions:
 `nvm use` selects a version and `nvm deactivate` returns to Nix's Node. Corepack
