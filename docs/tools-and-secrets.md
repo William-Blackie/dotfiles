@@ -74,17 +74,7 @@ awsCredentials = "op://VAULT_ID/AWS_CREDENTIALS_ITEM_ID/notesPlain"
 awsConfig = "op://VAULT_ID/AWS_CONFIG_ITEM_ID/notesPlain"
 
 [data.kubernetes]
-currentContext = "prod"
-
-[[data.kubernetes.sources]]
-name = "prod"
-account = "WORK_ACCOUNT_ID"
-reference = "op://PRODUCTION_VAULT_ID/KUBECONFIG_ITEM_ID/notesPlain"
-
-[[data.kubernetes.sources]]
-name = "staging"
-account = "WORK_ACCOUNT_ID"
-reference = "op://STAGING_VAULT_ID/KUBECONFIG_ITEM_ID/notesPlain"
+currentContext = "homelab"
 
 [[data.kubernetes.sources]]
 name = "homelab"
@@ -98,11 +88,12 @@ These mappings survive `chezmoi init`. AWS mappings can also be supplied through
 mapping leaves its existing file unmanaged; a failed or empty secret read stops
 the apply before replacing that file.
 
-Each Kubernetes source contributes its current context, renamed to its
-configured name along with its cluster and user. Switch using
-`kubectl config use-context staging` (or `prod` / `homelab`). Applying restores
-`currentContext` from the chezmoi config. Production and staging come from the
-work account; homelab comes from the personal account.
+Each personal Kubernetes source contributes its current context, renamed to its
+configured name along with its cluster and user. Chezmoi skips the legacy `prod`
+and `staging` sources and any source using the configured work account. If
+`currentContext` points to a skipped source, chezmoi selects the first remaining
+source. If no personal sources remain, chezmoi leaves `~/.kube/config`
+unmanaged.
 
 Change the authoritative item in 1Password, then refresh just these files:
 

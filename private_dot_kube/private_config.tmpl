@@ -2,7 +2,8 @@
 {{- $users := list -}}
 {{- $contexts := list -}}
 {{- $names := dict -}}
-{{- range .kubernetes.sources -}}
+{{- $kubernetes := includeTemplate ".chezmoitemplates/kubernetes" . | fromJson -}}
+{{- range $kubernetes.sources -}}
   {{- if or (not .name) (not .account) (hasKey $names .name) -}}
     {{- fail "Kubernetes sources require unique names and explicit accounts" -}}
   {{- end -}}
@@ -42,7 +43,7 @@
   {{- $users = append $users (dict "name" .name "user" $user) -}}
   {{- $contexts = append $contexts (dict "name" .name "context" $context) -}}
 {{- end -}}
-{{- $current := .kubernetes.currentContext -}}
+{{- $current := $kubernetes.currentContext -}}
 {{- if not (hasKey $names $current) -}}
   {{- fail "Kubernetes currentContext must name a configured source" -}}
 {{- end -}}

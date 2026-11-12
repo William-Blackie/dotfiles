@@ -22,6 +22,7 @@ with tempfile.TemporaryDirectory(prefix="chezmoi-secrets-") as temporary:
     source.mkdir()
     destination.mkdir()
     shutil.copyfile(repo / ".chezmoiignore", source / ".chezmoiignore")
+    shutil.copytree(repo / ".chezmoitemplates", source / ".chezmoitemplates")
     for target, template in targets.items():
         path = source / template
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -47,6 +48,7 @@ if os.environ.get('TEST_EMPTY'):
     sys.exit(0)
 if document and os.environ.get('TEST_DOCUMENT_FAILURE'): sys.exit(1)
 reference = 'homelab' if document else next(a for a in args if a.startswith('op://'))
+assert document or 'aws' in reference, 'Work kubeconfig must not be read'
 if 'aws' in reference:
     print(os.environ.get('TEST_VALUE', 'resolved') + ' ' + reference)
 else:
@@ -65,11 +67,13 @@ else:
         'account = "personal.1password.com"\n'
         "prompt = false\n"
     )
-    mappings = """
+    aws = """
 [data.workSecrets]
 account = "work.1password.com"
 awsCredentials = "op://vault/aws/notesPlain"
 awsConfig = "op://vault/aws/config"
+"""
+    legacy_kubernetes = """
 [data.kubernetes]
 currentContext = "prod"
 [[data.kubernetes.sources]]
@@ -80,6 +84,14 @@ reference = "op://vault/prod/notesPlain"
 name = "staging"
 account = "work.1password.com"
 reference = "op://vault/staging/notesPlain"
+"""
+    other_work_context = """
+[[data.kubernetes.sources]]
+name = "another-work-context"
+account = "work.1password.com"
+reference = "op://vault/another-work-context/notesPlain"
+"""
+    homelab = """
 [[data.kubernetes.sources]]
 name = "homelab"
 account = "personal.1password.com"
@@ -110,6 +122,11 @@ vault = "homelab"
         (destination / t).read_text() == "existing local value\n" for t in targets
     )
 
+    config.write_text(base_config + legacy_kubernetes)
+    result = subprocess.run(command, capture_output=True)
+    assert result.returncode == 0, result.stderr.decode()
+    assert (destination / ".kube/config").read_text() == "existing local value\n"
+    mappings = aws + legacy_kubernetes + other_work_context + homelab
     config.write_text(base_config + mappings)
     # The init template preserves local mappings without managing its own config.
     result = subprocess.run(
@@ -167,7 +184,7 @@ vault = "homelab"
         assert (destination / ".kube/config").read_text() == "existing local value\n"
 
     for invalid in (
-        mappings.replace('name = "staging"', 'name = "prod"'),
+        mappings + homelab,
         mappings.replace('currentContext = "prod"', 'currentContext = "missing"'),
         mappings.replace(
             'document = "homelab"', 'document = "homelab"\nreference = "op://invalid"'
@@ -208,13 +225,9 @@ vault = "homelab"
         )
         assert result.returncode == 0, result.stderr.decode()
         merged = json.loads(result.stdout)
-        assert merged["current-context"] == "prod"
+        assert merged["current-context"] == "homelab"
         for section in ("contexts", "clusters", "users"):
-            assert {entry["name"] for entry in merged[section]} == {
-                "prod",
-                "staging",
-                "homelab",
-            }
+            assert [entry["name"] for entry in merged[section]] == ["homelab"]
         for entry in merged["contexts"]:
             assert entry["context"] == {
                 "cluster": entry["name"],
@@ -225,6 +238,4 @@ vault = "homelab"
             entry["user"]["token"].startswith(value) for entry in merged["users"]
         )
 
-print(
-    "Secret tests passed: three contexts, both accounts, refresh, permissions, failure safety"
-)
+print("Secret tests passed: homelab, AWS, refresh, permissions, failure safety")

@@ -1,0 +1,19 @@
+{{- $kubernetes := get . "kubernetes" | default dict -}}
+{{- $workSecrets := get . "workSecrets" | default dict -}}
+{{- $workAccount := get $workSecrets "account" -}}
+{{- $current := get $kubernetes "currentContext" -}}
+{{- $droppedCurrent := false -}}
+{{- $sources := list -}}
+{{- range (get $kubernetes "sources" | default list) -}}
+  {{- $name := get . "name" -}}
+  {{/* Prod and staging were the work aliases even on hosts without AWS mappings. */}}
+  {{- if or (eq $name "prod" "staging") (and $workAccount (eq (get . "account") $workAccount)) -}}
+    {{- if eq $name $current -}}{{- $droppedCurrent = true -}}{{- end -}}
+  {{- else -}}
+    {{- $sources = append $sources . -}}
+  {{- end -}}
+{{- end -}}
+{{- if and $droppedCurrent $sources -}}
+  {{- $current = (first $sources).name -}}
+{{- end -}}
+{{- dict "sources" $sources "currentContext" $current | toJson -}}
