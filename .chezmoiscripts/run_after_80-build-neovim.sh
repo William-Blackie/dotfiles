@@ -30,6 +30,14 @@ if command -v msgfmt >/dev/null 2>&1; then
     export CMAKE_PREFIX_PATH="${GETTEXT_PREFIX}${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}"
 fi
 
+# The Nix cc wrapper's bundled Darwin SDK has the frameworks (CoreServices)
+# but not every system library (libutil); add the real system SDK's lib dir
+# as a fallback so the linker can still find those.
+CMAKE_EXTRA_FLAGS=""
+if command -v xcrun >/dev/null 2>&1 && SYSTEM_SDK="$(xcrun --show-sdk-path 2>/dev/null)"; then
+    CMAKE_EXTRA_FLAGS="-DCMAKE_EXE_LINKER_FLAGS=-L${SYSTEM_SDK}/usr/lib"
+fi
+
 # Runs git in the Neovim checkout without reading global git config.
 git_neovim() {
     GIT_CONFIG_GLOBAL=/dev/null git -C "$REPO_DIR" "$@"
@@ -59,7 +67,7 @@ fi
 
 echo "Building Neovim from $REPO_DIR at $HEAD..."
 make -C "$REPO_DIR" distclean
-make -C "$REPO_DIR" CMAKE_BUILD_TYPE="$BUILD_TYPE" CMAKE_INSTALL_PREFIX="$INSTALL_PREFIX"
+make -C "$REPO_DIR" CMAKE_BUILD_TYPE="$BUILD_TYPE" CMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS"
 rm -rf "$INSTALL_PREFIX/share/nvim/runtime"
-make -C "$REPO_DIR" CMAKE_BUILD_TYPE="$BUILD_TYPE" CMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" install
+make -C "$REPO_DIR" CMAKE_BUILD_TYPE="$BUILD_TYPE" CMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" CMAKE_EXTRA_FLAGS="$CMAKE_EXTRA_FLAGS" install
 printf '%s\n' "$STAMP_CONTENT" >"$STAMP_FILE"
