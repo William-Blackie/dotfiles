@@ -22,6 +22,14 @@ done
 
 mkdir -p "$INSTALL_PREFIX/bin" "$STATE_DIR"
 
+# The shared tools profile only links bin/ and share/, so gettext's headers and
+# library aren't on any standard search path; point cmake at its real Nix store
+# prefix so it can find Libintl.
+if command -v msgfmt >/dev/null 2>&1; then
+    GETTEXT_PREFIX="$(dirname "$(dirname "$(readlink -f "$(command -v msgfmt)")")")"
+    export CMAKE_PREFIX_PATH="${GETTEXT_PREFIX}${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}"
+fi
+
 # Runs git in the Neovim checkout without reading global git config.
 git_neovim() {
     GIT_CONFIG_GLOBAL=/dev/null git -C "$REPO_DIR" "$@"
