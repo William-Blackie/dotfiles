@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   check:
-    runs-on: macos-14
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +24,9 @@ jobs:
           echo "/tmp/dotfiles-tools/bin" >> "$GITHUB_PATH"
 
       - name: Install Neovim
-        run: brew install neovim
+        run: |
+          nix build nixpkgs#neovim -o /tmp/nvim
+          echo "/tmp/nvim/bin" >> "$GITHUB_PATH"
 
       - name: Install node dependencies
         run: |
