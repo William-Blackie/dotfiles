@@ -137,9 +137,12 @@ to return from the events stream; quit k9s with `:q`.
 
 ## Neovim
 
-LazyVim lock/state files are symlinked into `dot_config/exact_nvim/data/lazy`.
-Use `:Lazy sync` to update plugins. `Space g d` toggles Diffview; `q` closes it
-without saving or discarding edits.
+LazyVim lock/state files (`lazy-lock.json`, `lazyvim.json`) are managed directly
+by chezmoi, not symlinked: `:Lazy sync` writes through a rename, which breaks a
+symlink, so after syncing run
+`chezmoi re-add ~/.config/nvim/lazy-lock.json ~/.config/nvim/lazyvim.json` to
+bring the update back into the repo before the next `make apply`. `Space g d`
+toggles Diffview; `q` closes it without saving or discarding edits.
 
 Project environments come from approved direnv `.envrc` files. Run
 `direnv allow` after reviewing a project's configuration. Restart language
