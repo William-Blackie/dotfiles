@@ -23,13 +23,15 @@ jobs:
           nix build ./.nix#default -o /tmp/dotfiles-tools
           echo "/tmp/dotfiles-tools/bin" >> "$GITHUB_PATH"
 
-      - name: Install Neovim and zsh
+      - name: Install zsh
         run: |
-          nix build nixpkgs#neovim nixpkgs#zsh -o /tmp/extra-tools
-          echo "/tmp/extra-tools/bin" >> "$GITHUB_PATH"
-          echo "/tmp/extra-tools-1/bin" >> "$GITHUB_PATH"
+          nix build nixpkgs#zsh -o /tmp/zsh
+          echo "/tmp/zsh/bin" >> "$GITHUB_PATH"
 
       - name: Install node dependencies
         run: pnpm install --frozen-lockfile
 
-      - run: make check
+      # test-neovim needs the lazy.nvim plugin cache from a real machine; skip it here.
+      - run:
+          make format-check lint test-python test-nix test-onepassword
+          test-secrets test-vorssaint
