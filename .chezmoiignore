@@ -24,10 +24,6 @@ node_modules/
 tests/
 
 {{ $workSecrets := get . "workSecrets" | default dict -}}
-{{ $kubernetes := includeTemplate ".chezmoitemplates/kubernetes" . | fromJson -}}
-{{ if not $kubernetes.sources -}}
-.kube/config
-{{ end -}}
 {{ if not (and (get $workSecrets "account") (get $workSecrets "awsCredentials")) -}}
 .config/aws/credentials
 {{ end -}}

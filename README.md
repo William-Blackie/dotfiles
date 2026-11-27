@@ -154,8 +154,8 @@ Enable the 1Password SSH agent on each Mac. Agent accounts, keys, and
 `~/.config/1Password/ssh/agent.toml` stay local. Optional SSH overrides go in
 `~/.ssh/config.local`.
 
-AWS and Kubernetes configuration are rendered from explicit 1Password accounts.
-See [tools and secrets](docs/tools-and-secrets.md) for account setup, vault
+AWS configuration is rendered from an explicit 1Password account. See
+[tools and secrets](docs/tools-and-secrets.md) for account setup, vault
 references, Nix updates and rollback, and NVM management.
 
 ## Checks

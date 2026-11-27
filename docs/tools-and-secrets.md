@@ -61,9 +61,10 @@ storing its private key on disk. The same personal GitHub identity can be used
 for personal and work repositories; the work 1Password account is independent.
 
 Application sessions managed by GitHub CLI and Docker stay in the OS credential
-store. Kubernetes and AWS configuration are rendered directly from 1Password
-items into `~/.kube/config`, `~/.config/aws/credentials`, and
-`~/.config/aws/config`, with file permissions `0600`.
+store. AWS configuration is rendered directly from 1Password items into
+`~/.config/aws/credentials` and `~/.config/aws/config`, with file permissions
+`0600`. Kubeconfig is not managed by chezmoi; set up `~/.kube/config` yourself
+(kubectl and k9s are still installed via Nix).
 
 The machine-local chezmoi config holds references, never secret values:
 
@@ -72,15 +73,6 @@ The machine-local chezmoi config holds references, never secret values:
 account = "WORK_ACCOUNT_ID"
 awsCredentials = "op://VAULT_ID/AWS_CREDENTIALS_ITEM_ID/notesPlain"
 awsConfig = "op://VAULT_ID/AWS_CONFIG_ITEM_ID/notesPlain"
-
-[data.kubernetes]
-currentContext = "homelab"
-
-[[data.kubernetes.sources]]
-name = "homelab"
-account = "PERSONAL_ACCOUNT_ID"
-vault = "HOMELAB_VAULT_ID"
-document = "KUBECONFIG_DOCUMENT_ID"
 ```
 
 These mappings survive `chezmoi init`. AWS mappings can also be supplied through
@@ -88,17 +80,10 @@ These mappings survive `chezmoi init`. AWS mappings can also be supplied through
 mapping leaves its existing file unmanaged; a failed or empty secret read stops
 the apply before replacing that file.
 
-Each personal Kubernetes source contributes its current context, renamed to its
-configured name along with its cluster and user. Chezmoi skips the legacy `prod`
-and `staging` sources and any source using the configured work account. If
-`currentContext` points to a skipped source, chezmoi selects the first remaining
-source. If no personal sources remain, chezmoi leaves `~/.kube/config`
-unmanaged.
-
 Change the authoritative item in 1Password, then refresh just these files:
 
 ```sh
-chezmoi apply --exclude=scripts ~/.kube/config ~/.config/aws
+chezmoi apply --exclude=scripts ~/.config/aws
 ```
 
 Local edits do not sync back to 1Password and are replaced when reapplied. Keep

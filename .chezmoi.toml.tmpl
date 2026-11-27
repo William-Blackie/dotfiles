@@ -45,4 +45,4 @@ PATH = {{ printf "%s:%s" (joinPath .chezmoi.homeDir ".local/state/nix/profiles/d
 {{ end -}}
 {{ end -}}
 # Preserve machine-local references when init regenerates the config.
-{{ dict "data" (dict "workSecrets" $workSecrets "kubernetes" (get . "kubernetes" | default dict)) | toToml }}
+{{ dict "data" (dict "workSecrets" $workSecrets) | toToml }}
